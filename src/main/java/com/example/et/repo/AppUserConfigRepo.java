@@ -9,9 +9,9 @@ import java.util.UUID;
 
 public interface AppUserConfigRepo extends JpaRepository<AppUserConfig, UUID> {
   @Query("""
-    select u
-    from AppUserConfig u
-    where u.appUser.id = :userId
-""")
+          select u
+          from AppUserConfig u
+          where u.appUser.id = :userId
+      """)
   Optional<AppUserConfig> findByUserId(UUID userId);
 }

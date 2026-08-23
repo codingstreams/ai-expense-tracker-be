@@ -12,20 +12,20 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class Transaction {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private Transaction.TransactionType type;
+  @Enumerated(EnumType.STRING)
+  private Transaction.TransactionType type;
 
-    private Double amount;
-    private LocalDate transactionDate;
-    private String transferId;
+  private Double amount;
+  private LocalDate transactionDate;
+  private String transferId;
 
-    private String description;
+  private String description;
 
-    public enum TransactionType {
-        EXPENSE, INCOME, TRANSFER
-    }
+  public enum TransactionType {
+    EXPENSE, INCOME, TRANSFER
+  }
 }

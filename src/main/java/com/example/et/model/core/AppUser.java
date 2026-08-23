@@ -20,7 +20,7 @@ public class AppUser extends BaseAudit {
   @Column(name = "name", nullable = false)
   private String name;
 
-  @Column(name="email", nullable = false, unique = true)
+  @Column(name = "email", nullable = false, unique = true)
   private String email;
 
   @Column(name = "password", nullable = false)
@@ -33,7 +33,7 @@ public class AppUser extends BaseAudit {
   @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
   private AppUserConfig appUserConfig;
 
-  public static AppUser ofId(String userId){
+  public static AppUser ofId(String userId) {
     return AppUser.builder().id(UUID.fromString(userId)).build();
   }
 }

@@ -29,7 +29,7 @@ public class BearerAuthProvider implements AuthenticationProvider {
 
     final List<? extends GrantedAuthority> roles = JwtUtils.extractAuthorities(claims);
 
-    return BearerAuthToken.authenticated(username , roles);
+    return BearerAuthToken.authenticated(username, roles);
   }
 
   @Override

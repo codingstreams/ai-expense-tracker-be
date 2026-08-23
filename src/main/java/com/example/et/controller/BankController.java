@@ -17,7 +17,7 @@ public class BankController {
   private final BankRepo bankRepo;
 
   @GetMapping
-  public ResponseEntity<List<Bank>> getPaymentModes(){
+  public ResponseEntity<List<Bank>> getPaymentModes() {
     return ResponseEntity.ok().body(bankRepo.findAll());
   }
 }

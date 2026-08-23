@@ -17,6 +17,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
   private final ObjectMapper objectMapper;
+
   @Override
   public void commence(@NonNull HttpServletRequest request,
                        HttpServletResponse response,

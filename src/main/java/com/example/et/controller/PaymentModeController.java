@@ -17,7 +17,7 @@ public class PaymentModeController {
   private final PaymentModeRepo paymentModeRepo;
 
   @GetMapping
-  public ResponseEntity<List<PaymentMode>> getPaymentModes(){
+  public ResponseEntity<List<PaymentMode>> getPaymentModes() {
     return ResponseEntity.ok().body(paymentModeRepo.findAll());
   }
 }

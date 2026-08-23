@@ -6,6 +6,8 @@ import com.example.et.controller.dto.UserRegistrationRequest;
 
 public interface AuthService {
   AuthResponse login(LoginRequest request);
+
   AuthResponse registerUser(UserRegistrationRequest request);
+
   void logout(String token);
 }

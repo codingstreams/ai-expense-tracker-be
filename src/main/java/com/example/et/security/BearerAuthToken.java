@@ -20,11 +20,11 @@ public class BearerAuthToken extends AbstractAuthenticationToken {
     this.setAuthenticated(isAuthenticated);
   }
 
-  public static BearerAuthToken unauthenticated(String token){
+  public static BearerAuthToken unauthenticated(String token) {
     return new BearerAuthToken(null, null, token, false);
   }
 
-  public static BearerAuthToken authenticated(String userId, Collection<? extends GrantedAuthority> roles){
+  public static BearerAuthToken authenticated(String userId, Collection<? extends GrantedAuthority> roles) {
     return new BearerAuthToken(roles, userId, null, true);
   }
 

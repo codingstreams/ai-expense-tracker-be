@@ -14,12 +14,12 @@ public interface AccountRepo extends JpaRepository<Account, UUID> {
   List<Account> findByAppUserId(UUID userId);
 
   @Query("""
-        select new com.example.et.controller.dto.AccountDto(a.id, a.lastFourDigits, a.balance, a.accountType, b)
-         from Account a
-         join a.appUser u
-         join a.bank b
-         where u.id = :userId and a.id = :accountId
-    """)
+          select new com.example.et.controller.dto.AccountDto(a.id, a.lastFourDigits, a.balance, a.accountType, b)
+           from Account a
+           join a.appUser u
+           join a.bank b
+           where u.id = :userId and a.id = :accountId
+      """)
   AccountDto findByUserIdAndAccountId(UUID userId, UUID accountId);
 
   Optional<Account> findByIdAndAppUserId(UUID id, UUID appUserId);

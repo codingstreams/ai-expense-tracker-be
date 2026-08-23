@@ -21,15 +21,15 @@ public class AccountServiceImpl implements AccountService {
   private final AccountRepo accountRepo;
   private final BankRepo bankRepo;
 
+  private static @NonNull Function<Account, AccountDto> toDto() {
+    return account -> new AccountDto(account.getId(), account.getLastFourDigits(), account.getBalance(), account.getAccountType(), account.getBank());
+  }
+
   @Override
   public List<AccountDto> getUserAccounts(String userId) {
     return accountRepo.findByAppUserId(UUID.fromString(userId))
         .stream().map(toDto())
         .toList();
-  }
-
-  private static @NonNull Function<Account, AccountDto> toDto() {
-    return account -> new AccountDto(account.getId(), account.getLastFourDigits(), account.getBalance(), account.getAccountType(), account.getBank());
   }
 
   @Override
@@ -45,20 +45,20 @@ public class AccountServiceImpl implements AccountService {
         .map(Bank::getId)
         .toList();
 
-    if (bankRepo.countByIdIn(bankIds) != bankIds.size()){
+    if (bankRepo.countByIdIn(bankIds) != bankIds.size()) {
       throw new RuntimeException("Invalid bank ids.");
     }
 
-   final var accountToBeCreated = accounts.accounts()
-       .stream()
-       .map(accountDto -> Account.builder()
-           .appUser(AppUser.ofId(userId))
-           .accountType(accountDto.accountType())
-           .balance(accountDto.balance())
-           .lastFourDigits(accountDto.lastFourDigits())
-           .bank(accountDto.bank())
-           .build())
-       .toList();
+    final var accountToBeCreated = accounts.accounts()
+        .stream()
+        .map(accountDto -> Account.builder()
+            .appUser(AppUser.ofId(userId))
+            .accountType(accountDto.accountType())
+            .balance(accountDto.balance())
+            .lastFourDigits(accountDto.lastFourDigits())
+            .bank(accountDto.bank())
+            .build())
+        .toList();
 
     final var accountsCreated = accountRepo.saveAll(accountToBeCreated);
 
@@ -77,6 +77,7 @@ public class AccountServiceImpl implements AccountService {
     final var account = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Account not found."));
 
+    // check for null before updating
     account.setBalance(accountDto.balance());
     account.setLastFourDigits(accountDto.lastFourDigits());
     account.setAccountType(accountDto.accountType());
@@ -86,6 +87,7 @@ public class AccountServiceImpl implements AccountService {
     return toDto().apply(updatedAccount);
   }
 
+  // we can also use soft delete -> first just inactive the account then delete it later
   @Override
   public void deleteAccount(String userId, String accountId) {
     final var account = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))

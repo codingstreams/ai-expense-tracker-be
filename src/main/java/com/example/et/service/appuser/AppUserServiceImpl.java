@@ -67,7 +67,7 @@ public class AppUserServiceImpl implements AppUserService {
 
     // Check for payment mode
     final var paymentMode = paymentModeRepo.findByName(userDetailsDto.paymentMode())
-            .orElseThrow(()->new RuntimeException("PaymentMode: %s not found.".formatted(userDetailsDto.paymentMode())));
+        .orElseThrow(() -> new RuntimeException("PaymentMode: %s not found.".formatted(userDetailsDto.paymentMode())));
 
     userConfig.setPaymentMode(paymentMode);
 

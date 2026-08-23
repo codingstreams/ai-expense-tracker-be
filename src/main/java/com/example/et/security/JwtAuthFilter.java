@@ -24,6 +24,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   private final AuthenticationManager authenticationManager;
   private final ExpireTokenService expireTokenService;
 
+  public static Optional<String> extractToken(String authorizationHeader) {
+    if (StringUtils.isBlank(authorizationHeader)) {
+      return Optional.empty();
+    }
+    return Optional.of(authorizationHeader.substring(7));
+  }
+
   @Override
   protected void doFilterInternal(HttpServletRequest request,
                                   @NonNull HttpServletResponse response,
@@ -64,12 +71,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     } finally {
 //      TenantContext.clear();
     }
-  }
-
-  public static Optional<String> extractToken(String authorizationHeader) {
-    if (StringUtils.isBlank(authorizationHeader)) {
-      return Optional.empty();
-    }
-    return Optional.of(authorizationHeader.substring(7));
   }
 }

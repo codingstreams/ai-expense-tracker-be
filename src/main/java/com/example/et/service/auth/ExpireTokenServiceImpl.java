@@ -11,7 +11,7 @@ public class ExpireTokenServiceImpl implements ExpireTokenService {
 
   @Override
   public void addExpireToken(String token) {
-    if(!isExpireToken(token)) {
+    if (!isExpireToken(token)) {
       this.expireTokens.add(token);
     }
   }

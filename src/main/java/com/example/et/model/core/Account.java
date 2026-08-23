@@ -13,30 +13,31 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class Account extends BaseAudit{
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+public class Account extends BaseAudit {
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    @Column(name = "last_four_digits",  nullable = false)
-    private String lastFourDigits;
+  @Column(name = "last_four_digits", nullable = false)
+  private String lastFourDigits;
 
-    @Column(name = "balance", nullable = false)
-    private BigDecimal balance; // Limit in case of credit card amount
+  @Column(name = "balance", nullable = false)
+  private BigDecimal balance; // Limit in case of credit card amount
 
-    @Column(name = "account_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Account.AccountType accountType;
+  @Column(name = "account_type", nullable = false)
+  @Enumerated(EnumType.STRING)
+  private Account.AccountType accountType;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    private Bank bank;
+  @OneToOne(fetch = FetchType.EAGER)
+  private Bank bank;
 
-    @ManyToOne(fetch = FetchType.LAZY) // No cascading required as we don't want to update the parent when performing action on child
-    @ToString.Exclude
-    @JsonIgnore
-    private AppUser appUser;
+  @ManyToOne(fetch = FetchType.LAZY)
+  // No cascading required as we don't want to update the parent when performing action on child
+  @ToString.Exclude
+  @JsonIgnore
+  private AppUser appUser;
 
-    public enum AccountType{
-        SAVINGS, CREDIT
-    }
+  public enum AccountType {
+    SAVINGS, CREDIT
+  }
 }
