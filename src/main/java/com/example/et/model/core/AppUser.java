@@ -32,4 +32,8 @@ public class AppUser extends BaseAudit {
 
   @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
   private AppUserConfig appUserConfig;
+
+  public static AppUser ofId(String userId){
+    return AppUser.builder().id(UUID.fromString(userId)).build();
+  }
 }
