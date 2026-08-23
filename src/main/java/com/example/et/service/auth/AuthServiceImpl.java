@@ -5,6 +5,8 @@ import com.example.et.controller.dto.AuthResponse;
 import com.example.et.controller.dto.LoginRequest;
 import com.example.et.controller.dto.UserRegistrationRequest;
 import com.example.et.model.core.AppUser;
+import com.example.et.model.core.AppUserConfig;
+import com.example.et.model.core.LanguagePreference;
 import com.example.et.security.BearerAuthToken;
 import com.example.et.security.JwtAuthFilter;
 import com.example.et.service.appuser.AppUserService;
@@ -19,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -67,11 +70,20 @@ public class AuthServiceImpl implements AuthService {
 
     if (userExists) throw new UserAlreadyExistsException("Email/User: %s already present.".formatted(request.email()));
 
-    var newUser = AppUser.builder()
+    final var newUser = AppUser.builder()
         .name(request.name())
         .email(request.email())
         .password(passwordEncoder.encode(request.password()))
         .build();
+
+    final var userConfig = AppUserConfig.builder()
+        .appUser(newUser)
+        .languagePreference(LanguagePreference.EN)
+        .currency(AppUserConfig.Currency.INR)
+        .spendLimit(BigDecimal.ZERO)
+        .build();
+
+    newUser.setAppUserConfig(userConfig);
 
     final var registeredUser = appUserService.saveUser(newUser);
 

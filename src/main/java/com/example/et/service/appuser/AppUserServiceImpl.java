@@ -1,6 +1,9 @@
 package com.example.et.service.appuser;
 
+import com.example.et.controller.dto.UpdateUserDetailsDto;
+import com.example.et.controller.dto.UserDetailsDto;
 import com.example.et.model.core.AppUser;
+import com.example.et.repo.AppUserConfigRepo;
 import com.example.et.repo.AppUserRepo;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -17,6 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AppUserServiceImpl implements AppUserService {
   private final AppUserRepo appUserRepo;
+  private final AppUserConfigRepo appUserConfigRepo;
 
   @Override
   public boolean checkUserExists(String email) {
@@ -43,6 +47,25 @@ public class AppUserServiceImpl implements AppUserService {
   public AppUser getUserByUserId(String userId) {
     return appUserRepo.findById(UUID.fromString(userId))
         .orElseThrow(() -> new UsernameNotFoundException("User Id: %s not found.".formatted(userId)));
+  }
+
+  @Override
+  public UserDetailsDto getUserByUserIdWithConfig(String userId) {
+    return appUserRepo.findByIdWithUserConfig(UUID.fromString(userId));
+  }
+
+  @Override
+  public UpdateUserDetailsDto updateUserConfig(String userId, UpdateUserDetailsDto userDetailsDto) {
+    final var userConfig = appUserConfigRepo.findByUserId(UUID.fromString(userId))
+        .orElseThrow(() -> new UsernameNotFoundException("User Id: %s not found.".formatted(userId)));
+
+    userConfig.setCurrency(userDetailsDto.currency());
+    userConfig.setLanguagePreference(userDetailsDto.languagePreference());
+    userConfig.setSpendLimit(userDetailsDto.spendLimit());
+
+    appUserConfigRepo.save(userConfig);
+
+    return userDetailsDto;
   }
 
   @Override

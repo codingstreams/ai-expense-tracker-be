@@ -1,9 +1,9 @@
 package com.example.et.model.core;
 
 public enum LanguagePreference {
-    ENGLISH("en"), HINDI("hi");
+    EN("english"), HI("hindi");
 
-    private String code;
+    private String desc;
 
-    LanguagePreference(String code) {}
+    LanguagePreference(String desc) {}
 }
