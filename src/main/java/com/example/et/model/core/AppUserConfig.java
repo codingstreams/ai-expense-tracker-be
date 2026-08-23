@@ -28,6 +28,9 @@ public class AppUserConfig extends BaseAudit{
   @OneToOne(fetch = FetchType.LAZY)
   private AppUser appUser;
 
+  @OneToOne(fetch = FetchType.LAZY)
+  private PaymentMode paymentMode;
+
   public enum Currency {
     INR,
   }

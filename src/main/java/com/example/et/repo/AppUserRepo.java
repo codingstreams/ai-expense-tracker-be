@@ -22,10 +22,12 @@ public interface AppUserRepo extends JpaRepository<AppUser, UUID> {
           u.isOnboardingComplete,
           c.languagePreference,
           c.spendLimit,
-          c.currency
+          c.currency,
+          p.name
       )
       from AppUserConfig c
       right join c.appUser u
+      left join c.paymentMode p
       where u.id = :userId
       """)
   UserDetailsDto findByIdWithUserConfig(UUID userId);

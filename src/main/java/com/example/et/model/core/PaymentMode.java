@@ -1,13 +1,12 @@
 package com.example.et.model.core;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @Entity
 @Data
@@ -16,15 +15,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PaymentMode {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
+  @Column(nullable = false)
   private String name;
 
-//  @Enumerated(EnumType.STRING)
-//  private TransactionBehavior type;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "txn_type", nullable = false)
+  private TransactionBehavior type;
 
-  public static PaymentMode ofId(Long paymentModeId) {
-    return PaymentMode.builder().id(paymentModeId).build();
+  public enum TransactionBehavior {
+    ASSET, LIABILITY
   }
 }

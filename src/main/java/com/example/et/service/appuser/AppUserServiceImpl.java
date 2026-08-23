@@ -5,6 +5,7 @@ import com.example.et.controller.dto.UserDetailsDto;
 import com.example.et.model.core.AppUser;
 import com.example.et.repo.AppUserConfigRepo;
 import com.example.et.repo.AppUserRepo;
+import com.example.et.repo.PaymentModeRepo;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class AppUserServiceImpl implements AppUserService {
   private final AppUserRepo appUserRepo;
   private final AppUserConfigRepo appUserConfigRepo;
+  private final PaymentModeRepo paymentModeRepo;
 
   @Override
   public boolean checkUserExists(String email) {
@@ -62,6 +64,12 @@ public class AppUserServiceImpl implements AppUserService {
     userConfig.setCurrency(userDetailsDto.currency());
     userConfig.setLanguagePreference(userDetailsDto.languagePreference());
     userConfig.setSpendLimit(userDetailsDto.spendLimit());
+
+    // Check for payment mode
+    final var paymentMode = paymentModeRepo.findByName(userDetailsDto.paymentMode())
+            .orElseThrow(()->new RuntimeException("PaymentMode: %s not found.".formatted(userDetailsDto.paymentMode())));
+
+    userConfig.setPaymentMode(paymentMode);
 
     appUserConfigRepo.save(userConfig);
 

@@ -7,5 +7,6 @@ import java.math.BigDecimal;
 
 public record UpdateUserDetailsDto(LanguagePreference languagePreference,
                                    BigDecimal spendLimit,
-                                   AppUserConfig.Currency currency) {
+                                   AppUserConfig.Currency currency,
+                                   String paymentMode) implements UserEditableProperties {
 }

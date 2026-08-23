@@ -10,5 +10,5 @@ public record UserDetailsDto(String email,
                              boolean isOnboardingComplete,
                              LanguagePreference languagePreference,
                              BigDecimal spendLimit,
-                             AppUserConfig.Currency currency) {
+                             AppUserConfig.Currency currency, String paymentMode) implements UserEditableProperties {
 }
