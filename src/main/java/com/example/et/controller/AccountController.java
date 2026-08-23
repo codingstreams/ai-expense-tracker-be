@@ -16,7 +16,6 @@ import java.util.List;
 public class AccountController {
   private final AccountService accountService;
 
-  // List all user accounts with live balances
   @GetMapping
   public ResponseEntity<List<AccountDto>> getUserAccounts(@AuthenticationPrincipal String userId) {
     final var accounts = accountService.getUserAccounts(userId);
@@ -26,7 +25,24 @@ public class AccountController {
   @PostMapping
   public ResponseEntity<List<AccountDto>> addAccounts(@AuthenticationPrincipal String userId, @RequestBody UserBankAccounts accounts) {
     final var createdAccounts = accountService.addAccounts(userId, accounts);
-    return  ResponseEntity.ok(createdAccounts);
+    return ResponseEntity.ok(createdAccounts);
   }
 
+  @GetMapping("/{accountId}")
+  public ResponseEntity<AccountDto> getUserAccountDetails(@AuthenticationPrincipal String userId, @PathVariable String accountId) {
+    final var account = accountService.getUserAccountDetails(userId, accountId);
+    return ResponseEntity.ok(account);
+  }
+
+  @PutMapping("/{accountId}")
+  public ResponseEntity<AccountDto> updateAccount(@AuthenticationPrincipal String userId, @PathVariable String accountId, @RequestBody AccountDto accountDto) {
+    final var account = accountService.updateAccount(userId, accountId, accountDto);
+    return ResponseEntity.ok(account);
+  }
+
+  @DeleteMapping("/{accountId}")
+  public ResponseEntity<Void> deleteAccount(@AuthenticationPrincipal String userId, @PathVariable String accountId) {
+    accountService.deleteAccount(userId, accountId);
+    return ResponseEntity.noContent().build();
+  }
 }

@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
-public class AccountServiceImpl implements  AccountService{
+public class AccountServiceImpl implements AccountService {
   private final AccountRepo accountRepo;
   private final BankRepo bankRepo;
 
@@ -29,7 +29,7 @@ public class AccountServiceImpl implements  AccountService{
   }
 
   private static @NonNull Function<Account, AccountDto> toDto() {
-    return account -> new AccountDto(account.getId().toString(), account.getLastFourDigits(), account.getBalance(), account.getAccountType(), account.getBank());
+    return account -> new AccountDto(account.getId(), account.getLastFourDigits(), account.getBalance(), account.getAccountType(), account.getBank());
   }
 
   @Override
@@ -65,5 +65,31 @@ public class AccountServiceImpl implements  AccountService{
     return accountsCreated.stream()
         .map(toDto())
         .toList();
+  }
+
+  @Override
+  public AccountDto getUserAccountDetails(String userId, String accountId) {
+    return accountRepo.findByUserIdAndAccountId(UUID.fromString(userId), UUID.fromString(accountId));
+  }
+
+  @Override
+  public AccountDto updateAccount(String userId, String accountId, AccountDto accountDto) {
+    final var account = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("Account not found."));
+
+    account.setBalance(accountDto.balance());
+    account.setLastFourDigits(accountDto.lastFourDigits());
+    account.setAccountType(accountDto.accountType());
+    account.setBank(accountDto.bank());
+
+    final var updatedAccount = accountRepo.save(account);
+    return toDto().apply(updatedAccount);
+  }
+
+  @Override
+  public void deleteAccount(String userId, String accountId) {
+    final var account = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("Account not found."));
+    accountRepo.delete(account);
   }
 }

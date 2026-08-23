@@ -12,4 +12,10 @@ public interface AccountService {
   Account getUserAccount(UUID accountId);
 
   List<AccountDto> addAccounts(String userId, UserBankAccounts accounts);
+
+  AccountDto getUserAccountDetails(String userId, String accountId);
+
+  AccountDto updateAccount(String userId, String accountId, AccountDto accountDto);
+
+  void deleteAccount(String userId, String accountId);
 }
