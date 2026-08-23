@@ -1,5 +1,6 @@
 package com.example.et.model.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,10 +17,12 @@ import java.time.LocalDateTime;
 public class BaseAudit {
   @CreatedDate
   @Column(name = "created_at", updatable = false, nullable = false)
+  @JsonIgnore
   private LocalDateTime createdAt;
 
   @LastModifiedDate
   @Column(name = "last_modified_at", nullable = false)
+  @JsonIgnore
   private LocalDateTime lastModifiedAt;
 
   @PrePersist

@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentMode {
+public class PaymentMode extends BaseAudit{
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;

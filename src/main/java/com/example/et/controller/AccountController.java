@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping("/api/accounts")
 @RequiredArgsConstructor
 public class AccountController {
   private final AccountService accountService;
@@ -23,4 +23,6 @@ public class AccountController {
     var accounts = accountService.getUserAccounts(uuid);
     return ResponseEntity.ok(accounts);
   }
+
+
 }
