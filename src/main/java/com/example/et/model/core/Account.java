@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -22,7 +21,7 @@ public class Account extends BaseAudit {
   private String lastFourDigits;
 
   @Column(name = "balance", nullable = false)
-  private BigDecimal balance; // Limit in case of credit card amount
+  private Float balance; // Limit in case of credit card amount
 
   @Column(name = "account_type", nullable = false)
   @Enumerated(EnumType.STRING)

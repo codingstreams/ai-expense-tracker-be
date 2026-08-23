@@ -3,10 +3,8 @@ package com.example.et.controller.dto;
 import com.example.et.model.core.AppUserConfig;
 import com.example.et.model.core.LanguagePreference;
 
-import java.math.BigDecimal;
-
 public record UpdateUserDetailsDto(LanguagePreference languagePreference,
-                                   BigDecimal spendLimit,
+                                   Integer spendLimit,
                                    AppUserConfig.Currency currency,
                                    String paymentMode) implements UserEditableProperties {
 }

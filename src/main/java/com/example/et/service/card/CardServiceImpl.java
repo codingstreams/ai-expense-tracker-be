@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -52,7 +51,7 @@ public class CardServiceImpl implements CardService {
         account = accountRepo.save(Account.builder()
             .appUser(user)
             .accountType(Account.AccountType.CREDIT)
-            .balance(cardDto.limit() != null ? cardDto.limit() : BigDecimal.ZERO)
+            .balance(cardDto.limit() != null ? cardDto.limit() : 0)
             .lastFourDigits(cardDto.lastFourDigits())
             .bank(cardDto.bank())
             .build());

@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none # Disable Hibernate DDL automatic generation when using Flyway
+      ddl-auto: validate # Disable Hibernate DDL automatic generation when using Flyway
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 jwt:

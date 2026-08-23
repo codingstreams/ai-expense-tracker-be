@@ -21,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -80,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
         .appUser(newUser)
         .languagePreference(LanguagePreference.EN)
         .currency(AppUserConfig.Currency.INR)
-        .spendLimit(BigDecimal.ZERO)
+        .spendLimit(0)
         .build();
 
     newUser.setAppUserConfig(userConfig);
