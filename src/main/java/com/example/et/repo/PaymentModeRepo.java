@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface PaymentModeRepo extends JpaRepository<PaymentMode, UUID> {
   Optional<PaymentMode> findByName(String paymentMode);
+
+  Optional<PaymentMode> findByNameIgnoreCase(String name);
 }

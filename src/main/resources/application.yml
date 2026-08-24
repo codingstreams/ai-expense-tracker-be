@@ -16,6 +16,26 @@ spring:
       ddl-auto: validate # Disable Hibernate DDL automatic generation when using Flyway
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
+#  ai:
+#    google:
+#      genai:
+#        api-key: ${GOOGLE_API_KEY}
+#        chat:
+#          options:
+#            model: gemini-3.6-flash
+#            temperature: 0.0
+
+  ai:
+    openai:
+      api-key: ${GROQ_API_KEY}
+      base-url: https://api.groq.com/openai/v1
+      chat:
+        options:
+          model: openai/gpt-oss-20b
+          temperature: 0.0
+          options:
+            reasoning_effort: low
+
 jwt:
   secret-key: ${JWT_KEY}
   expiration-time-access-token-in-minutes: 10

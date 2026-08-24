@@ -10,6 +10,7 @@ import com.example.et.repo.PaymentModeRepo;
 import com.example.et.repo.SystemCategoryRepo;
 import com.example.et.repo.TransactionRepo;
 import com.example.et.service.account.AccountService;
+import com.example.et.service.ai.parsetask.AiParseTaskService;
 import com.example.et.service.card.CardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +30,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   private final CardService cardService;
   private final PaymentModeRepo paymentModeRepo;
   private final SystemCategoryRepo systemCategoryRepo;
+  private final AiParseTaskService aiParseTaskService;
 
   private TransactionDto toDto(Transaction t) {
     return new TransactionDto(
@@ -155,6 +157,7 @@ public class TransactionsServiceImpl implements TransactionsService {
           acc.setBalance(acc.getBalance() - txn.getAmount());
           accountService.saveAccount(acc);
         }
+        aiParseTaskService.unlinkTransaction(txn.getId());
       }
       transactionRepo.deleteAll(transferTxns);
       return;
@@ -166,6 +169,7 @@ public class TransactionsServiceImpl implements TransactionsService {
       accountService.saveAccount(account);
     }
 
+    aiParseTaskService.unlinkTransaction(transactionId);
     transactionRepo.delete(transaction);
   }
 }

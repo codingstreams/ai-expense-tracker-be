@@ -44,6 +44,6 @@ public class Account extends BaseAudit {
   private AppUser appUser;
 
   public enum AccountType {
-    SAVINGS, CREDIT
+    SAVINGS, CREDIT, CASH
   }
 }

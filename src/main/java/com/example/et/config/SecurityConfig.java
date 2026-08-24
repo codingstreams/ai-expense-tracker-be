@@ -1,6 +1,7 @@
 package com.example.et.config;
 
 import com.example.et.security.JwtAuthFilter;
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,6 +24,8 @@ public class SecurityConfig {
         .csrf(CsrfConfigurer::disable)
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(http -> http
+            .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR)
+            .permitAll()
             .requestMatchers("/api/auth/**", "/error")
             .permitAll()
             .anyRequest()
