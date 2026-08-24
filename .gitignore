@@ -39,3 +39,5 @@ out/
 .env.local
 /apis.md
 /commands.md
+/target/
+/.learnings/

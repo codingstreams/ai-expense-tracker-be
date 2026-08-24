@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +14,8 @@ public interface TransactionRepo extends JpaRepository<Transaction, UUID> {
   Page<Transaction> findByAppUserId(UUID appUserId, Pageable pageable);
 
   List<Transaction> findByAppUserIdOrderByTransactionDateDesc(UUID appUserId, Pageable pageable);
+
+  List<Transaction> findByAppUserIdAndTransactionDateBetween(UUID appUserId, LocalDate startDate, LocalDate endDate);
 
   Optional<Transaction> findByIdAndAppUserId(UUID id, UUID appUserId);
 
