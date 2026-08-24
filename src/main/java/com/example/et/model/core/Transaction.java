@@ -4,26 +4,41 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
-//@Entity
+@Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class Transaction {
+public class Transaction extends BaseAudit {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
   @Enumerated(EnumType.STRING)
   private Transaction.TransactionType type;
 
-  private Double amount;
+  private Float amount;
+
   private LocalDate transactionDate;
-  private String transferId;
+
+  private UUID transferId;
 
   private String description;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  private SystemCategory transactionCategory;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  private AppUser appUser; // Owner
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  private Account account;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  private PaymentMode paymentMode;
 
   public enum TransactionType {
     EXPENSE, INCOME, TRANSFER

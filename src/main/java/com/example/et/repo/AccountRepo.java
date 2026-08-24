@@ -14,7 +14,7 @@ public interface AccountRepo extends JpaRepository<Account, UUID> {
   List<Account> findByAppUserId(UUID userId);
 
   @Query("""
-          select new com.example.et.controller.dto.AccountDto(a.id, a.lastFourDigits, a.balance, a.accountType, b)
+          select new com.example.et.controller.dto.AccountDto(a.id, a.lastFourDigits, a.balance, a.accountType, b, a.isUpiEnabled, a.isNetBankingEnabled)
            from Account a
            join a.appUser u
            join a.bank b

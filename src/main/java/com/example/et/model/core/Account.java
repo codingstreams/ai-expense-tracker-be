@@ -21,17 +21,24 @@ public class Account extends BaseAudit {
   private String lastFourDigits;
 
   @Column(name = "balance", nullable = false)
-  private Float balance; // Limit in case of credit card amount
+  private Float balance;
 
   @Column(name = "account_type", nullable = false)
   @Enumerated(EnumType.STRING)
   private Account.AccountType accountType;
 
+  @Column(name = "is_upi_enabled", nullable = false)
+  @Builder.Default
+  private boolean isUpiEnabled = false;
+
+  @Column(name = "is_net_banking_enabled", nullable = false)
+  @Builder.Default
+  private boolean isNetBankingEnabled = false;
+
   @OneToOne(fetch = FetchType.EAGER)
   private Bank bank;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  // No cascading required as we don't want to update the parent when performing action on child
   @ToString.Exclude
   @JsonIgnore
   private AppUser appUser;

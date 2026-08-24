@@ -22,7 +22,15 @@ public class AccountServiceImpl implements AccountService {
   private final BankRepo bankRepo;
 
   private static @NonNull Function<Account, AccountDto> toDto() {
-    return account -> new AccountDto(account.getId(), account.getLastFourDigits(), account.getBalance(), account.getAccountType(), account.getBank());
+    return account -> new AccountDto(
+        account.getId(),
+        account.getLastFourDigits(),
+        account.getBalance(),
+        account.getAccountType(),
+        account.getBank(),
+        account.isUpiEnabled(),
+        account.isNetBankingEnabled()
+    );
   }
 
   @Override
@@ -33,8 +41,14 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public Account getUserAccount(UUID accountId) {
-    return null;
+  public Account getUserAccount(String userId, UUID accountId) {
+    return accountRepo.findByIdAndAppUserId(accountId, UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("Account not found."));
+  }
+
+  @Override
+  public Account saveAccount(Account account) {
+    return accountRepo.save(account);
   }
 
   @Override
@@ -57,6 +71,8 @@ public class AccountServiceImpl implements AccountService {
             .balance(accountDto.balance())
             .lastFourDigits(accountDto.lastFourDigits())
             .bank(accountDto.bank())
+            .isUpiEnabled(accountDto.isUpiEnabled())
+            .isNetBankingEnabled(accountDto.isNetBankingEnabled())
             .build())
         .toList();
 
@@ -77,17 +93,17 @@ public class AccountServiceImpl implements AccountService {
     final var account = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Account not found."));
 
-    // check for null before updating
     account.setBalance(accountDto.balance());
     account.setLastFourDigits(accountDto.lastFourDigits());
     account.setAccountType(accountDto.accountType());
     account.setBank(accountDto.bank());
+    account.setUpiEnabled(accountDto.isUpiEnabled());
+    account.setNetBankingEnabled(accountDto.isNetBankingEnabled());
 
     final var updatedAccount = accountRepo.save(account);
     return toDto().apply(updatedAccount);
   }
 
-  // we can also use soft delete -> first just inactive the account then delete it later
   @Override
   public void deleteAccount(String userId, String accountId) {
     final var account = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))

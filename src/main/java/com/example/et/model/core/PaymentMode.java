@@ -1,13 +1,11 @@
 package com.example.et.model.core;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Data
 @Builder

@@ -42,6 +42,12 @@ public class CardServiceImpl implements CardService {
   }
 
   @Override
+  public Card getUserCard(String userId, UUID cardId) {
+    return cardRepo.findByIdAndAppUserId(cardId, UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("Card not found."));
+  }
+
+  @Override
   @Transactional
   public List<CardDto> addCards(String userId, UserCards userCards) {
     final var user = AppUser.ofId(userId);

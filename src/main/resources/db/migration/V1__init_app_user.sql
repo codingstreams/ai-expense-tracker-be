@@ -1,6 +1,6 @@
 create table app_user
 (
-    id                     uuid primary key,
+    id                     uuid primary key      default gen_random_uuid(),
     name                   varchar(255) not null,
     email                  varchar(255) not null unique,
     password               varchar(255) not null,

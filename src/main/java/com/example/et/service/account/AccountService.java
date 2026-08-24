@@ -10,7 +10,9 @@ import java.util.UUID;
 public interface AccountService {
   List<AccountDto> getUserAccounts(String userId);
 
-  Account getUserAccount(UUID accountId);
+  Account getUserAccount(String userId, UUID accountId);
+
+  Account saveAccount(Account account);
 
   List<AccountDto> addAccounts(String userId, UserBankAccounts accounts);
 

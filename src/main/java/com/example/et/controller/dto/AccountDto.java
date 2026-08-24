@@ -5,6 +5,13 @@ import com.example.et.model.core.Bank;
 
 import java.util.UUID;
 
-public record AccountDto(UUID id, String lastFourDigits, Float balance, Account.AccountType accountType,
-                         Bank bank) {
+public record AccountDto(
+    UUID id,
+    String lastFourDigits,
+    Float balance,
+    Account.AccountType accountType,
+    Bank bank,
+    boolean isUpiEnabled,
+    boolean isNetBankingEnabled
+) {
 }
