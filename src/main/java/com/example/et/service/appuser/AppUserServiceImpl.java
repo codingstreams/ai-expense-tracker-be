@@ -41,8 +41,8 @@ public class AppUserServiceImpl implements AppUserService {
   }
 
   @Override
-  public boolean checkIsUserOnboardedByEmail(String email) {
-    return appUserRepo.existsByEmailAndIsOnboardingComplete(email, true);
+  public boolean checkIsUserOnboardedByEmail(String userId) {
+    return appUserRepo.existsByIdAndIsOnboardingComplete(UUID.fromString(userId), true);
   }
 
   @Override
@@ -64,9 +64,10 @@ public class AppUserServiceImpl implements AppUserService {
     userConfig.setCurrency(userDetailsDto.currency());
     userConfig.setLanguagePreference(userDetailsDto.languagePreference());
     userConfig.setSpendLimit(userDetailsDto.spendLimit());
+    userConfig.getAppUser().setIsOnboardingComplete(userDetailsDto.isOnboardingComplete());
 
     // Check for payment mode
-    final var paymentMode = paymentModeRepo.findByName(userDetailsDto.paymentMode())
+    final var paymentMode = paymentModeRepo.findByNameIgnoreCase(userDetailsDto.paymentMode())
         .orElseThrow(() -> new RuntimeException("PaymentMode: %s not found.".formatted(userDetailsDto.paymentMode())));
 
     userConfig.setPaymentMode(paymentMode);

@@ -13,7 +13,7 @@ public interface AppUserService extends UserDetailsService {
 
   AppUser getUserByEmail(String email);
 
-  boolean checkIsUserOnboardedByEmail(String email);
+  boolean checkIsUserOnboardedByEmail(String userId);
 
   AppUser getUserByUserId(String userId);
 

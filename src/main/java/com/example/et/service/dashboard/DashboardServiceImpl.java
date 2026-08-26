@@ -1,15 +1,17 @@
 package com.example.et.service.dashboard;
 
-import com.example.et.controller.dto.CategoryBreakdownDto;
-import com.example.et.controller.dto.DashboardSummaryDto;
-import com.example.et.controller.dto.MonthlyTrendDto;
+import com.example.et.controller.dto.*;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.SystemCategory;
 import com.example.et.model.core.Transaction;
 import com.example.et.repo.AccountRepo;
 import com.example.et.repo.TransactionRepo;
+import com.example.et.service.account.AccountService;
+import com.example.et.service.appuser.AppUserService;
+import com.example.et.service.card.CardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -21,6 +23,9 @@ import java.util.stream.Collectors;
 public class DashboardServiceImpl implements DashboardService {
   private final AccountRepo accountRepo;
   private final TransactionRepo transactionRepo;
+  private final AccountService accountService;
+  private final CardService cardService;
+  private final AppUserService appUserService;
 
   @Override
   public DashboardSummaryDto getSummary(String userId) {
@@ -48,7 +53,7 @@ public class DashboardServiceImpl implements DashboardService {
         .sum();
 
     final var netSavings = totalIncome - totalExpense;
-    final var dailyBurnRate = now.getDayOfMonth() > 0 ? totalExpense / now.getDayOfMonth() : 0.0;
+    final var dailyBurnRate = totalExpense / now.getDayOfMonth();
 
     return new DashboardSummaryDto(netWorth, totalIncome, totalExpense, netSavings, dailyBurnRate);
   }
@@ -139,5 +144,17 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     return result;
+  }
+
+  @Override
+  @Transactional
+  public OnboardUserDto onboardUser(String userId, OnboardUserDto requestBody) {
+    final var accounts = accountService.addAccounts(userId, new UserBankAccounts(requestBody.accounts()));
+
+    final var cashBalance = accountService.updateCashBalance(userId, requestBody.cashBalance());
+
+    final var userConfig = appUserService.updateUserConfig(userId, requestBody.userConfig());
+
+    return new OnboardUserDto(userConfig, accounts, cashBalance);
   }
 }

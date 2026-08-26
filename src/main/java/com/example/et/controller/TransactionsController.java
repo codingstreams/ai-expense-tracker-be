@@ -3,6 +3,7 @@ package com.example.et.controller;
 import com.example.et.controller.dto.PagedTransactionsDto;
 import com.example.et.controller.dto.TransactionDto;
 import com.example.et.controller.dto.TransactionRequestDto;
+import com.example.et.controller.dto.TransactionResponseDto;
 import com.example.et.service.transaction.TransactionsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -30,9 +31,14 @@ public class TransactionsController {
     return ResponseEntity.ok(transactionsService.getAllTransactions(userId, pageable));
   }
 
-  @GetMapping("/recent")
-  public ResponseEntity<List<TransactionDto>> getRecentTransactions(@AuthenticationPrincipal String userId) {
+  @GetMapping(value = "/recent", version = "1.0")
+  public ResponseEntity<List<TransactionDto>> getRecentTransactionsV1(@AuthenticationPrincipal String userId) {
     return ResponseEntity.ok(transactionsService.getRecentTransactions(userId));
+  }
+
+  @GetMapping(value = "/recent", version = "2.0")
+  public ResponseEntity<List<TransactionResponseDto>> getRecentTransactionsV2(@AuthenticationPrincipal String userId) {
+    return ResponseEntity.ok(transactionsService.getRecentTransactionsV2(userId));
   }
 
   @DeleteMapping("/{transactionId}")

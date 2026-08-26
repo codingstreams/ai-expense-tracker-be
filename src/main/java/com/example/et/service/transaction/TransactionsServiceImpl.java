@@ -3,9 +3,8 @@ package com.example.et.service.transaction;
 import com.example.et.controller.dto.PagedTransactionsDto;
 import com.example.et.controller.dto.TransactionDto;
 import com.example.et.controller.dto.TransactionRequestDto;
-import com.example.et.model.core.Account;
-import com.example.et.model.core.AppUser;
-import com.example.et.model.core.Transaction;
+import com.example.et.controller.dto.TransactionResponseDto;
+import com.example.et.model.core.*;
 import com.example.et.repo.PaymentModeRepo;
 import com.example.et.repo.SystemCategoryRepo;
 import com.example.et.repo.TransactionRepo;
@@ -13,6 +12,7 @@ import com.example.et.service.account.AccountService;
 import com.example.et.service.ai.parsetask.AiParseTaskService;
 import com.example.et.service.card.CardService;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -130,7 +131,7 @@ public class TransactionsServiceImpl implements TransactionsService {
 
   @Override
   public PagedTransactionsDto getAllTransactions(String userId, Pageable pageable) {
-    final var page = transactionRepo.findByAppUserId(UUID.fromString(userId), pageable).map(this::toDto);
+    final var page = transactionRepo.findByAppUserId(UUID.fromString(userId), pageable).map(TransactionsServiceImpl::toDtoV2);
     return PagedTransactionsDto.from(page);
   }
 
@@ -140,6 +141,34 @@ public class TransactionsServiceImpl implements TransactionsService {
         .stream()
         .map(this::toDto)
         .toList();
+  }
+
+  @Override
+  public List<TransactionResponseDto> getRecentTransactionsV2(String userId) {
+    return transactionRepo.findByAppUserIdOrderByTransactionDateDesc(UUID.fromString(userId), PageRequest.of(0, 5))
+        .stream()
+        .map(TransactionsServiceImpl::toDtoV2)
+        .toList();
+  }
+
+  private static @NonNull TransactionResponseDto toDtoV2(Transaction t) {
+    return new TransactionResponseDto(
+            t.getId(),
+            t.getType(),
+            t.getAmount(),
+            t.getTransactionDate(),
+            t.getDescription(),
+            Optional.ofNullable(t.getAccount())
+                    .map(Account::getBank)
+                    .map(Bank::getName)
+                    .orElse("CASH"),
+            Optional.ofNullable(t.getPaymentMode())
+                    .map(PaymentMode::getName)
+                    .orElse(""),
+            Optional.ofNullable(t.getTransactionCategory())
+                    .map(SystemCategory::getName)
+                    .orElse("")
+    );
   }
 
   @Override

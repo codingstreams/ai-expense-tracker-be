@@ -11,7 +11,7 @@ public record AccountDto(
     Float balance,
     Account.AccountType accountType,
     Bank bank,
-    boolean isUpiEnabled,
-    boolean isNetBankingEnabled
+    Boolean isUpiEnabled,
+    Boolean isNetBankingEnabled
 ) {
 }

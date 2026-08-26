@@ -5,7 +5,7 @@ import com.example.et.model.core.LanguagePreference;
 
 public record UserDetailsDto(String email,
                              String name,
-                             boolean isOnboardingComplete,
+                             Boolean isOnboardingComplete,
                              LanguagePreference languagePreference,
                              Integer spendLimit,
                              AppUserConfig.Currency currency, String paymentMode) implements UserEditableProperties {

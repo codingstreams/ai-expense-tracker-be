@@ -31,4 +31,6 @@ public interface AppUserRepo extends JpaRepository<AppUser, UUID> {
       where u.id = :userId
       """)
   UserDetailsDto findByIdWithUserConfig(UUID userId);
+
+  boolean existsByIdAndIsOnboardingComplete(UUID userId, boolean isOnboarded);
 }

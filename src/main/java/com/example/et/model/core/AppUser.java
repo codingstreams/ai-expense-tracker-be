@@ -28,7 +28,7 @@ public class AppUser extends BaseAudit {
 
   @Column(name = "is_onboarding_complete", nullable = false)
   @ColumnDefault("false")
-  private boolean isOnboardingComplete;
+  private Boolean isOnboardingComplete;
 
   @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
   private AppUserConfig appUserConfig;

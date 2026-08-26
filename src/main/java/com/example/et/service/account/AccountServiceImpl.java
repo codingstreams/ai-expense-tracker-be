@@ -7,11 +7,13 @@ import com.example.et.model.core.AppUser;
 import com.example.et.model.core.Bank;
 import com.example.et.repo.AccountRepo;
 import com.example.et.repo.BankRepo;
+import com.example.et.repo.PaymentModeRepo;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -19,6 +21,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
   private final AccountRepo accountRepo;
+  private final PaymentModeRepo paymentModeRepo;
   private final BankRepo bankRepo;
 
   private static @NonNull Function<Account, AccountDto> toDto() {
@@ -71,8 +74,8 @@ public class AccountServiceImpl implements AccountService {
             .balance(accountDto.balance())
             .lastFourDigits(accountDto.lastFourDigits())
             .bank(accountDto.bank())
-            .isUpiEnabled(accountDto.isUpiEnabled())
-            .isNetBankingEnabled(accountDto.isNetBankingEnabled())
+            .isUpiEnabled(Optional.ofNullable(accountDto.isUpiEnabled()).orElse(true))
+            .isNetBankingEnabled(Optional.ofNullable(accountDto.isNetBankingEnabled()).orElse(true))
             .build())
         .toList();
 
@@ -109,5 +112,34 @@ public class AccountServiceImpl implements AccountService {
     final var account = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Account not found."));
     accountRepo.delete(account);
+  }
+
+  @Override
+  public Float updateCashBalance(String userId, Float cashBalance) {
+    final var cashAccount = accountRepo.findCashAccountByUserId(UUID.fromString(userId)).orElseThrow(() -> new RuntimeException("Account not found."));
+
+    if(cashBalance > 0) {
+      cashAccount.setBalance(cashBalance);
+    }
+
+    accountRepo.save(cashAccount);
+    return cashBalance;
+  }
+
+  @Override
+  public AccountDto getUserCashAccountDetails(String userId) {
+    return accountRepo.findByUserIdAndAccountType(UUID.fromString(userId), Account.AccountType.CASH);
+  }
+
+  @Override
+  public List<AccountDto> getUserAccountsV2(String userId, String paymentMode) {
+//final var selectedPaymentMode = paymentModeRepo.findByNameIgnoreCase(paymentMode)
+//        .orElseThrow(()->new RuntimeException("Payment mode not found."));
+
+    return accountRepo.findByAppUserId(UUID.fromString(userId))
+            .stream()
+//            .filter(account->account.isUpiEnabled() || account.isNetBankingEnabled())
+            .map(toDto())
+            .toList();
   }
 }

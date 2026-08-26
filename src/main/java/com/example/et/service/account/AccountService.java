@@ -21,4 +21,10 @@ public interface AccountService {
   AccountDto updateAccount(String userId, String accountId, AccountDto accountDto);
 
   void deleteAccount(String userId, String accountId);
+
+  Float updateCashBalance(String userId, Float cashBalance);
+
+  AccountDto getUserCashAccountDetails(String userId);
+
+  List<AccountDto> getUserAccountsV2(String userId, String paymentMode);
 }

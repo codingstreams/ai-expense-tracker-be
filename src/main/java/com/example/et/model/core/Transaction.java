@@ -28,16 +28,16 @@ public class Transaction extends BaseAudit {
 
   private String description;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   private SystemCategory transactionCategory;
 
   @ManyToOne(fetch = FetchType.LAZY)
   private AppUser appUser; // Owner
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   private Account account;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   private PaymentMode paymentMode;
 
   public enum TransactionType {

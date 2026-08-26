@@ -11,4 +11,6 @@ public interface UserEditableProperties {
   AppUserConfig.Currency currency();
 
   String paymentMode();
+
+  Boolean isOnboardingComplete();
 }

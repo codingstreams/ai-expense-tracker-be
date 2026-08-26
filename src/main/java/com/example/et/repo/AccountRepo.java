@@ -23,4 +23,22 @@ public interface AccountRepo extends JpaRepository<Account, UUID> {
   AccountDto findByUserIdAndAccountId(UUID userId, UUID accountId);
 
   Optional<Account> findByIdAndAppUserId(UUID id, UUID appUserId);
+
+  @Query("""
+          select a
+          from Account a
+          join a.appUser u
+          left join a.bank b
+          where u.id = :userId and a.lastFourDigits = 'CASH'
+      """)
+  Optional<Account> findCashAccountByUserId(UUID userId);
+
+  @Query("""
+          select new com.example.et.controller.dto.AccountDto(a.id, a.lastFourDigits, a.balance, a.accountType, b, a.isUpiEnabled, a.isNetBankingEnabled)
+           from Account a
+           join a.appUser u
+           left join a.bank b
+           where u.id = :userId and a.accountType = :accountType
+      """)
+  AccountDto findByUserIdAndAccountType(UUID userId, Account.AccountType accountType);
 }

@@ -5,14 +5,14 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public record PagedTransactionsDto(
-    List<TransactionDto> content,
-    int pageNumber,
-    int pageSize,
-    long totalElements,
-    int totalPages,
-    boolean isLast
+        List<TransactionResponseDto> content,
+        int pageNumber,
+        int pageSize,
+        long totalElements,
+        int totalPages,
+        boolean isLast
 ) {
-  public static PagedTransactionsDto from(Page<TransactionDto> page) {
+  public static PagedTransactionsDto from(Page<TransactionResponseDto> page) {
     return new PagedTransactionsDto(
         page.getContent(),
         page.getNumber(),
