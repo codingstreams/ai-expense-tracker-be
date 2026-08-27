@@ -47,7 +47,7 @@ spring:
 
 jwt:
   secret-key: ${JWT_KEY}
-  expiration-time-access-token-in-minutes: 10
+  expiration-time-access-token-in-minutes: ${JWT_TOKEN_EXPIRE}
 
 server:
   port: ${PORT:8080}
