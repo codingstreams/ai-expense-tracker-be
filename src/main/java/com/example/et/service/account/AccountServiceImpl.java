@@ -77,6 +77,7 @@ public class AccountServiceImpl implements AccountService {
             .bank(accountDto.bank())
             .isUpiEnabled(Optional.ofNullable(accountDto.isUpiEnabled()).orElse(true))
             .isNetBankingEnabled(Optional.ofNullable(accountDto.isNetBankingEnabled()).orElse(true))
+            .isActive(true)
             .build())
         .toList();
 
