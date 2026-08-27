@@ -48,3 +48,6 @@ spring:
 jwt:
   secret-key: ${JWT_KEY}
   expiration-time-access-token-in-minutes: 10
+
+server:
+  port: ${PORT:8080}
