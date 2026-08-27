@@ -2,6 +2,7 @@ package com.example.et.controller;
 
 import com.example.et.service.dataseeder.DataSeederService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/generate-data")
 @RequiredArgsConstructor
+@Profile("dev")
 public class DataSeederController {
   private final DataSeederService dataSeederService;
 
