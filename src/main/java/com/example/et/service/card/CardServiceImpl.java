@@ -58,7 +58,7 @@ public class CardServiceImpl implements CardService {
         account = accountRepo.save(Account.builder()
             .appUser(user)
             .accountType(Account.AccountType.CREDIT)
-            .balance(cardDto.limit() != null ? cardDto.limit() : 0)
+            .balance(cardDto.limit() != null ? cardDto.limit() : 0.0f)
             .lastFourDigits(cardDto.lastFourDigits())
             .bank(cardDto.bank())
             .build());
