@@ -2,6 +2,7 @@ package com.example.et.config;
 
 import com.example.et.security.JwtAuthFilter;
 import jakarta.servlet.DispatcherType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,6 +19,10 @@ import java.util.List;
 
 @Configuration
 public class SecurityConfig {
+
+  @Value("${cors.allowed-origins}")
+  private List<String> allowedOrigins;
+
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
                                           JwtAuthFilter jwtAuthFilter,
@@ -43,7 +48,7 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://192.168.1.10:3000")); // Your Next.js URL
+    configuration.setAllowedOrigins(allowedOrigins); // Your Next.js URL
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-API-Version"));
     configuration.setAllowCredentials(true);

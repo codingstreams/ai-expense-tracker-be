@@ -51,3 +51,6 @@ jwt:
 
 server:
   port: ${PORT:8080}
+
+cors:
+  allowed-origins: ${APP_URL:http://localhost:3000}
