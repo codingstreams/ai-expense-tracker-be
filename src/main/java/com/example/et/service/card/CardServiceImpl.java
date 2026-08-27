@@ -34,9 +34,10 @@ public class CardServiceImpl implements CardService {
   }
 
   @Override
-  public List<CardDto> getUserCards(String userId) {
+  public List<CardDto> getUserCards(String userId, CardType cardType) {
     return cardRepo.findByAppUserId(UUID.fromString(userId))
         .stream()
+        .filter(card -> cardType == null || card.getCardType() == cardType)
         .map(toDto())
         .toList();
   }

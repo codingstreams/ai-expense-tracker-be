@@ -2,6 +2,7 @@ package com.example.et.controller;
 
 import com.example.et.controller.dto.CardDto;
 import com.example.et.controller.dto.UserCards;
+import com.example.et.model.core.CardType;
 import com.example.et.service.card.CardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,8 @@ public class CardController {
   private final CardService cardService;
 
   @GetMapping
-  public ResponseEntity<List<CardDto>> getUserCards(@AuthenticationPrincipal String userId) {
-    return ResponseEntity.ok(cardService.getUserCards(userId));
+  public ResponseEntity<List<CardDto>> getUserCards(@AuthenticationPrincipal String userId, @RequestParam(name = "type") CardType cardType) {
+    return ResponseEntity.ok(cardService.getUserCards(userId, cardType));
   }
 
   @PostMapping

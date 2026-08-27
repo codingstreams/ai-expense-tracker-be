@@ -1,6 +1,7 @@
 package com.example.et.service.account;
 
 import com.example.et.controller.dto.AccountDto;
+import com.example.et.controller.dto.UpdateCashDto;
 import com.example.et.controller.dto.UserBankAccounts;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
@@ -111,7 +112,10 @@ public class AccountServiceImpl implements AccountService {
   public void deleteAccount(String userId, String accountId) {
     final var account = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Account not found."));
-    accountRepo.delete(account);
+
+    account.setIsActive(false);
+    accountRepo.save(account);
+//    accountRepo.delete(account);
   }
 
   @Override
@@ -141,5 +145,18 @@ public class AccountServiceImpl implements AccountService {
 //            .filter(account->account.isUpiEnabled() || account.isNetBankingEnabled())
             .map(toDto())
             .toList();
+  }
+
+  @Override
+  public AccountDto updateCashBalance(String userId, UpdateCashDto requestBody) {
+    final var cashAccount = accountRepo.findCashAccountByUserId(UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("Account not found."));
+
+    if(requestBody.cashBalance() > 0){
+      cashAccount.setBalance(requestBody.cashBalance());
+    }
+
+    accountRepo.save(cashAccount);
+    return toDto().apply(cashAccount);
   }
 }

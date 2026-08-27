@@ -30,7 +30,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(http -> http
             .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR)
             .permitAll()
-            .requestMatchers("/api/auth/**", "/error")
+            .requestMatchers("/api/auth/**", "/error", "/api/generate-data/**")
             .permitAll()
             .anyRequest()
             .authenticated())

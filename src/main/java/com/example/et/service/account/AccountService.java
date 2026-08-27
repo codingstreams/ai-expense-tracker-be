@@ -1,6 +1,7 @@
 package com.example.et.service.account;
 
 import com.example.et.controller.dto.AccountDto;
+import com.example.et.controller.dto.UpdateCashDto;
 import com.example.et.controller.dto.UserBankAccounts;
 import com.example.et.model.core.Account;
 
@@ -27,4 +28,6 @@ public interface AccountService {
   AccountDto getUserCashAccountDetails(String userId);
 
   List<AccountDto> getUserAccountsV2(String userId, String paymentMode);
+
+  AccountDto updateCashBalance(String userId, UpdateCashDto requestBody);
 }

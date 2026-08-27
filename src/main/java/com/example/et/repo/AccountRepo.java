@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AccountRepo extends JpaRepository<Account, UUID> {
-  @Query("select a from Account a where a.appUser.id = :userId")
+  @Query("select a from Account a where a.appUser.id = :userId and a.isActive = true")
   List<Account> findByAppUserId(UUID userId);
 
   @Query("""
@@ -18,7 +18,7 @@ public interface AccountRepo extends JpaRepository<Account, UUID> {
            from Account a
            join a.appUser u
            left join a.bank b
-           where u.id = :userId and a.id = :accountId
+           where u.id = :userId and a.id = :accountId and a.isActive = true
       """)
   AccountDto findByUserIdAndAccountId(UUID userId, UUID accountId);
 
@@ -38,7 +38,7 @@ public interface AccountRepo extends JpaRepository<Account, UUID> {
            from Account a
            join a.appUser u
            left join a.bank b
-           where u.id = :userId and a.accountType = :accountType
+           where u.id = :userId and a.accountType = :accountType and a.isActive = true
       """)
   AccountDto findByUserIdAndAccountType(UUID userId, Account.AccountType accountType);
 }

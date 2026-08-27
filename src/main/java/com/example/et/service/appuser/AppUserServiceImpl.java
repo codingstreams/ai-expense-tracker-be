@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,10 +62,21 @@ public class AppUserServiceImpl implements AppUserService {
     final var userConfig = appUserConfigRepo.findByUserId(UUID.fromString(userId))
         .orElseThrow(() -> new UsernameNotFoundException("User Id: %s not found.".formatted(userId)));
 
-    userConfig.setCurrency(userDetailsDto.currency());
-    userConfig.setLanguagePreference(userDetailsDto.languagePreference());
-    userConfig.setSpendLimit(userDetailsDto.spendLimit());
-    userConfig.getAppUser().setIsOnboardingComplete(userDetailsDto.isOnboardingComplete());
+    if (userDetailsDto.currency() != null) {
+      userConfig.setCurrency(userDetailsDto.currency());
+    }
+
+    if (userDetailsDto.languagePreference() != null) {
+      userConfig.setLanguagePreference(userDetailsDto.languagePreference());
+    }
+
+    if (userDetailsDto.spendLimit() != null) {
+      userConfig.setSpendLimit(userDetailsDto.spendLimit());
+    }
+
+    if (userDetailsDto.isOnboardingComplete() != null) {
+      userConfig.getAppUser().setIsOnboardingComplete(userDetailsDto.isOnboardingComplete());
+    }
 
     // Check for payment mode
     final var paymentMode = paymentModeRepo.findByNameIgnoreCase(userDetailsDto.paymentMode())
@@ -75,6 +87,11 @@ public class AppUserServiceImpl implements AppUserService {
     appUserConfigRepo.save(userConfig);
 
     return userDetailsDto;
+  }
+
+  @Override
+  public List<AppUser> saveUsers(ArrayList<AppUser> users) {
+    return appUserRepo.saveAll(users);
   }
 
   @Override

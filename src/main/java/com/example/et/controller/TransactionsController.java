@@ -1,9 +1,6 @@
 package com.example.et.controller;
 
-import com.example.et.controller.dto.PagedTransactionsDto;
-import com.example.et.controller.dto.TransactionDto;
-import com.example.et.controller.dto.TransactionRequestDto;
-import com.example.et.controller.dto.TransactionResponseDto;
+import com.example.et.controller.dto.*;
 import com.example.et.service.transaction.TransactionsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +24,8 @@ public class TransactionsController {
   }
 
   @GetMapping
-  public ResponseEntity<PagedTransactionsDto> getAllTransactions(@AuthenticationPrincipal String userId, Pageable pageable) {
-    return ResponseEntity.ok(transactionsService.getAllTransactions(userId, pageable));
+  public ResponseEntity<PagedTransactionsDto> getAllTransactions(@AuthenticationPrincipal String userId, @ModelAttribute TransactionFilterParams filterParams, Pageable pageable) {
+    return ResponseEntity.ok(transactionsService.getAllTransactions(userId, filterParams, pageable));
   }
 
   @GetMapping(value = "/recent", version = "1.0")

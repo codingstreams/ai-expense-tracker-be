@@ -3,6 +3,7 @@ package com.example.et.model.core;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class Account extends BaseAudit {
+public class Account extends BaseAudit implements ActivableEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
@@ -42,6 +43,14 @@ public class Account extends BaseAudit {
   @ToString.Exclude
   @JsonIgnore
   private AppUser appUser;
+
+  @ColumnDefault("true")
+  private Boolean isActive;
+
+  @Override
+  public Boolean isActive() {
+    return isActive;
+  }
 
   public enum AccountType {
     SAVINGS, CREDIT, CASH

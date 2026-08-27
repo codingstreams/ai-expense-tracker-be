@@ -5,6 +5,9 @@ import com.example.et.controller.dto.UserDetailsDto;
 import com.example.et.model.core.AppUser;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public interface AppUserService extends UserDetailsService {
 
   boolean checkUserExists(String email);
@@ -20,4 +23,6 @@ public interface AppUserService extends UserDetailsService {
   UserDetailsDto getUserByUserIdWithConfig(String userId);
 
   UpdateUserDetailsDto updateUserConfig(String userId, UpdateUserDetailsDto userDetailsDto);
+
+  List<AppUser> saveUsers(ArrayList<AppUser> users);
 }

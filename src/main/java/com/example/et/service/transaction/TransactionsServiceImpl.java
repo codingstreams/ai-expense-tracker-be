@@ -1,10 +1,8 @@
 package com.example.et.service.transaction;
 
-import com.example.et.controller.dto.PagedTransactionsDto;
-import com.example.et.controller.dto.TransactionDto;
-import com.example.et.controller.dto.TransactionRequestDto;
-import com.example.et.controller.dto.TransactionResponseDto;
+import com.example.et.controller.dto.*;
 import com.example.et.model.core.*;
+import com.example.et.model.specs.TransactionSpecifications;
 import com.example.et.repo.PaymentModeRepo;
 import com.example.et.repo.SystemCategoryRepo;
 import com.example.et.repo.TransactionRepo;
@@ -130,8 +128,13 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   @Override
-  public PagedTransactionsDto getAllTransactions(String userId, Pageable pageable) {
-    final var page = transactionRepo.findByAppUserId(UUID.fromString(userId), pageable).map(TransactionsServiceImpl::toDtoV2);
+  public PagedTransactionsDto getAllTransactions(String userId, TransactionFilterParams filterParams, Pageable pageable) {
+    final var parsedUserId = UUID.fromString(userId);
+    final var spec = TransactionSpecifications.withFilters(parsedUserId, filterParams);
+
+    final var page = transactionRepo.findAll(spec, pageable)
+        .map(TransactionsServiceImpl::toDtoV2);
+
     return PagedTransactionsDto.from(page);
   }
 

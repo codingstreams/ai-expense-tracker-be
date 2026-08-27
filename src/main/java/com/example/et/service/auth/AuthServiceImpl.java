@@ -16,6 +16,7 @@ import com.example.et.service.appuser.AppUserService;
 import com.example.et.service.exception.UserAlreadyExistsException;
 import com.example.et.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,6 +30,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
   private final AppUserService appUserService;
   private final AccountRepo accountRepo;
@@ -67,8 +69,17 @@ public class AuthServiceImpl implements AuthService {
   public AuthResponse registerUser(UserRegistrationRequest request) {
     final var userExists = appUserService.checkUserExists(request.email());
 
-    if (userExists) throw new UserAlreadyExistsException("Email/User: %s already present.".formatted(request.email()));
+    if (userExists) {
+      log.info("User {} already exists", request.email());
+      throw new UserAlreadyExistsException("User " + request.email() + " already exists");
+    }
 
+    final var registeredUser = createNewUserAndAccount(request);
+
+    return login(new LoginRequest(registeredUser.getEmail(), request.password()));
+  }
+
+  private AppUser createNewUserAndAccount(UserRegistrationRequest request) {
     final var cashPaymentMode = paymentModeRepo.findByNameIgnoreCase("Cash").orElse(null);
 
     final var newUser = AppUser.builder()
@@ -97,11 +108,12 @@ public class AuthServiceImpl implements AuthService {
         .lastFourDigits("CASH")
         .isUpiEnabled(false)
         .isNetBankingEnabled(false)
+        .isActive(true)
         .build();
 
     accountRepo.save(cashAccount);
 
-    return login(new LoginRequest(registeredUser.getEmail(), request.password()));
+    return registeredUser;
   }
 
   @Override
