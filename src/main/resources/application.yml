@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: et
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+  jpa:
+    hibernate:
+      ddl-auto: validate # Disable Hibernate DDL automatic generation when using Flyway
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
