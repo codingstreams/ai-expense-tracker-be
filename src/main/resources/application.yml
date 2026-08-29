@@ -15,3 +15,7 @@ spring:
     hibernate:
       ddl-auto: validate # Disable Hibernate DDL automatic generation when using Flyway
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+jwt:
+  secret-key: ${JWT_KEY}
+  expiration-time-access-token-in-minutes: 10

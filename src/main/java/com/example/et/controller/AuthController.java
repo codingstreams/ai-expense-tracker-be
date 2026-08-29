@@ -1,6 +1,7 @@
 package com.example.et.controller;
 
 import com.example.et.controller.dto.AuthResponse;
+import com.example.et.controller.dto.LoginRequest;
 import com.example.et.controller.dto.UserRegistrationRequest;
 import com.example.et.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,12 @@ public class AuthController {
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> registerUser(@RequestBody UserRegistrationRequest userRegistrationRequest) {
     final var authResponse = authService.register(userRegistrationRequest);
+    return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
+    final var authResponse = authService.login(loginRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
   }
 }
