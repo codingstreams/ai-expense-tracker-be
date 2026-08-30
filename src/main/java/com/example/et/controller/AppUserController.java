@@ -1,14 +1,13 @@
 package com.example.et.controller;
 
 
+import com.example.et.controller.dto.UpdateUserDetailsDto;
 import com.example.et.controller.dto.UserDetailsDto;
 import com.example.et.service.appuser.AppUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -23,4 +22,9 @@ public class AppUserController {
     return ResponseEntity.ok(appUser);
   }
 
+  @PutMapping("/me/config")
+  public ResponseEntity<UpdateUserDetailsDto> updateUserConfig(@AuthenticationPrincipal String userId, @RequestBody UpdateUserDetailsDto userDetailsDto) {
+    final var appUser = appUserService.updateUserConfig(userId, userDetailsDto);
+    return ResponseEntity.ok(appUser);
+  }
 }

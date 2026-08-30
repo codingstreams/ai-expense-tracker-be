@@ -1,7 +1,10 @@
 package com.example.et.service.appuser;
 
+import com.example.et.controller.dto.UpdateUserDetailsDto;
 import com.example.et.controller.dto.UserDetailsDto;
 import com.example.et.model.core.AppUser;
+import com.example.et.model.core.AppUserConfig;
+import com.example.et.repo.AppUserConfigRepo;
 import com.example.et.repo.AppUserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,6 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AppUserServiceImpl implements AppUserService {
   private final AppUserRepo appUserRepo;
+  private final AppUserConfigRepo appUserConfigRepo;
 
   @Override
   public boolean checkUserExists(String email) {
@@ -36,6 +40,32 @@ public class AppUserServiceImpl implements AppUserService {
   @Override
   public UserDetailsDto getUserByUserIdWithConfig(String userId) {
     return appUserRepo.findByIdWithUserConfig(UUID.fromString(userId));
+  }
+
+  @Override
+  public UpdateUserDetailsDto updateUserConfig(String userId, UpdateUserDetailsDto userDetailsDto) {
+    final var userConfig = appUserConfigRepo.findByUserId(UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("User Id: %s not found.".formatted(userId)));
+
+    if (userDetailsDto.currency() != null) {
+      userConfig.setCurrency(userDetailsDto.currency());
+    }
+
+    if (userDetailsDto.languagePreference() != null) {
+      userConfig.setLanguagePreference(userDetailsDto.languagePreference());
+    }
+
+    if (userDetailsDto.spendLimit() != null) {
+      userConfig.setSpendLimit(userDetailsDto.spendLimit());
+    }
+
+    if (userDetailsDto.isOnboardingComplete() != null) {
+      userConfig.getAppUser().setOnboardingComplete(userDetailsDto.isOnboardingComplete());
+    }
+
+    appUserConfigRepo.save(userConfig);
+
+    return userDetailsDto;
   }
 
   @Override
