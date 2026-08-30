@@ -1,5 +1,6 @@
 package com.example.et.service.appuser;
 
+import com.example.et.controller.dto.UserDetailsDto;
 import com.example.et.model.core.AppUser;
 import com.example.et.repo.AppUserRepo;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,11 @@ public class AppUserServiceImpl implements AppUserService {
   @Override
   public boolean checkIsUserOnboardedByEmail(String email) {
     return appUserRepo.existsByEmailAndIsOnboardingComplete(email, true);
+  }
+
+  @Override
+  public UserDetailsDto getUserByUserIdWithConfig(String userId) {
+    return appUserRepo.findByIdWithUserConfig(UUID.fromString(userId));
   }
 
   @Override

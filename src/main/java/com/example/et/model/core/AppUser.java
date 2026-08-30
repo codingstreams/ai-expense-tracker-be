@@ -30,4 +30,7 @@ public class AppUser extends BaseAudit{
   @Builder.Default
   @Column(name = "is_onboarding_complete", nullable = false)
   private boolean isOnboardingComplete = false;
+
+  @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
+  private AppUserConfig appUserConfig;
 }

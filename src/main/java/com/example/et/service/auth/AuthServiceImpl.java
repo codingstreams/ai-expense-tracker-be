@@ -5,6 +5,7 @@ import com.example.et.controller.dto.AuthResponse;
 import com.example.et.controller.dto.LoginRequest;
 import com.example.et.controller.dto.UserRegistrationRequest;
 import com.example.et.model.core.AppUser;
+import com.example.et.model.core.AppUserConfig;
 import com.example.et.security.BearerAuthToken;
 import com.example.et.service.appuser.AppUserService;
 import com.example.et.util.JwtUtils;
@@ -48,6 +49,15 @@ public class AuthServiceImpl implements AuthService {
         .password(passwordEncoder.encode(request.password()))
         .isOnboardingComplete(false)
         .build();
+
+    final var userConfig = AppUserConfig.builder()
+        .appUser(newUser)
+        .languagePreference(AppUserConfig.LanguagePreference.EN)
+        .currency(AppUserConfig.Currency.INR)
+        .spendLimit(0)
+        .build();
+
+    newUser.setAppUserConfig(userConfig);
 
     appUserService.saveUser(newUser);
 
