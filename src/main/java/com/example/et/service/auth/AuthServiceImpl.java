@@ -6,6 +6,7 @@ import com.example.et.controller.dto.LoginRequest;
 import com.example.et.controller.dto.UserRegistrationRequest;
 import com.example.et.model.core.AppUser;
 import com.example.et.security.BearerAuthToken;
+import com.example.et.security.JwtAuthFilter;
 import com.example.et.service.appuser.AppUserService;
 import com.example.et.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
   private final SecretKey secretKey;
   private final JwtProps jwtProps;
   private final PasswordEncoder passwordEncoder;
+  private final ExpireTokenService expireTokenService;
 
   @Override
   public AuthResponse register(UserRegistrationRequest request) {
@@ -76,5 +78,10 @@ public class AuthServiceImpl implements AuthService {
         expirationTimeAccessToken,
         onboarded
     );
+  }
+
+  @Override
+  public void logout(String token) {
+    JwtAuthFilter.extractToken(token).ifPresent(expireTokenService::addExpireToken);
   }
 }
