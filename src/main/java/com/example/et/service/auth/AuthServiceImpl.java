@@ -4,10 +4,12 @@ import com.example.et.config.props.JwtProps;
 import com.example.et.controller.dto.AuthResponse;
 import com.example.et.controller.dto.LoginRequest;
 import com.example.et.controller.dto.UserRegistrationRequest;
+import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
 import com.example.et.model.core.AppUserConfig;
 import com.example.et.security.BearerAuthToken;
 import com.example.et.security.JwtAuthFilter;
+import com.example.et.service.account.AccountService;
 import com.example.et.service.appuser.AppUserService;
 import com.example.et.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
   private final JwtProps jwtProps;
   private final PasswordEncoder passwordEncoder;
   private final ExpireTokenService expireTokenService;
+  private final AccountService accountService;
 
   @Override
   public AuthResponse register(UserRegistrationRequest request) {
@@ -62,6 +65,20 @@ public class AuthServiceImpl implements AuthService {
     newUser.setAppUserConfig(userConfig);
 
     appUserService.saveUser(newUser);
+
+    final var registeredUser = appUserService.saveUser(newUser);
+
+    final var cashAccount = Account.builder()
+        .appUser(registeredUser)
+        .accountType(Account.AccountType.CASH)
+        .balance(0.0f)
+        .lastFourDigits("CASH")
+        .isUpiEnabled(false)
+        .isNetBankingEnabled(false)
+        .isActive(true)
+        .build();
+
+    accountService.saveAccount(cashAccount);
 
     return login(new LoginRequest(request.email(), request.password()));
   }
