@@ -74,4 +74,10 @@ public class CardServiceImpl implements CardService {
         .toList();
   }
 
+  @Override
+  public Card getUserCard(String userId, UUID cardId) {
+    return cardRepo.findByIdAndAppUserId(cardId, UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("Card not found."));
+  }
+
 }
