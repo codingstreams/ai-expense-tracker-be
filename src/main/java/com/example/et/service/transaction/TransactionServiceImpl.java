@@ -167,4 +167,33 @@ public class TransactionServiceImpl implements TransactionService {
 
     return toDto(savedTransaction);
   }
+
+  @Override
+  public void deleteTransaction(String userId, UUID transactionId) {
+    final var userUuid = UUID.fromString(userId);
+    final var transaction = transactionRepo.findByIdAndAppUserId(transactionId, userUuid)
+        .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+    if (transaction.getType() == Transaction.TransactionType.TRANSFER && transaction.getTransferId() != null) {
+      final var transferTxns = transactionRepo.findAllByTransferIdAndAppUserId(transaction.getTransferId(), userUuid);
+      for (var txn : transferTxns) {
+        if (txn.getAccount() != null) {
+          final var acc = txn.getAccount();
+          acc.setBalance(acc.getBalance() - txn.getAmount());
+          accountService.saveAccount(acc);
+        }
+
+      }
+      transactionRepo.deleteAll(transferTxns);
+      return;
+    }
+
+    if (transaction.getAccount() != null) {
+      final var account = transaction.getAccount();
+      account.setBalance(account.getBalance() - transaction.getAmount());
+      accountService.saveAccount(account);
+    }
+
+    transactionRepo.delete(transaction);
+  }
 }

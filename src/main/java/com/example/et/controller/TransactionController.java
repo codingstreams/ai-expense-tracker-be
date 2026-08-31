@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/transactions")
 @RequiredArgsConstructor
@@ -27,5 +29,11 @@ public class TransactionController {
   @PostMapping
   public ResponseEntity<TransactionResponseDto> createTransaction(@RequestBody TransactionRequestDto requestBody, @AuthenticationPrincipal String userId) {
     return ResponseEntity.status(HttpStatus.CREATED).body(transactionService.createTransaction(userId, requestBody));
+  }
+
+  @DeleteMapping("/{transactionId}")
+  public ResponseEntity<Void> deleteTransaction(@PathVariable UUID transactionId, @AuthenticationPrincipal String userId) {
+    transactionService.deleteTransaction(userId, transactionId);
+    return ResponseEntity.ok().build();
   }
 }
