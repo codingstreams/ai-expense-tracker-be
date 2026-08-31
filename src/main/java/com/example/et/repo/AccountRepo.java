@@ -5,14 +5,14 @@ import com.example.et.model.core.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface AccountRepo extends JpaRepository<Account, UUID> {
   @Query("""
-    select a from Account a where a.appUser.id = :userId and a.isActive = true
-    """)
+      select a from Account a where a.appUser.id = :userId and a.isActive = true
+      """)
   List<Account> findByAppUserId(UUID userId);
 
   @Query("""
@@ -23,4 +23,12 @@ public interface AccountRepo extends JpaRepository<Account, UUID> {
            where u.id = :userId and a.id = :accountId and a.isActive = true
       """)
   AccountDto findByUserIdAndAccountId(UUID userId, UUID accountId);
+
+  @Query("""
+      select a
+          from Account a
+          join a.appUser u
+          where u.id = :appUserId and a.id = :id and a.isActive = true
+      """)
+  Optional<Account> findByIdAndAppUserId(UUID id, UUID appUserId);
 }

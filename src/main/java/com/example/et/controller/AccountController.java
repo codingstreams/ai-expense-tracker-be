@@ -34,4 +34,11 @@ public class AccountController {
     final var account = accountService.getUserAccountDetails(userId, accountId);
     return ResponseEntity.ok(account);
   }
+
+  @PutMapping("/{accountId}")
+  public ResponseEntity<AccountDto> updateAccount(@AuthenticationPrincipal String userId, @PathVariable String accountId, @RequestBody AccountDto accountDto) {
+    final var account = accountService.updateAccount(userId, accountId, accountDto);
+    return ResponseEntity.ok(account);
+  }
+
 }

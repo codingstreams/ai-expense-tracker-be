@@ -82,4 +82,32 @@ public class AccountServiceImpl implements AccountService {
   public AccountDto getUserAccountDetails(String userId, String accountId) {
     return accountRepo.findByUserIdAndAccountId(UUID.fromString(userId), UUID.fromString(accountId));
   }
+
+  @Override
+  public AccountDto updateAccount(String userId, String accountId, AccountDto account) {
+    final var existingAccount = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("Account not found."));
+
+    if (account != null) {
+      if (account.balance() != null) {
+        existingAccount.setBalance(account.balance());
+      }
+      if (account.lastFourDigits() != null) {
+        existingAccount.setLastFourDigits(account.lastFourDigits());
+      }
+      if (account.accountType() != null) {
+        existingAccount.setAccountType(account.accountType());
+      }
+      if (account.bank() != null) {
+        existingAccount.setBank(account.bank());
+      }
+
+      existingAccount.setUpiEnabled(Optional.ofNullable(account.isUpiEnabled()).orElse(existingAccount.isUpiEnabled()));
+      existingAccount.setNetBankingEnabled(Optional.ofNullable(account.isNetBankingEnabled()).orElse(existingAccount.isNetBankingEnabled()));
+    }
+
+    final var updatedAccount = accountRepo.save(existingAccount);
+
+    return toDto().apply(updatedAccount);
+  }
 }

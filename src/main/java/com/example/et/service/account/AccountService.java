@@ -14,4 +14,6 @@ public interface AccountService {
   void saveAccount(Account account);
 
   AccountDto getUserAccountDetails(String userId, String accountId);
+
+  AccountDto updateAccount(String userId, String accountId, AccountDto account);
 }
