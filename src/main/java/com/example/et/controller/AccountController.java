@@ -28,4 +28,10 @@ public class AccountController {
     final var createdAccounts = accountService.addAccounts(userId, accounts);
     return ResponseEntity.ok(createdAccounts);
   }
+
+  @GetMapping("/{accountId}")
+  public ResponseEntity<AccountDto> getUserAccountDetails(@AuthenticationPrincipal String userId, @PathVariable String accountId) {
+    final var account = accountService.getUserAccountDetails(userId, accountId);
+    return ResponseEntity.ok(account);
+  }
 }

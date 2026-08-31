@@ -77,4 +77,9 @@ public class AccountServiceImpl implements AccountService {
   public void saveAccount(Account account) {
     accountRepo.save(account);
   }
+
+  @Override
+  public AccountDto getUserAccountDetails(String userId, String accountId) {
+    return accountRepo.findByUserIdAndAccountId(UUID.fromString(userId), UUID.fromString(accountId));
+  }
 }

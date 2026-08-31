@@ -12,4 +12,6 @@ public interface AccountService {
   List<AccountDto> addAccounts(String userId, UserBankAccounts requestBody);
 
   void saveAccount(Account account);
+
+  AccountDto getUserAccountDetails(String userId, String accountId);
 }
