@@ -110,4 +110,13 @@ public class AccountServiceImpl implements AccountService {
 
     return toDto().apply(updatedAccount);
   }
+
+  @Override
+  public void deleteAccount(String userId, String accountId) {
+    final var existingAccount = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("Account not found."));
+
+    existingAccount.setIsActive(false);
+    accountRepo.save(existingAccount);
+  }
 }
