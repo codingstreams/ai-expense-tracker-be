@@ -74,8 +74,8 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public void saveAccount(Account account) {
-    accountRepo.save(account);
+  public Account saveAccount(Account account) {
+    return accountRepo.save(account);
   }
 
   @Override
@@ -118,5 +118,11 @@ public class AccountServiceImpl implements AccountService {
 
     existingAccount.setIsActive(false);
     accountRepo.save(existingAccount);
+  }
+
+  @Override
+  public Account getAccount(UUID accountId, UUID userId) {
+    return accountRepo.findByIdAndAppUserId(accountId, userId)
+        .orElseThrow(() -> new RuntimeException("Account not found."));
   }
 }
