@@ -16,4 +16,8 @@ public record TransactionFilterParams(
     
     Float minAmount,
     Float maxAmount
-) {}
+) {
+    public static TransactionFilterParams empty() {
+        return new TransactionFilterParams(null, null, null, null, null, null);
+    }
+}
