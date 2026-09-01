@@ -31,4 +31,13 @@ public interface AccountRepo extends JpaRepository<Account, UUID> {
           where u.id = :appUserId and a.id = :id and a.isActive = true
       """)
   Optional<Account> findByIdAndAppUserId(UUID id, UUID appUserId);
+
+  @Query("""
+          select a
+          from Account a
+          join a.appUser u
+          left join a.bank b
+          where u.id = :userId and a.lastFourDigits = 'CASH'
+      """)
+  Optional<Account> findCashAccountByUserId(UUID userId);
 }

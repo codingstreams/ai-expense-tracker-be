@@ -130,4 +130,16 @@ public class AccountServiceImpl implements AccountService {
     return accountRepo.findByIdAndAppUserId(accountId, userId)
         .orElseThrow(() -> new RuntimeException("Account not found."));
   }
+
+  @Override
+  public Float updateCashBalance(String userId, Float cashBalance) {
+    final var cashAccount = accountRepo.findCashAccountByUserId(UUID.fromString(userId)).orElseThrow(() -> new RuntimeException("Account not found."));
+
+    if(cashBalance > 0) {
+      cashAccount.setBalance(cashBalance);
+    }
+
+    accountRepo.save(cashAccount);
+    return cashBalance;
+  }
 }

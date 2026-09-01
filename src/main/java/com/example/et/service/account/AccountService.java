@@ -23,4 +23,6 @@ public interface AccountService {
   void deleteAccount(String userId, String accountId);
 
   Account getAccount(UUID userId, UUID accountId);
+
+  Float updateCashBalance(String userId, Float cashBalance);
 }
