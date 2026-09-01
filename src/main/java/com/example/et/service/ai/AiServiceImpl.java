@@ -165,6 +165,17 @@ public class AiServiceImpl implements AiService {
 
   @Override
   public AiInsightDto generateInsights(String userId) {
+    long weeklyCount = aiInsightRepo.countByAppUserIdAndCreatedAtGreaterThanEqual(
+        UUID.fromString(userId), LocalDateTime.now().minusDays(7));
+    if (weeklyCount >= 2) {
+      throw new RuntimeException("Weekly AI insight limit reached (maximum 2 per week).");
+    }
+
+    long monthlyCount = aiInsightRepo.countByAppUserIdAndCreatedAtGreaterThanEqual(
+        UUID.fromString(userId), LocalDateTime.now().minusDays(30));
+    if (monthlyCount >= 4) {
+      throw new RuntimeException("Monthly AI insight limit reached (maximum 4 per month).");
+    }
 
     final var now = LocalDate.now();
     final var startDate = now.withDayOfMonth(1);
