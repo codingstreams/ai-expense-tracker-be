@@ -1,10 +1,13 @@
 package com.example.et.service.ai;
 
 import com.example.et.controller.dto.AiInputDto;
+import com.example.et.controller.dto.AiInsightDto;
 import com.example.et.controller.dto.AiTaskDto;
 import com.example.et.controller.dto.TransactionRequestDto;
+import com.example.et.model.ai.AiInsight;
 import com.example.et.model.ai.AiParsingTask;
 import com.example.et.model.core.*;
+import com.example.et.repo.AiInsightRepo;
 import com.example.et.repo.AppUserConfigRepo;
 import com.example.et.repo.PaymentModeRepo;
 import com.example.et.repo.SysCategoryRepo;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,7 @@ public class AiServiceImpl implements AiService {
   private final SysCategoryRepo sysCategoryRepo;
   private final AccountService accountService;
   private final TransactionService transactionService;
+  private final AiInsightRepo aiInsightRepo;
 
   public record ParsedTransaction(
       Float amount,
@@ -149,6 +154,32 @@ public class AiServiceImpl implements AiService {
       task.setErrorMessage(e.getMessage());
       aiParseTaskService.save(task);
     }
+  }
+
+  @Override
+  public AiInsightDto getLatestInsight(String userId) {
+    return aiInsightRepo.findFirstByAppUserIdOrderByCreatedAtDesc(UUID.fromString(userId))
+        .map(this::toDto)
+        .orElse(null);
+  }
+
+  private AiInsightDto toDto(AiInsight entity) {
+    return new AiInsightDto(
+        entity.getPeriod(),
+        entity.getCreatedAt(),
+        entity.getSummary(),
+        entity.getTopSpendingCategory() != null ? new AiInsightDto.TopCategory(
+            entity.getTopSpendingCategory(),
+            entity.getTopSpendingPercentage() != null ? entity.getTopSpendingPercentage().doubleValue() : null,
+            entity.getTopSpendingInsight()
+        ) : null,
+        entity.getAnomalies() != null && !entity.getAnomalies().isBlank()
+            ? List.of(entity.getAnomalies().split(";"))
+            : List.of(),
+        entity.getActionableTips() != null && !entity.getActionableTips().isBlank()
+            ? List.of(entity.getActionableTips().split(";"))
+            : List.of()
+    );
   }
 
   private Account resolveAccount(AppUser appUser, PaymentMode paymentMode) {
