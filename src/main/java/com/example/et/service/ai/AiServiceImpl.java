@@ -1,9 +1,6 @@
 package com.example.et.service.ai;
 
-import com.example.et.controller.dto.AiInputDto;
-import com.example.et.controller.dto.AiInsightDto;
-import com.example.et.controller.dto.AiTaskDto;
-import com.example.et.controller.dto.TransactionRequestDto;
+import com.example.et.controller.dto.*;
 import com.example.et.model.ai.AiInsight;
 import com.example.et.model.ai.AiParsingTask;
 import com.example.et.model.core.*;
@@ -17,12 +14,15 @@ import com.example.et.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -161,6 +161,93 @@ public class AiServiceImpl implements AiService {
     return aiInsightRepo.findFirstByAppUserIdOrderByCreatedAtDesc(UUID.fromString(userId))
         .map(this::toDto)
         .orElse(null);
+  }
+
+  @Override
+  public AiInsightDto generateInsights(String userId) {
+
+    final var now = LocalDate.now();
+    final var startDate = now.withDayOfMonth(1);
+    final var endDate = now.withDayOfMonth(now.lengthOfMonth());
+
+    final var filterParams = new TransactionFilterParams(null, null, startDate, endDate, null, null);
+    final var transactions = transactionService.getAllTransactions(userId, filterParams, Pageable.unpaged());
+
+    final var periodName = now.getMonth().name() + " " + now.getYear();
+
+    if (transactions.content().isEmpty()) {
+      return new AiInsightDto(
+          periodName,
+          LocalDateTime.now(),
+          "No transactions recorded for the current period.",
+          null,
+          List.of(),
+          List.of("Start logging your daily transactions to receive AI insights.")
+      );
+    }
+
+    final var dataSummary = transactions.content().stream()
+        .map(t -> String.format("- %s: %.2f (%s, %s, %s, %s)",
+            t.transactionDate(),
+            Math.abs(t.amount()),
+            t.type(),
+            t.category() != null ? t.category() : "Uncategorized",
+            t.description(),
+            t.paymentMode()))
+        .collect(Collectors.joining("\n"));
+
+    final var systemPrompt = """
+    You are a personal financial advisor. Analyze the given month's transactions and provide structured insights.
+    
+    - summary: 2 concise sentences on spending pace and savings health.
+    - topSpendingCategory: the single category with highest spend (name, percentage of total expenses, and brief insight).
+    - anomalies: list of unusual transactions or rapid spend patterns.
+    - actionableTips: 2-3 specific, realistic saving recommendations.
+    """;
+
+
+    try {
+      final var insight = chatClient.prompt()
+          .system(systemPrompt)
+          .user("Period: " + periodName + "\nTransactions:\n" + dataSummary)
+          .call()
+          .entity(AiInsightDto.class);
+
+      if (insight != null) {
+        final var entity = AiInsight.builder()
+            .appUser(AppUser.ofId(userId))
+            .period(periodName)
+            .summary(insight.summary())
+            .topSpendingCategory(insight.topSpendingCategory() != null ? insight.topSpendingCategory().category() : null)
+            .topSpendingPercentage(insight.topSpendingCategory() != null && insight.topSpendingCategory().percentage() != null ? insight.topSpendingCategory().percentage().floatValue() : null)
+            .topSpendingInsight(insight.topSpendingCategory() != null ? insight.topSpendingCategory().insight() : null)
+            .anomalies(insight.anomalies() != null ? String.join(";", insight.anomalies()) : null)
+            .actionableTips(insight.actionableTips() != null ? String.join(";", insight.actionableTips()) : null)
+            .build();
+
+        aiInsightRepo.save(entity);
+
+        return new AiInsightDto(
+            periodName,
+            LocalDateTime.now(),
+            insight.summary(),
+            insight.topSpendingCategory(),
+            insight.anomalies() != null ? insight.anomalies() : List.of(),
+            insight.actionableTips() != null ? insight.actionableTips() : List.of()
+        );
+      }
+    } catch (Exception e) {
+      log.error("Failed to generate AI insights for user: {}", userId, e);
+    }
+
+    return new AiInsightDto(
+        periodName,
+        LocalDateTime.now(),
+        "Unable to generate AI insights at this time.",
+        null,
+        List.of(),
+        List.of()
+    );
   }
 
   private AiInsightDto toDto(AiInsight entity) {

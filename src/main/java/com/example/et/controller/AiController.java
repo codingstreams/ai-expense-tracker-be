@@ -28,4 +28,9 @@ public class AiController {
     return latest != null ? ResponseEntity.ok(latest) : ResponseEntity.noContent().build();
   }
 
+  @PostMapping("/insights/generate")
+  public ResponseEntity<AiInsightDto> generateInsights(@AuthenticationPrincipal String userId) {
+    return ResponseEntity.ok(aiService.generateInsights(userId));
+  }
+
 }
