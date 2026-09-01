@@ -10,6 +10,8 @@ import java.util.UUID;
 public interface AccountService {
   List<AccountDto> getUserAccounts(String userId);
 
+  List<Account> getUserAccountList(String userId);
+
   List<AccountDto> addAccounts(String userId, UserBankAccounts requestBody);
 
   Account saveAccount(Account account);
@@ -20,5 +22,5 @@ public interface AccountService {
 
   void deleteAccount(String userId, String accountId);
 
-  Account getAccount(UUID accountId, UUID userId);
+  Account getAccount(UUID userId, UUID accountId);
 }

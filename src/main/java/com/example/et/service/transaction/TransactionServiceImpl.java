@@ -68,7 +68,7 @@ public class TransactionServiceImpl implements TransactionService {
       return card.getAccount();
     }
     if (accountId != null) {
-      return accountService.getAccount(UUID.fromString(userId), accountId);
+      return accountService.getAccount(UUID.fromString(userId),accountId);
     }
     throw new RuntimeException("Either accountId or cardId must be provided");
   }
@@ -124,8 +124,8 @@ public class TransactionServiceImpl implements TransactionService {
         savedTransaction = transactionRepo.save(transaction);
       }
       case TRANSFER -> {
-        final var sourceAccount = accountService.getAccount(requestBody.accountId(), UUID.fromString(userId));
-        final var destAccount = accountService.getAccount(requestBody.toAccountId(), UUID.fromString(userId));
+        final var sourceAccount = accountService.getAccount(UUID.fromString(userId), requestBody.accountId());
+        final var destAccount = accountService.getAccount(UUID.fromString(userId), requestBody.toAccountId());
 
         if (sourceAccount.getBalance() - requestBody.amount() < 0) {
           throw new RuntimeException("Insufficient balance in source account to complete the transfer.");

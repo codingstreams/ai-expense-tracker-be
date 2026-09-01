@@ -7,6 +7,7 @@ import com.example.et.controller.dto.UserRegistrationRequest;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
 import com.example.et.model.core.AppUserConfig;
+import com.example.et.repo.PaymentModeRepo;
 import com.example.et.security.BearerAuthToken;
 import com.example.et.security.JwtAuthFilter;
 import com.example.et.service.account.AccountService;
@@ -38,6 +39,7 @@ public class AuthServiceImpl implements AuthService {
   private final PasswordEncoder passwordEncoder;
   private final ExpireTokenService expireTokenService;
   private final AccountService accountService;
+  private final PaymentModeRepo paymentModeRepo;
 
   @Override
   public AuthResponse register(UserRegistrationRequest request) {
@@ -47,6 +49,8 @@ public class AuthServiceImpl implements AuthService {
       log.info("User {} already exists", request.email());
       throw new RuntimeException("User " + request.email() + " already exists");
     }
+
+    final var cashPaymentMode = paymentModeRepo.findByNameIgnoreCase("Cash").orElse(null);
 
     final var newUser = AppUser.builder()
         .name(request.name())
@@ -60,6 +64,7 @@ public class AuthServiceImpl implements AuthService {
         .languagePreference(AppUserConfig.LanguagePreference.EN)
         .currency(AppUserConfig.Currency.INR)
         .spendLimit(0)
+        .paymentMode(cashPaymentMode)
         .build();
 
     newUser.setAppUserConfig(userConfig);

@@ -41,6 +41,11 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
+  public List<Account> getUserAccountList(String userId) {
+    return accountRepo.findByAppUserId(UUID.fromString(userId));
+  }
+
+  @Override
   public List<AccountDto> addAccounts(String userId, UserBankAccounts requestBody) {
     final var bankIds = requestBody.accounts()
         .stream()
@@ -121,7 +126,7 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public Account getAccount(UUID accountId, UUID userId) {
+  public Account getAccount(UUID userId, UUID accountId) {
     return accountRepo.findByIdAndAppUserId(accountId, userId)
         .orElseThrow(() -> new RuntimeException("Account not found."));
   }

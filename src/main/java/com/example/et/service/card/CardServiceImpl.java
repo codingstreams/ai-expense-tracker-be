@@ -57,7 +57,7 @@ public class CardServiceImpl implements CardService {
             .bank(cardDto.bank())
             .build());
       } else {
-        account = accountService.getAccount(cardDto.accountId(), UUID.fromString(userId));
+        account = accountService.getAccount(UUID.fromString(userId), cardDto.accountId());
       }
 
       return Card.builder()
