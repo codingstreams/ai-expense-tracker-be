@@ -18,21 +18,12 @@ spring:
 
   flyway:
     enabled: true
-    baseline-on-migrate: true # Set to true if you are introducing Flyway into a database that already has data/tables
+    baseline-on-migrate: true
 
   jpa:
     hibernate:
       ddl-auto: validate # Disable Hibernate DDL automatic generation when using Flyway
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-
-#  ai:
-#    google:
-#      genai:
-#        api-key: ${GOOGLE_API_KEY}
-#        chat:
-#          options:
-#            model: gemini-3.6-flash
-#            temperature: 0.0
 
   ai:
     openai:

@@ -3,18 +3,17 @@ package com.example.et.service.appuser;
 import com.example.et.controller.dto.UpdateUserDetailsDto;
 import com.example.et.controller.dto.UserDetailsDto;
 import com.example.et.model.core.AppUser;
+import com.example.et.model.core.AppUserConfig;
 import com.example.et.repo.AppUserConfigRepo;
 import com.example.et.repo.AppUserRepo;
 import com.example.et.repo.PaymentModeRepo;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,20 +35,8 @@ public class AppUserServiceImpl implements AppUserService {
   }
 
   @Override
-  public AppUser getUserByEmail(String email) {
-    return appUserRepo.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("Username: %s not found.".formatted(email)));
-  }
-
-  @Override
-  public boolean checkIsUserOnboardedByEmail(String userId) {
-    return appUserRepo.existsByIdAndIsOnboardingComplete(UUID.fromString(userId), true);
-  }
-
-  @Override
-  public AppUser getUserByUserId(String userId) {
-    return appUserRepo.findById(UUID.fromString(userId))
-        .orElseThrow(() -> new UsernameNotFoundException("User Id: %s not found.".formatted(userId)));
+  public boolean checkIsUserOnboardedByEmail(String email) {
+    return appUserRepo.existsByEmailAndIsOnboardingComplete(email, true);
   }
 
   @Override
@@ -60,7 +47,7 @@ public class AppUserServiceImpl implements AppUserService {
   @Override
   public UpdateUserDetailsDto updateUserConfig(String userId, UpdateUserDetailsDto userDetailsDto) {
     final var userConfig = appUserConfigRepo.findByUserId(UUID.fromString(userId))
-        .orElseThrow(() -> new UsernameNotFoundException("User Id: %s not found.".formatted(userId)));
+        .orElseThrow(() -> new RuntimeException("User Id: %s not found.".formatted(userId)));
 
     if (userDetailsDto.currency() != null) {
       userConfig.setCurrency(userDetailsDto.currency());
@@ -75,7 +62,7 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     if (userDetailsDto.isOnboardingComplete() != null) {
-      userConfig.getAppUser().setIsOnboardingComplete(userDetailsDto.isOnboardingComplete());
+      userConfig.getAppUser().setOnboardingComplete(userDetailsDto.isOnboardingComplete());
     }
 
     // Check for payment mode
@@ -90,13 +77,16 @@ public class AppUserServiceImpl implements AppUserService {
   }
 
   @Override
-  public List<AppUser> saveUsers(ArrayList<AppUser> users) {
-    return appUserRepo.saveAll(users);
+  public AppUser getUserByEmail(String email) {
+    return appUserRepo.findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("Username: %s not found.".formatted(email)));
   }
 
   @Override
-  public @NonNull UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
-    final var appUser = getUserByEmail(email);
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    final var appUser = appUserRepo.findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("Email %s not found.".formatted(email)));
+
     return new User(appUser.getId().toString(), appUser.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_USER")));
   }
 }

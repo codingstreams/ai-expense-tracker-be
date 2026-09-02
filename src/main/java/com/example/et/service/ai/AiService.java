@@ -6,11 +6,9 @@ import com.example.et.controller.dto.AiTaskDto;
 import com.example.et.model.ai.AiParsingTask;
 
 public interface AiService {
-  AiTaskDto save(String appUserId, AiInputDto requestBody);
+  AiTaskDto save(String userId, AiInputDto requestBody);
 
   void parse(AiParsingTask task);
 
-  AiInsightDto generateInsights(String appUserId);
-
-  AiInsightDto getLatestInsight(String appUserId);
+  AiInsightDto getLatestInsight(String userId);
 }

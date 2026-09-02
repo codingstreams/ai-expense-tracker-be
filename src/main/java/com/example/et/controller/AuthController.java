@@ -7,6 +7,7 @@ import com.example.et.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,19 +18,19 @@ public class AuthController {
 
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> registerUser(@RequestBody UserRegistrationRequest userRegistrationRequest) {
-    final var authResponse = authService.registerUser(userRegistrationRequest);
+    final var authResponse = authService.register(userRegistrationRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
   }
 
   @PostMapping("/login")
   public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
     final var authResponse = authService.login(loginRequest);
-    return ResponseEntity.status(HttpStatus.OK).body(authResponse);
+    return ResponseEntity.ok(authResponse);
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<?> logout(@RequestHeader("AUTHORIZATION") String token) {
+  public ResponseEntity<Void> logout(@RequestHeader("AUTHORIZATION") String token) {
     authService.logout(token);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.noContent().build();
   }
 }

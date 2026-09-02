@@ -6,18 +6,17 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
-public class ExpireTokenServiceImpl implements ExpireTokenService {
-  private final List<String> expireTokens = new CopyOnWriteArrayList<>();
-
+public class ExpireTokenServiceImpl implements ExpireTokenService{
+  private final List<String> store = new CopyOnWriteArrayList<>();
   @Override
   public void addExpireToken(String token) {
-    if (!isExpireToken(token)) {
-      this.expireTokens.add(token);
+    if(!isExpireToken(token)){
+      store.add(token);
     }
   }
 
   @Override
   public boolean isExpireToken(String token) {
-    return this.expireTokens.contains(token);
+    return store.contains(token);
   }
 }

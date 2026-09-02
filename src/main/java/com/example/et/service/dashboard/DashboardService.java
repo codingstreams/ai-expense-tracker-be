@@ -8,11 +8,11 @@ import com.example.et.controller.dto.OnboardUserDto;
 import java.util.List;
 
 public interface DashboardService {
-  DashboardSummaryDto getSummary(String userId);
+  OnboardUserDto onboardUser(String userId, OnboardUserDto requestBody);
 
   List<CategoryBreakdownDto> getCategoryBreakdown(String userId, Integer year, Integer month);
 
-  List<MonthlyTrendDto> getMonthlyTrend(String userId, Integer months);
+  DashboardSummaryDto getSummary(String userId);
 
-  OnboardUserDto onboardUser(String userId, OnboardUserDto requestBody);
+  List<MonthlyTrendDto> getMonthlyTrend(String userId, Integer months);
 }

@@ -28,7 +28,7 @@ public class DataSeederController {
   public ResponseEntity<Map<String, Object>> generateFullData(
       @RequestParam(defaultValue = "5") Integer usersCount,
       @RequestParam(defaultValue = "3") Integer months) {
-    int seededCount = dataSeederService.seedFullData(usersCount, months);
+    int seededCount = dataSeederService.seedData(usersCount, months);
     return ResponseEntity.ok(Map.of(
         "usersSeeded", seededCount,
         "monthsPerUser", months,

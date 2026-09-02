@@ -1,5 +1,6 @@
 package com.example.et.controller;
 
+
 import com.example.et.controller.dto.*;
 import com.example.et.service.ai.AiService;
 import com.example.et.service.ai.chat.AiChatService;
@@ -21,14 +22,9 @@ public class AiController {
     return ResponseEntity.ok(aiService.save(userId, requestBody));
   }
 
-  @PostMapping("/insights/generate")
-  public ResponseEntity<AiInsightDto> generateInsights(@AuthenticationPrincipal String userId) {
-    return ResponseEntity.ok(aiService.generateInsights(userId));
-  }
-
   @GetMapping("/insights")
   public ResponseEntity<AiInsightDto> getLatestInsight(@AuthenticationPrincipal String userId) {
-    AiInsightDto latest = aiService.getLatestInsight(userId);
+    final var latest = aiService.getLatestInsight(userId);
     return latest != null ? ResponseEntity.ok(latest) : ResponseEntity.noContent().build();
   }
 

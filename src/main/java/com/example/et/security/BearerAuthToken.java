@@ -1,6 +1,5 @@
 package com.example.et.security;
 
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -11,7 +10,7 @@ public class BearerAuthToken extends AbstractAuthenticationToken {
   private final String username;
   private final String credentials; // Token
 
-  private BearerAuthToken(@Nullable Collection<? extends GrantedAuthority> authorities,
+  private BearerAuthToken(Collection<? extends GrantedAuthority> authorities,
                           String username,
                           String credentials, boolean isAuthenticated) {
     super(authorities);
@@ -29,12 +28,12 @@ public class BearerAuthToken extends AbstractAuthenticationToken {
   }
 
   @Override
-  public @Nullable Object getCredentials() {
+  public Object getCredentials() {
     return credentials;
   }
 
   @Override
-  public @Nullable Object getPrincipal() {
+  public Object getPrincipal() {
     return username;
   }
 }

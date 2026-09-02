@@ -1,3 +1,0 @@
-ALTER TABLE account
-    ADD COLUMN is_upi_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN is_net_banking_enabled BOOLEAN NOT NULL DEFAULT FALSE;

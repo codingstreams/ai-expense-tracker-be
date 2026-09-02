@@ -5,12 +5,10 @@ import com.example.et.controller.dto.UserCards;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
 import com.example.et.model.core.Card;
-import com.example.et.model.core.CardType;
-import com.example.et.repo.AccountRepo;
 import com.example.et.repo.CardRepo;
+import com.example.et.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,7 +18,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class CardServiceImpl implements CardService {
   private final CardRepo cardRepo;
-  private final AccountRepo accountRepo;
+  private final AccountService accountService;
 
   private static Function<Card, CardDto> toDto() {
     return card -> new CardDto(
@@ -34,7 +32,7 @@ public class CardServiceImpl implements CardService {
   }
 
   @Override
-  public List<CardDto> getUserCards(String userId, CardType cardType) {
+  public List<CardDto> getUserCards(String userId, Card.CardType cardType) {
     return cardRepo.findByAppUserId(UUID.fromString(userId))
         .stream()
         .filter(card -> cardType == null || card.getCardType() == cardType)
@@ -43,28 +41,23 @@ public class CardServiceImpl implements CardService {
   }
 
   @Override
-  public Card getUserCard(String userId, UUID cardId) {
-    return cardRepo.findByIdAndAppUserId(cardId, UUID.fromString(userId))
-        .orElseThrow(() -> new RuntimeException("Card not found."));
-  }
-
-  @Override
-  @Transactional
   public List<CardDto> addCards(String userId, UserCards userCards) {
     final var user = AppUser.ofId(userId);
+
     final var cardsToSave = userCards.cards().stream().map(cardDto -> {
       Account account;
-      if (cardDto.cardType() == CardType.CREDIT_CARD) {
-        account = accountRepo.save(Account.builder()
+
+      if (cardDto.cardType() == Card.CardType.CREDIT_CARD) {
+        account = accountService.saveAccount(Account.builder()
             .appUser(user)
             .accountType(Account.AccountType.CREDIT)
             .balance(cardDto.limit() != null ? cardDto.limit() : 0.0f)
             .lastFourDigits(cardDto.lastFourDigits())
+                .isActive(true)
             .bank(cardDto.bank())
             .build());
       } else {
-        account = accountRepo.findByIdAndAppUserId(cardDto.accountId(), UUID.fromString(userId))
-            .orElseThrow(() -> new RuntimeException("Account not found."));
+        account = accountService.getAccount(UUID.fromString(userId), cardDto.accountId());
       }
 
       return Card.builder()
@@ -80,4 +73,11 @@ public class CardServiceImpl implements CardService {
         .map(toDto())
         .toList();
   }
+
+  @Override
+  public Card getUserCard(String userId, UUID cardId) {
+    return cardRepo.findByIdAndAppUserId(cardId, UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("Card not found."));
+  }
+
 }

@@ -10,6 +10,7 @@ import org.springframework.security.web.authentication.www.NonceExpiredException
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
+
 import java.util.*;
 
 public interface JwtUtils {
@@ -73,7 +74,9 @@ public interface JwtUtils {
   }
 
   static List<SimpleGrantedAuthority> extractAuthorities(Claims claims) {
-    final var roles = (claims.get("roles", List.class) instanceof List<?> list) ? list : Collections.emptyList();
+    final Object rolesObj = claims.get("roles");
+
+    final List<?> roles = (rolesObj instanceof List<?> list) ? list : Collections.emptyList();
 
     if (roles.isEmpty()) {
       return Collections.emptyList();

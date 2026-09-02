@@ -33,4 +33,13 @@ public class AppUserConfig extends BaseAudit {
   public enum Currency {
     INR,
   }
+
+  public enum LanguagePreference {
+    EN("english"), HI("hindi");
+
+    private String desc;
+
+    LanguagePreference(String desc) {
+    }
+  }
 }

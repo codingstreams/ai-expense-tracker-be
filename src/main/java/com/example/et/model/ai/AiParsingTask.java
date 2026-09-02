@@ -38,4 +38,8 @@ public class AiParsingTask extends BaseAudit {
     @JoinColumn(name = "transaction_id")
     @OnDelete(action = OnDeleteAction.SET_NULL)
     private Transaction transaction;
+
+    public enum Status {
+        PENDING, PROCESSING, COMPLETED, FAILED
+    }
 }
