@@ -1,6 +1,7 @@
 package com.example.et.service.dashboard;
 
 import com.example.et.controller.dto.*;
+import com.example.et.model.core.Account;
 import com.example.et.model.core.SystemCategory;
 import com.example.et.model.core.Transaction;
 import com.example.et.service.account.AccountService;
@@ -74,5 +75,40 @@ public class DashboardServiceImpl implements DashboardService {
         })
         .sorted(Comparator.comparingDouble(CategoryBreakdownDto::totalAmount).reversed())
         .toList();
+  }
+
+  @Override
+  public DashboardSummaryDto getSummary(String userId) {
+    final var accounts = accountService.getUserAccountList(userId);
+
+    // Net worth
+    final var netWorth = accounts.stream()
+        .mapToDouble(a -> a.getAccountType() == Account.AccountType.CREDIT ? -a.getBalance() : a.getBalance())
+        .sum();
+
+    // Total Expense
+    final var now = LocalDate.now();
+    final var startDate = now.withDayOfMonth(1);
+    final var endDate = now.withDayOfMonth(now.lengthOfMonth());
+
+    final var transactions = transactionService.getAllTransactions(userId, TransactionFilterParams.dateRange(startDate, endDate), Pageable.unpaged())
+        .content();
+
+    final var totalExpense = transactions.stream()
+        .filter(t -> t.type() == Transaction.TransactionType.EXPENSE)
+        .mapToDouble(t -> Math.abs(t.amount()))
+        .sum();
+
+    // Total Income
+    final var totalIncome = transactions.stream()
+        .filter(t -> t.type() == Transaction.TransactionType.INCOME)
+        .mapToDouble(t -> Math.abs(t.amount()))
+        .sum();
+
+    // Daily Burn Rate
+    final var netSavings = totalIncome - totalExpense;
+    final var dailyBurnRate = totalExpense / now.getDayOfMonth();
+
+    return new DashboardSummaryDto(netWorth, totalIncome, totalExpense, netSavings, dailyBurnRate);
   }
 }

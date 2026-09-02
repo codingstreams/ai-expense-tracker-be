@@ -1,6 +1,7 @@
 package com.example.et.controller;
 
 import com.example.et.controller.dto.CategoryBreakdownDto;
+import com.example.et.controller.dto.DashboardSummaryDto;
 import com.example.et.controller.dto.OnboardUserDto;
 import com.example.et.model.core.AppUserConfig;
 import com.example.et.service.dashboard.DashboardService;
@@ -33,6 +34,12 @@ public class DashboardController {
       @AuthenticationPrincipal String userId) {
     return ResponseEntity.ok(dashboardService.getCategoryBreakdown(userId, year, month));
   }
+
+  @GetMapping("/summary")
+  public ResponseEntity<DashboardSummaryDto> getSummary(@AuthenticationPrincipal String userId) {
+    return ResponseEntity.ok(dashboardService.getSummary(userId));
+  }
+
 
   @PostMapping("/onboard-user")
   public ResponseEntity<OnboardUserDto> onboardUser(@AuthenticationPrincipal String userId, @RequestBody OnboardUserDto requestBody){
