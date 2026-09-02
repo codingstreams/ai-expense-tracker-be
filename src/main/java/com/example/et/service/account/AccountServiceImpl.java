@@ -1,6 +1,7 @@
 package com.example.et.service.account;
 
 import com.example.et.controller.dto.AccountDto;
+import com.example.et.controller.dto.UpdateCashDto;
 import com.example.et.controller.dto.UserBankAccounts;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
@@ -136,12 +137,25 @@ public class AccountServiceImpl implements AccountService {
   public Float updateCashBalance(String userId, Float cashBalance) {
     final var cashAccount = accountRepo.findCashAccountByUserId(UUID.fromString(userId)).orElseThrow(() -> new RuntimeException("Account not found."));
 
-    if(cashBalance > 0) {
+    if (cashBalance > 0) {
       cashAccount.setBalance(cashBalance);
     }
 
     accountRepo.save(cashAccount);
     return cashBalance;
+  }
+
+  @Override
+  public AccountDto updateCashBalance(String userId, UpdateCashDto updateCashDto) {
+    final var cashAccount = accountRepo.findCashAccountByUserId(UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("Account not found."));
+
+    if (updateCashDto.cashBalance() > 0) {
+      cashAccount.setBalance(updateCashDto.cashBalance());
+    }
+
+    accountRepo.save(cashAccount);
+    return toDto().apply(cashAccount);
   }
 
   @Override

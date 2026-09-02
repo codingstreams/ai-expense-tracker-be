@@ -2,6 +2,7 @@ package com.example.et.controller;
 
 
 import com.example.et.controller.dto.AccountDto;
+import com.example.et.controller.dto.UpdateCashDto;
 import com.example.et.controller.dto.UserBankAccounts;
 import com.example.et.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -58,5 +59,11 @@ public class AccountController {
   public ResponseEntity<Void> deleteAccount(@AuthenticationPrincipal String userId, @PathVariable String accountId) {
     accountService.deleteAccount(userId, accountId);
     return ResponseEntity.noContent().build();
+  }
+
+  @PutMapping("/cash")
+  public ResponseEntity<AccountDto> updateCashBalance(@AuthenticationPrincipal String userId, @RequestBody UpdateCashDto requestBody) {
+    final var account = accountService.updateCashBalance(userId, requestBody);
+    return ResponseEntity.ok(account);
   }
 }
