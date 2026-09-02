@@ -15,4 +15,6 @@ public interface AppUserService extends UserDetailsService {
   UserDetailsDto getUserByUserIdWithConfig(String userId);
 
   UpdateUserDetailsDto updateUserConfig(String userId, UpdateUserDetailsDto userDetailsDto);
+
+  AppUser getUserByEmail(String email);
 }

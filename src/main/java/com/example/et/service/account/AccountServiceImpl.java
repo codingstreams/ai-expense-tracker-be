@@ -173,4 +173,10 @@ public class AccountServiceImpl implements AccountService {
   public AccountDto getUserCashAccountDetails(String userId) {
     return accountRepo.findByUserIdAndAccountType(UUID.fromString(userId), Account.AccountType.CASH);
   }
+
+  @Override
+  public Account getUserAccount(String userId, UUID accountId) {
+    return accountRepo.findByIdAndAppUserId(accountId, UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("Account not found."));
+  }
 }

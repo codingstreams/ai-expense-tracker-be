@@ -69,6 +69,12 @@ public class AppUserServiceImpl implements AppUserService {
   }
 
   @Override
+  public AppUser getUserByEmail(String email) {
+    return appUserRepo.findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("Username: %s not found.".formatted(email)));
+  }
+
+  @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
     final var appUser = appUserRepo.findByEmail(email)
         .orElseThrow(() -> new UsernameNotFoundException("Email %s not found.".formatted(email)));

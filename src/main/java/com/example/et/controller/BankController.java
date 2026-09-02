@@ -1,9 +1,7 @@
 package com.example.et.controller;
 
 import com.example.et.model.core.Bank;
-import com.example.et.model.core.PaymentMode;
 import com.example.et.repo.BankRepo;
-import com.example.et.repo.PaymentModeRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +17,7 @@ public class BankController {
   private final BankRepo bankRepo;
 
   @GetMapping
-  public ResponseEntity<List<Bank>> getPaymentModes() {
+  public ResponseEntity<List<Bank>> getBanks() {
     return ResponseEntity.ok().body(bankRepo.findAll());
   }
 }

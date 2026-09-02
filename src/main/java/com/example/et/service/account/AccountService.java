@@ -32,4 +32,6 @@ public interface AccountService {
   List<AccountDto> getUserAccountsV2(String userId, String paymentMode);
 
   AccountDto getUserCashAccountDetails(String userId);
+  Account getUserAccount(String userId, UUID accountId);
 }
+

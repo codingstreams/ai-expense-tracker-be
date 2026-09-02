@@ -4,5 +4,5 @@ import com.example.et.model.core.AppUserConfig;
 
 public record UpdateUserDetailsDto(AppUserConfig.LanguagePreference languagePreference,
                                    Integer spendLimit,
-                                   AppUserConfig.Currency currency, Boolean isOnboardingComplete) {
+                                   AppUserConfig.Currency currency,  String paymentMode, Boolean isOnboardingComplete) {
 }
