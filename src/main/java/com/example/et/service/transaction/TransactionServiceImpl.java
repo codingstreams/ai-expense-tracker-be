@@ -10,7 +10,9 @@ import com.example.et.repo.SysCategoryRepo;
 import com.example.et.repo.TransactionRepo;
 import com.example.et.repo.spec.TransactionSpecification;
 import com.example.et.service.account.AccountService;
+import com.example.et.service.ai.parsetask.AiParseTaskService;
 import com.example.et.service.card.CardService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class TransactionServiceImpl implements TransactionService {
   private final SysCategoryRepo sysCategoryRepo;
   private final AccountService accountService;
   private final CardService cardService;
+  private final AiParseTaskService aiParseTaskService;
 
   private static TransactionResponseDto toDto(Transaction t) {
     return new TransactionResponseDto(
@@ -169,6 +172,7 @@ public class TransactionServiceImpl implements TransactionService {
   }
 
   @Override
+  @Transactional
   public void deleteTransaction(String userId, UUID transactionId) {
     final var userUuid = UUID.fromString(userId);
     final var transaction = transactionRepo.findByIdAndAppUserId(transactionId, userUuid)
@@ -182,7 +186,7 @@ public class TransactionServiceImpl implements TransactionService {
           acc.setBalance(acc.getBalance() - txn.getAmount());
           accountService.saveAccount(acc);
         }
-
+        aiParseTaskService.unlinkTransaction(txn.getId());
       }
       transactionRepo.deleteAll(transferTxns);
       return;
@@ -194,6 +198,7 @@ public class TransactionServiceImpl implements TransactionService {
       accountService.saveAccount(account);
     }
 
+    aiParseTaskService.unlinkTransaction(transactionId);
     transactionRepo.delete(transaction);
   }
 }
