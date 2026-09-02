@@ -1,5 +1,6 @@
 package com.example.et.controller;
 
+import com.example.et.controller.dto.CategoryBreakdownDto;
 import com.example.et.controller.dto.OnboardUserDto;
 import com.example.et.model.core.AppUserConfig;
 import com.example.et.service.dashboard.DashboardService;
@@ -9,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -22,6 +24,14 @@ public class DashboardController {
     final var response = new HashMap<String, Object>();
     response.put("options", AppUserConfig.LanguagePreference.values());
     return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/category-breakdown")
+  public ResponseEntity<List<CategoryBreakdownDto>> getCategoryBreakdown(
+      @RequestParam(required = false) Integer year,
+      @RequestParam(required = false) Integer month,
+      @AuthenticationPrincipal String userId) {
+    return ResponseEntity.ok(dashboardService.getCategoryBreakdown(userId, year, month));
   }
 
   @PostMapping("/onboard-user")

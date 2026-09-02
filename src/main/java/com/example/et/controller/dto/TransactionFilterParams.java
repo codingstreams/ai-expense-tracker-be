@@ -20,4 +20,8 @@ public record TransactionFilterParams(
     public static TransactionFilterParams empty() {
         return new TransactionFilterParams(null, null, null, null, null, null);
     }
+
+  public static TransactionFilterParams dateRange(LocalDate startDate, LocalDate endDate) {
+    return new TransactionFilterParams(null, null, startDate, endDate, null, null);
+  }
 }
