@@ -25,4 +25,8 @@ public interface AccountService {
   Account getAccount(UUID userId, UUID accountId);
 
   Float updateCashBalance(String userId, Float cashBalance);
+
+  List<AccountDto> getUserAccountsV2(String userId, String paymentMode);
+
+  AccountDto getUserCashAccountDetails(String userId);
 }

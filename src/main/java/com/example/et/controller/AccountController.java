@@ -23,6 +23,18 @@ public class AccountController {
     return ResponseEntity.ok(accounts);
   }
 
+  @GetMapping(version = "2")
+  public ResponseEntity<List<AccountDto>> getUserAccountsV2(@AuthenticationPrincipal String userId, @RequestParam(required = false) String paymentMode) {
+    final var accounts = accountService.getUserAccountsV2(userId, paymentMode);
+    return ResponseEntity.ok(accounts);
+  }
+
+  @GetMapping("/cash")
+  public ResponseEntity<AccountDto> getUserCashAccountDetails(@AuthenticationPrincipal String userId) {
+    final var account = accountService.getUserCashAccountDetails(userId);
+    return ResponseEntity.ok(account);
+  }
+
   @PostMapping
   public ResponseEntity<List<AccountDto>> addAccounts(@AuthenticationPrincipal String userId, @RequestBody UserBankAccounts accounts) {
     final var createdAccounts = accountService.addAccounts(userId, accounts);

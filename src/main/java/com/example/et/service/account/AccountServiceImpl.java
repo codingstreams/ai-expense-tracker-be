@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -141,5 +142,21 @@ public class AccountServiceImpl implements AccountService {
 
     accountRepo.save(cashAccount);
     return cashBalance;
+  }
+
+  @Override
+  public List<AccountDto> getUserAccountsV2(String userId, String paymentMode) {
+    return accountRepo.findByAppUserId(UUID.fromString(userId))
+        .stream()
+        .filter(account -> (account.getAccountType() == Account.AccountType.CASH) || (Objects.nonNull(paymentMode) && paymentMode.toLowerCase().contains("upi")
+            ? account.isUpiEnabled()
+            : account.isNetBankingEnabled()))
+        .map(toDto())
+        .toList();
+  }
+
+  @Override
+  public AccountDto getUserCashAccountDetails(String userId) {
+    return accountRepo.findByUserIdAndAccountType(UUID.fromString(userId), Account.AccountType.CASH);
   }
 }
