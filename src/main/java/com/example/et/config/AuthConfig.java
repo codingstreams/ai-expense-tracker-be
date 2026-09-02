@@ -1,10 +1,8 @@
 package com.example.et.config;
 
 import com.example.et.config.props.JwtProps;
-import com.example.et.security.BearerAuthProvider;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,32 +18,29 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Configuration
-@EnableConfigurationProperties(JwtProps.class)
 public class AuthConfig {
-
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
-
   @Bean
   AuthenticationManager authenticationManager(
-      @Qualifier("usernamePasswordAuthProvider") AuthenticationProvider usernamePasswordAuthProvider,
-      @Qualifier("bearerAuthProvider") BearerAuthProvider bearerAuthProvider) {
+      @Qualifier("usernamePasswordAuthProvider") AuthenticationProvider usernamePasswordAuthProvider, @Qualifier("bearerAuthProvider") AuthenticationProvider bearerAuthProvider) {
     final var authenticationProvider = List.of(usernamePasswordAuthProvider, bearerAuthProvider);
     return new ProviderManager(authenticationProvider);
   }
 
   @Bean("usernamePasswordAuthProvider")
-  AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService) {
-    final var authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
-    authenticationProvider.setPasswordEncoder(passwordEncoder());
-    return authenticationProvider;
+  AuthenticationProvider usernamePasswordAuthProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+    final var daoAuthProvider = new DaoAuthenticationProvider(userDetailsService);
+    daoAuthProvider.setPasswordEncoder(passwordEncoder);
+    return daoAuthProvider;
   }
 
   @Bean
   SecretKey secretKey(JwtProps jwtProps) {
     return Keys.hmacShaKeyFor(jwtProps.getSecretKey()
         .getBytes(StandardCharsets.UTF_8));
+  }
+
+  @Bean
+  PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
   }
 }

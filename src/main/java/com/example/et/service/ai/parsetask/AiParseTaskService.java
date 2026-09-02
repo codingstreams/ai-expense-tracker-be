@@ -1,7 +1,6 @@
 package com.example.et.service.ai.parsetask;
 
 import com.example.et.model.ai.AiParsingTask;
-import com.example.et.model.ai.Status;
 
 import java.util.List;
 import java.util.UUID;
@@ -9,7 +8,7 @@ import java.util.UUID;
 public interface AiParseTaskService {
   AiParsingTask save(AiParsingTask aiParsingTask);
 
-  List<AiParsingTask> getPendingTasksWithAppUser(Status status);
+  List<AiParsingTask> getPendingTasksWithAppUser(AiParsingTask.Status status);
 
   AiParsingTask getById(UUID id);
 

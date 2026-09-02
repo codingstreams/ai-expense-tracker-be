@@ -1,10 +1,9 @@
 package com.example.et.security;
 
-import com.example.et.controller.dto.ApiResponse;
+import com.example.et.controller.dto.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -19,13 +18,13 @@ public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
   private final ObjectMapper objectMapper;
 
   @Override
-  public void commence(@NonNull HttpServletRequest request,
+  public void commence(HttpServletRequest request,
                        HttpServletResponse response,
                        AuthenticationException authException) throws IOException {
     response.setContentType("application/json");
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-    final var errorResponse = new ApiResponse(
+    final var errorResponse = new ApiErrorResponse(
         HttpServletResponse.SC_UNAUTHORIZED,
         authException.getMessage(),
         Instant.now().toString()

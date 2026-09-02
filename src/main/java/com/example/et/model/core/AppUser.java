@@ -2,19 +2,20 @@ package com.example.et.model.core;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = false)
 @Entity
-@Getter
-@Setter
+@Table(name = "app_user")
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class AppUser extends BaseAudit {
+public class AppUser extends BaseAudit{
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(name = "id", updatable = false, nullable = false)
   private UUID id;
 
   @Column(name = "name", nullable = false)
@@ -26,9 +27,9 @@ public class AppUser extends BaseAudit {
   @Column(name = "password", nullable = false)
   private String password;
 
+  @Builder.Default
   @Column(name = "is_onboarding_complete", nullable = false)
-  @ColumnDefault("false")
-  private Boolean isOnboardingComplete;
+  private boolean isOnboardingComplete = false;
 
   @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
   private AppUserConfig appUserConfig;

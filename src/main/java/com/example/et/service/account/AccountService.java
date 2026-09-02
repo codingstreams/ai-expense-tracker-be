@@ -11,23 +11,27 @@ import java.util.UUID;
 public interface AccountService {
   List<AccountDto> getUserAccounts(String userId);
 
-  Account getUserAccount(String userId, UUID accountId);
+  List<Account> getUserAccountList(String userId);
+
+  List<AccountDto> addAccounts(String userId, UserBankAccounts requestBody);
 
   Account saveAccount(Account account);
 
-  List<AccountDto> addAccounts(String userId, UserBankAccounts accounts);
-
   AccountDto getUserAccountDetails(String userId, String accountId);
 
-  AccountDto updateAccount(String userId, String accountId, AccountDto accountDto);
+  AccountDto updateAccount(String userId, String accountId, AccountDto account);
 
   void deleteAccount(String userId, String accountId);
 
+  Account getAccount(UUID userId, UUID accountId);
+
   Float updateCashBalance(String userId, Float cashBalance);
 
-  AccountDto getUserCashAccountDetails(String userId);
+  AccountDto updateCashBalance(String userId, UpdateCashDto  updateCashDto);
 
   List<AccountDto> getUserAccountsV2(String userId, String paymentMode);
 
-  AccountDto updateCashBalance(String userId, UpdateCashDto requestBody);
+  AccountDto getUserCashAccountDetails(String userId);
+  Account getUserAccount(String userId, UUID accountId);
 }
+

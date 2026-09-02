@@ -18,12 +18,4 @@ public class PaymentMode extends BaseAudit {
 
   @Column(nullable = false)
   private String name;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "txn_type", nullable = false)
-  private TransactionBehavior type;
-
-  public enum TransactionBehavior {
-    ASSET, LIABILITY
-  }
 }

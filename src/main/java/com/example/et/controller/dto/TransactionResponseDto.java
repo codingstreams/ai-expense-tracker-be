@@ -14,9 +14,5 @@ public record TransactionResponseDto(
     String account,
     String paymentMode,
     String category
-//    UUID accountId,
-//    UUID paymentModeId,
-//    UUID categoryId,
-//    UUID transferId
 ) {
 }

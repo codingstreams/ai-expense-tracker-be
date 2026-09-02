@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -19,30 +20,26 @@ import java.util.List;
 
 @Configuration
 public class SecurityConfig {
-
   @Value("${cors.allowed-origins}")
   private List<String> allowedOrigins;
 
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
-                                          JwtAuthFilter jwtAuthFilter,
-                                          AuthenticationEntryPoint authenticationEntryPoint) {
+  SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter, AuthenticationEntryPoint authenticationEntryPoint) throws Exception {
 
-    httpSecurity
+    http
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(CsrfConfigurer::disable)
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(http -> http
-            .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR)
-            .permitAll()
-            .requestMatchers("/api/auth/**", "/error", "/api/generate-data/**")
+        .authorizeHttpRequests(h -> h
+            .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
+            .requestMatchers("/api/auth/register", "/api/auth/login", "/error")
             .permitAll()
             .anyRequest()
             .authenticated())
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .exceptionHandling(e -> e.authenticationEntryPoint(authenticationEntryPoint));
 
-    return httpSecurity.build();
+    return http.build();
   }
 
   @Bean

@@ -28,4 +28,8 @@ public class Card extends BaseAudit {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "app_user_id")
   private AppUser appUser;
+
+  public enum CardType {
+    CREDIT_CARD, DEBIT_CARD
+  }
 }

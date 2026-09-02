@@ -1,19 +1,19 @@
-package com.example.et.scheduler;
+package com.example.et.service.ai.scheduler;
 
 import com.example.et.model.ai.AiParsingTask;
-import com.example.et.model.ai.Status;
 import com.example.et.service.ai.AiService;
 import com.example.et.service.ai.parsetask.AiParseTaskService;
 import com.example.et.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AiTaskScheduler {
   private final AiParseTaskService aiParseTaskService;
   private final AiService aiService;
@@ -21,15 +21,18 @@ public class AiTaskScheduler {
 
   @Scheduled(fixedRate = 5000)
   public void processAiParsingTask() {
-    List<AiParsingTask> pendingTasks = aiParseTaskService.getPendingTasksWithAppUser(Status.PENDING);
+    log.info("AiTaskScheduler start");
+
+    final var pendingTasks = aiParseTaskService.getPendingTasksWithAppUser(AiParsingTask.Status.PENDING);
 
     for (AiParsingTask task : pendingTasks) {
-      String userId = task.getAppUser() != null ? task.getAppUser().getId().toString() : null;
-      String taskId = task.getId().toString();
+      final var userId = task.getAppUser() != null ? task.getAppUser().getId().toString() : null;
+      final var taskId = task.getId().toString();
 
-      task.setStatus(Status.PROCESSING);
+      task.setStatus(AiParsingTask.Status.PROCESSING);
       aiParseTaskService.save(task);
 
+      // Send Notification
       if (userId != null) {
         notificationService.send(
             userId,
@@ -42,7 +45,7 @@ public class AiTaskScheduler {
       aiService.parse(task);
 
       if (userId != null) {
-        if (task.getStatus() == Status.COMPLETED) {
+        if (task.getStatus() == AiParsingTask.Status.COMPLETED) {
           notificationService.send(
               userId,
               taskId,

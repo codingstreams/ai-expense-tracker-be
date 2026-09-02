@@ -5,24 +5,16 @@ import com.example.et.controller.dto.UserDetailsDto;
 import com.example.et.model.core.AppUser;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public interface AppUserService extends UserDetailsService {
-
   boolean checkUserExists(String email);
 
   AppUser saveUser(AppUser newUser);
 
-  AppUser getUserByEmail(String email);
-
-  boolean checkIsUserOnboardedByEmail(String userId);
-
-  AppUser getUserByUserId(String userId);
+  boolean checkIsUserOnboardedByEmail(String email);
 
   UserDetailsDto getUserByUserIdWithConfig(String userId);
 
   UpdateUserDetailsDto updateUserConfig(String userId, UpdateUserDetailsDto userDetailsDto);
 
-  List<AppUser> saveUsers(ArrayList<AppUser> users);
+  AppUser getUserByEmail(String email);
 }

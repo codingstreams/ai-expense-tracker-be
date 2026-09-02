@@ -2,10 +2,10 @@ package com.example.et.service.ai.chat;
 
 import com.example.et.controller.dto.AiChatRequestDto;
 import com.example.et.controller.dto.AiChatResponseDto;
-import com.example.et.model.core.Account;
-import com.example.et.model.core.Transaction;
-import com.example.et.repo.AccountRepo;
-import com.example.et.repo.TransactionRepo;
+import com.example.et.controller.dto.TransactionFilterParams;
+import com.example.et.service.account.AccountService;
+import com.example.et.service.transaction.TransactionService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -24,12 +24,13 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+
 @Service
 @RequiredArgsConstructor
-public class AiChatServiceImpl implements AiChatService {
+public class AiChatServiceImpl implements AiChatService{
+  private final AccountService accountService;
+  private final TransactionService transactionService;
   private final ChatClient chatClient;
-  private final AccountRepo accountRepo;
-  private final TransactionRepo transactionRepo;
 
   private final Map<String, ChatSession> sessions = new ConcurrentHashMap<>();
   private static final long SESSION_TIMEOUT_SECONDS = 900;
@@ -40,9 +41,15 @@ public class AiChatServiceImpl implements AiChatService {
     }
   }
 
+  private boolean isExpired(ChatSession session) {
+    return session.lastAccessedAt().plusSeconds(SESSION_TIMEOUT_SECONDS).isBefore(Instant.now());
+  }
+
+
   @Override
   public AiChatResponseDto chat(String userId, AiChatRequestDto request) {
     final var userUuid = UUID.fromString(userId);
+
     final var sessionId = (request.sessionId() != null && !request.sessionId().isBlank())
         ? request.sessionId()
         : UUID.randomUUID().toString();
@@ -55,23 +62,23 @@ public class AiChatServiceImpl implements AiChatService {
       return existing.withUpdatedAccess();
     });
 
-    final var accounts = accountRepo.findByAppUserId(userUuid);
-    final var transactions = transactionRepo.findByAppUserIdOrderByTransactionDateDesc(userUuid, PageRequest.of(0, 100));
+    final var accounts = accountService.getUserAccounts(userId);
+    final var transactions = transactionService.getAllTransactions(userId, TransactionFilterParams.empty(), PageRequest.of(0, 100));
 
     final var accountsSummary = accounts.stream()
         .map(a -> String.format("- Account: %s (%s), Balance: %.2f",
-            a.getLastFourDigits(),
-            a.getAccountType(),
-            a.getBalance()))
+            a.lastFourDigits(),
+            a.accountType(),
+            a.balance()))
         .collect(Collectors.joining("\n"));
 
-    final var transactionsSummary = transactions.stream()
+    final var transactionsSummary = transactions.content().stream()
         .map(t -> String.format("- %s: %.2f | %s | Category: %s | Description: %s",
-            t.getTransactionDate(),
-            Math.abs(t.getAmount()),
-            t.getType(),
-            t.getTransactionCategory() != null ? t.getTransactionCategory().getName() : "Uncategorized",
-            t.getDescription()))
+            t.transactionDate(),
+            Math.abs(t.amount()),
+            t.type(),
+            t.category() != null ? t.category() : "Uncategorized",
+            t.description()))
         .collect(Collectors.joining("\n"));
 
     final var systemPrompt = """
@@ -98,10 +105,6 @@ public class AiChatServiceImpl implements AiChatService {
     session.history().add(new AssistantMessage(reply != null ? reply : ""));
 
     return new AiChatResponseDto(reply, sessionId);
-  }
-
-  private boolean isExpired(ChatSession session) {
-    return session.lastAccessedAt().plusSeconds(SESSION_TIMEOUT_SECONDS).isBefore(Instant.now());
   }
 
   @Scheduled(fixedRate = 60000)
