@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: et
+
+  mvc:
+    apiversion:
+      enabled: true
+      use:
+        header: "X-API-Version"
+
+      supported: 1.0,2.0
+      default: 1.0
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+  jpa:
+    hibernate:
+      ddl-auto: validate # Disable Hibernate DDL automatic generation when using Flyway
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  ai:
+    openai:
+      api-key: ${GROQ_API_KEY}
+      base-url: https://api.groq.com/openai/v1
+      chat:
+        options:
+          model: openai/gpt-oss-20b
+          temperature: 0.0
+          options:
+            reasoning_effort: low
+
+jwt:
+  secret-key: ${JWT_KEY}
+  expiration-time-access-token-in-minutes: 10
+
+server:
+  port: ${PORT:8080}
+
+cors:
+  allowed-origins: ${APP_URL:http://localhost:3000}
