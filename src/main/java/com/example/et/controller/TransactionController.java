@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,6 +25,12 @@ public class TransactionController {
   @GetMapping
   public ResponseEntity<PagedTransactionsDto> getAllTransactions(@AuthenticationPrincipal String userId, @ModelAttribute TransactionFilterParams filterParams, Pageable pageable) {
     return ResponseEntity.ok(transactionService.getAllTransactions(userId, filterParams, pageable));
+  }
+
+  @GetMapping("/recent")
+  public ResponseEntity<List<TransactionResponseDto>> getRecentTransactions(@AuthenticationPrincipal String userId) {
+    final var transactions = transactionService.getAllTransactions(userId, TransactionFilterParams.empty(), Pageable.ofSize(5));
+    return ResponseEntity.ok(transactions.content());
   }
 
   @PostMapping
