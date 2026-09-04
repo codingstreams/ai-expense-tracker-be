@@ -2,7 +2,6 @@ package com.example.et.service.dashboard;
 
 import com.example.et.controller.dto.*;
 import com.example.et.model.core.Account;
-import com.example.et.model.core.SystemCategory;
 import com.example.et.model.core.Transaction;
 import com.example.et.service.account.AccountService;
 import com.example.et.service.appuser.AppUserService;
@@ -75,7 +74,7 @@ public class DashboardServiceImpl implements DashboardService {
   }
 
   @Override
-  public DashboardSummaryDto getSummary(String userId) {
+  public UserSummaryDto getSummary(String userId) {
     final var accounts = accountService.getUserAccountList(userId);
 
     // Net worth
@@ -106,7 +105,7 @@ public class DashboardServiceImpl implements DashboardService {
     final var netSavings = totalIncome - totalExpense;
     final var dailyBurnRate = totalExpense / now.getDayOfMonth();
 
-    return new DashboardSummaryDto(netWorth, totalIncome, totalExpense, netSavings, dailyBurnRate);
+    return new UserSummaryDto(netWorth, totalIncome, totalExpense, netSavings, dailyBurnRate);
   }
 
   @Override
@@ -153,5 +152,10 @@ public class DashboardServiceImpl implements DashboardService {
 
     return result;
 
+  }
+
+  @Override
+  public List<MonthlyTrendDto> getMonthlyTrend(String userId) {
+    return getMonthlyTrend(userId, 6);
   }
 }

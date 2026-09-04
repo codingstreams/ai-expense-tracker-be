@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -200,5 +201,10 @@ public class TransactionServiceImpl implements TransactionService {
 
     aiParseTaskService.unlinkTransaction(transactionId);
     transactionRepo.delete(transaction);
+  }
+
+  @Override
+  public List<TransactionResponseDto> getRecentTransactions(String userId) {
+    return getAllTransactions(userId, TransactionFilterParams.empty(), Pageable.ofSize(5)).content();
   }
 }

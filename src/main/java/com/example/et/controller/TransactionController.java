@@ -29,8 +29,8 @@ public class TransactionController {
 
   @GetMapping("/recent")
   public ResponseEntity<List<TransactionResponseDto>> getRecentTransactions(@AuthenticationPrincipal String userId) {
-    final var transactions = transactionService.getAllTransactions(userId, TransactionFilterParams.empty(), Pageable.ofSize(5));
-    return ResponseEntity.ok(transactions.content());
+    final var transactions = transactionService.getRecentTransactions(userId);
+    return ResponseEntity.ok(transactions);
   }
 
   @PostMapping

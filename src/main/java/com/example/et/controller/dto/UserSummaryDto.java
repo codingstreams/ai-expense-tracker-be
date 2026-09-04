@@ -1,6 +1,6 @@
 package com.example.et.controller.dto;
 
-public record DashboardSummaryDto(
+public record UserSummaryDto(
     Double netWorth,
     Double totalIncome,
     Double totalExpense,

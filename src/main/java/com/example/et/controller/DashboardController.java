@@ -1,11 +1,9 @@
 package com.example.et.controller;
 
-import com.example.et.controller.dto.CategoryBreakdownDto;
-import com.example.et.controller.dto.DashboardSummaryDto;
-import com.example.et.controller.dto.MonthlyTrendDto;
-import com.example.et.controller.dto.OnboardUserDto;
+import com.example.et.controller.dto.*;
 import com.example.et.model.core.AppUserConfig;
 import com.example.et.service.dashboard.DashboardService;
+import com.example.et.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +18,19 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DashboardController {
   private final DashboardService dashboardService;
+  private final TransactionService transactionService;
+
+  @GetMapping(value = "/overview", version = "2")
+  public ResponseEntity<DashboardOverviewResponseDto> getDashboardOverview(@AuthenticationPrincipal String userId){
+    final var userSummary = dashboardService.getSummary(userId);
+    final var monthlyTrend = dashboardService.getMonthlyTrend(userId);
+    final var recentTransactions = transactionService.getRecentTransactions(userId);
+    final var categoryBreakdown = dashboardService.getCategoryBreakdown(userId, null, null);
+
+    final var result = new DashboardOverviewResponseDto(userSummary, monthlyTrend, recentTransactions, categoryBreakdown);
+
+    return  ResponseEntity.ok(result);
+  }
 
   @GetMapping("/language-preferences")
   public ResponseEntity<Map<String, Object>> getLanguagePreferences() {
@@ -37,7 +48,7 @@ public class DashboardController {
   }
 
   @GetMapping("/summary")
-  public ResponseEntity<DashboardSummaryDto> getSummary(@AuthenticationPrincipal String userId) {
+  public ResponseEntity<UserSummaryDto> getSummary(@AuthenticationPrincipal String userId) {
     return ResponseEntity.ok(dashboardService.getSummary(userId));
   }
 

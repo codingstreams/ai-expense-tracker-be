@@ -6,6 +6,7 @@ import com.example.et.controller.dto.TransactionRequestDto;
 import com.example.et.controller.dto.TransactionResponseDto;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface TransactionService {
@@ -14,4 +15,6 @@ public interface TransactionService {
   TransactionResponseDto createTransaction(String userId, TransactionRequestDto requestBody);
 
   void deleteTransaction(String userId, UUID transactionId);
+
+  List<TransactionResponseDto> getRecentTransactions(String userId);
 }
