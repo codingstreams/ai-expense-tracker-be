@@ -3,6 +3,7 @@ package com.example.et.controller;
 
 import com.example.et.model.core.SystemCategory;
 import com.example.et.repo.SysCategoryRepo;
+import com.example.et.service.category.SysCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,10 +16,10 @@ import java.util.List;
 @RequestMapping("/api/system-categories")
 @RequiredArgsConstructor
 public class SysCategoryController {
-  private final SysCategoryRepo sysCategoryRepo;
+  private final SysCategoryService sysCategoryService;
 
   @GetMapping
   public ResponseEntity<List<SystemCategory>> getSystemCategories() {
-    return ResponseEntity.ok().body(sysCategoryRepo.findAll());
+    return ResponseEntity.ok(sysCategoryService.getAllSystemCategories());
   }
 }
