@@ -16,13 +16,21 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+    hikari:
+      pool-name: production-pool
+      maximum-pool-size: 5
+      minimum-idle: 3
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
   flyway:
     enabled: true
     baseline-on-migrate: true
 
   jpa:
     hibernate:
-      ddl-auto: validate # Disable Hibernate DDL automatic generation when using Flyway
+      ddl-auto: validate
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   ai:
