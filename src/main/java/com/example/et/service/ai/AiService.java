@@ -11,4 +11,6 @@ public interface AiService {
   void parse(AiParsingTask task);
 
   AiInsightDto getLatestInsight(String userId);
+
+  AiInsightDto generateInsights(String userId);
 }
