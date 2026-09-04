@@ -33,4 +33,9 @@ public class AiController {
                                                 @AuthenticationPrincipal String userId) {
     return ResponseEntity.ok(aiChatService.chat(userId, request));
   }
+  @PostMapping("/insights/generate")
+  public ResponseEntity<AiInsightDto> generateInsights(@AuthenticationPrincipal String userId) {
+    return ResponseEntity.ok(aiService.generateInsights(userId));
+  }
+
 }
