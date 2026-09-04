@@ -2,6 +2,8 @@ package com.example.et.controller;
 
 import com.example.et.model.core.PaymentMode;
 import com.example.et.repo.PaymentModeRepo;
+import com.example.et.service.paymentmode.PaymentModeService;
+import jakarta.persistence.Cacheable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,10 +16,10 @@ import java.util.List;
 @RequestMapping("/api/payment-modes")
 @RequiredArgsConstructor
 public class PaymentModeController {
-  private final PaymentModeRepo paymentModeRepo;
+  private final PaymentModeService paymentModeService;
 
   @GetMapping
   public ResponseEntity<List<PaymentMode>> getPaymentModes() {
-    return ResponseEntity.ok().body(paymentModeRepo.findAll());
+    return ResponseEntity.ok().body(paymentModeService.getAllPaymentModes());
   }
 }

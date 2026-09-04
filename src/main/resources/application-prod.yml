@@ -45,3 +45,6 @@ server:
 
 cors:
   allowed-origins: ${APP_URL:http://localhost:3000}
+
+redis:
+  url: ${REDIS_URL}
