@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -13,7 +16,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class Account extends BaseAudit implements ActivableEntity {
+public class Account extends BaseAudit implements ActivableEntity, Serializable {
+  @Serial
+  private static final long serialVersionUID = 1L;
+
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
@@ -54,5 +60,25 @@ public class Account extends BaseAudit implements ActivableEntity {
 
   public enum AccountType {
     SAVINGS, CREDIT, CASH
+  }
+
+  public void debit(Float amount) {
+    if(Objects.isNull(amount) || amount <= 0) {
+      throw new RuntimeException("Invalid amount");
+    }
+
+    if (this.balance - amount < 0) {
+      throw new RuntimeException("Insufficient amount to debit the expense transaction.");
+    }
+
+    this.balance -= amount;
+  }
+
+  public void credit(Float amount) {
+    if(Objects.isNull(amount) || amount <= 0) {
+      throw new RuntimeException("Invalid amount");
+    }
+
+    this.balance += amount;
   }
 }

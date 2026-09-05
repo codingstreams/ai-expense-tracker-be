@@ -1,6 +1,6 @@
 package com.example.et.repo.spec;
 
-import com.example.et.controller.dto.TransactionFilterParams;
+import com.example.et.controller.dto.transaction.TransactionFilterParams;
 import com.example.et.model.core.Transaction;
 import org.springframework.data.jpa.domain.Specification;
 

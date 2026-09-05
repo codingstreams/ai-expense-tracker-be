@@ -1,11 +1,11 @@
 package com.example.et.service.card;
 
-import com.example.et.controller.dto.CardDto;
-import com.example.et.controller.dto.UserCards;
+import com.example.et.controller.dto.card.CardDto;
+import com.example.et.controller.dto.card.UserCards;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
 import com.example.et.model.core.Card;
-import com.example.et.repo.CardRepo;
+import com.example.et.repo.card.CardRepo;
 import com.example.et.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -75,6 +75,7 @@ public class CardServiceImpl implements CardService {
   }
 
   @Override
+//  @Cacheable(value = "userCards", key = "#userId.#cardId")
   public Card getUserCard(String userId, UUID cardId) {
     return cardRepo.findByIdAndAppUserId(cardId, UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Card not found."));

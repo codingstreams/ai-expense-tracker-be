@@ -1,8 +1,8 @@
 package com.example.et.controller;
 
 
-import com.example.et.controller.dto.CardDto;
-import com.example.et.controller.dto.UserCards;
+import com.example.et.controller.dto.card.CardDto;
+import com.example.et.controller.dto.card.UserCards;
 import com.example.et.model.core.Card;
 import com.example.et.service.card.CardService;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.example.et.service.appuser;
 
-import com.example.et.controller.dto.UpdateUserDetailsDto;
-import com.example.et.controller.dto.UserDetailsDto;
+import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
+import com.example.et.controller.dto.appuser.UserDetailsDto;
 import com.example.et.model.core.AppUser;
 import org.springframework.security.core.userdetails.UserDetailsService;
 

@@ -1,6 +1,6 @@
 package com.example.et.security;
 
-import com.example.et.controller.dto.ApiErrorResponse;
+import com.example.et.controller.dto.error.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,10 @@
 package com.example.et.service.ai;
 
-import com.example.et.controller.dto.*;
+import com.example.et.controller.dto.ai.AiInputDto;
+import com.example.et.controller.dto.ai.AiInsightDto;
+import com.example.et.controller.dto.ai.AiTaskDto;
+import com.example.et.controller.dto.transaction.TransactionFilterParams;
+import com.example.et.controller.dto.transaction.TransactionRequestDto;
 import com.example.et.model.ai.AiInsight;
 import com.example.et.model.ai.AiParsingTask;
 import com.example.et.model.core.*;

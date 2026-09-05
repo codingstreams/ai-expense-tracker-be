@@ -1,8 +1,8 @@
 package com.example.et.controller;
 
-import com.example.et.controller.dto.AccountDto;
-import com.example.et.controller.dto.UpdateCashDto;
-import com.example.et.controller.dto.UserBankAccounts;
+import com.example.et.controller.dto.account.AccountDto;
+import com.example.et.controller.dto.account.UpdateCashDto;
+import com.example.et.controller.dto.account.UserBankAccounts;
 import com.example.et.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

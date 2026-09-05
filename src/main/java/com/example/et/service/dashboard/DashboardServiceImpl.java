@@ -1,6 +1,12 @@
 package com.example.et.service.dashboard;
 
-import com.example.et.controller.dto.*;
+import com.example.et.controller.dto.account.UserBankAccounts;
+import com.example.et.controller.dto.dashboard.CategoryBreakdownDto;
+import com.example.et.controller.dto.dashboard.MonthlyTrendDto;
+import com.example.et.controller.dto.dashboard.OnboardUserDto;
+import com.example.et.controller.dto.dashboard.UserSummaryDto;
+import com.example.et.controller.dto.transaction.TransactionFilterParams;
+import com.example.et.controller.dto.transaction.TransactionResponseDto;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.Transaction;
 import com.example.et.service.account.AccountService;

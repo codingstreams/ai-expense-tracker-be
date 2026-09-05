@@ -1,8 +1,8 @@
 package com.example.et.service.account;
 
-import com.example.et.controller.dto.AccountDto;
-import com.example.et.controller.dto.UpdateCashDto;
-import com.example.et.controller.dto.UserBankAccounts;
+import com.example.et.controller.dto.account.AccountDto;
+import com.example.et.controller.dto.account.UpdateCashDto;
+import com.example.et.controller.dto.account.UserBankAccounts;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
 import com.example.et.model.core.Bank;

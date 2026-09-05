@@ -1,8 +1,8 @@
 package com.example.et.service.ai.chat;
 
-import com.example.et.controller.dto.AiChatRequestDto;
-import com.example.et.controller.dto.AiChatResponseDto;
-import com.example.et.controller.dto.TransactionFilterParams;
+import com.example.et.controller.dto.ai.AiChatRequestDto;
+import com.example.et.controller.dto.ai.AiChatResponseDto;
+import com.example.et.controller.dto.transaction.TransactionFilterParams;
 import com.example.et.service.account.AccountService;
 import com.example.et.service.transaction.TransactionService;
 

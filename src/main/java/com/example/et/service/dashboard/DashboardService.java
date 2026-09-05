@@ -1,9 +1,9 @@
 package com.example.et.service.dashboard;
 
-import com.example.et.controller.dto.CategoryBreakdownDto;
-import com.example.et.controller.dto.UserSummaryDto;
-import com.example.et.controller.dto.MonthlyTrendDto;
-import com.example.et.controller.dto.OnboardUserDto;
+import com.example.et.controller.dto.dashboard.CategoryBreakdownDto;
+import com.example.et.controller.dto.dashboard.UserSummaryDto;
+import com.example.et.controller.dto.dashboard.MonthlyTrendDto;
+import com.example.et.controller.dto.dashboard.OnboardUserDto;
 
 import java.util.List;
 

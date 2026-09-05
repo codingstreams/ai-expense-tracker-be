@@ -1,8 +1,8 @@
 package com.example.et.service.ai;
 
-import com.example.et.controller.dto.AiInputDto;
-import com.example.et.controller.dto.AiInsightDto;
-import com.example.et.controller.dto.AiTaskDto;
+import com.example.et.controller.dto.ai.AiInputDto;
+import com.example.et.controller.dto.ai.AiInsightDto;
+import com.example.et.controller.dto.ai.AiTaskDto;
 import com.example.et.model.ai.AiParsingTask;
 
 public interface AiService {

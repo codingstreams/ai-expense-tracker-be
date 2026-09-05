@@ -1,8 +1,8 @@
 package com.example.et.controller;
 
 
-import com.example.et.controller.dto.UpdateUserDetailsDto;
-import com.example.et.controller.dto.UserDetailsDto;
+import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
+import com.example.et.controller.dto.appuser.UserDetailsDto;
 import com.example.et.service.appuser.AppUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,8 +1,8 @@
 package com.example.et.service.auth;
 
-import com.example.et.controller.dto.AuthResponse;
-import com.example.et.controller.dto.LoginRequest;
-import com.example.et.controller.dto.UserRegistrationRequest;
+import com.example.et.controller.dto.auth.AuthResponse;
+import com.example.et.controller.dto.auth.LoginRequest;
+import com.example.et.controller.dto.auth.UserRegistrationRequest;
 
 public interface AuthService {
   AuthResponse register(UserRegistrationRequest userRegistrationRequest);

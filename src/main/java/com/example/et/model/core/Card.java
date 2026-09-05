@@ -3,6 +3,8 @@ package com.example.et.model.core;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.UUID;
 
 @Entity
@@ -11,7 +13,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class Card extends BaseAudit {
+public class Card extends BaseAudit implements Serializable {
+  @Serial
+  private static final long serialVersionUID = 1L;
+
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;

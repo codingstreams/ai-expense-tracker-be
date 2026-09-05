@@ -1,9 +1,9 @@
 package com.example.et.service.auth;
 
 import com.example.et.config.props.JwtProps;
-import com.example.et.controller.dto.AuthResponse;
-import com.example.et.controller.dto.LoginRequest;
-import com.example.et.controller.dto.UserRegistrationRequest;
+import com.example.et.controller.dto.auth.AuthResponse;
+import com.example.et.controller.dto.auth.LoginRequest;
+import com.example.et.controller.dto.auth.UserRegistrationRequest;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
 import com.example.et.model.core.AppUserConfig;
@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

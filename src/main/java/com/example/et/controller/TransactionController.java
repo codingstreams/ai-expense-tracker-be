@@ -1,10 +1,10 @@
 package com.example.et.controller;
 
 
-import com.example.et.controller.dto.PagedTransactionsDto;
-import com.example.et.controller.dto.TransactionFilterParams;
-import com.example.et.controller.dto.TransactionRequestDto;
-import com.example.et.controller.dto.TransactionResponseDto;
+import com.example.et.controller.dto.transaction.PagedTransactionsDto;
+import com.example.et.controller.dto.transaction.TransactionFilterParams;
+import com.example.et.controller.dto.transaction.TransactionRequestDto;
+import com.example.et.controller.dto.transaction.TransactionResponseDto;
 import com.example.et.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +35,8 @@ public class TransactionController {
 
   @PostMapping
   public ResponseEntity<TransactionResponseDto> createTransaction(@RequestBody TransactionRequestDto requestBody, @AuthenticationPrincipal String userId) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(transactionService.createTransaction(userId, requestBody));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(transactionService.createTransaction(userId, requestBody));
   }
 
   @DeleteMapping("/{transactionId}")

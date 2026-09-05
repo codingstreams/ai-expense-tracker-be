@@ -1,0 +1,79 @@
+package com.example.et.service.transaction.strategy;
+
+import com.example.et.controller.dto.transaction.TransactionResponseDto;
+import com.example.et.model.core.Account;
+import com.example.et.model.core.AppUser;
+import com.example.et.model.core.Transaction;
+import com.example.et.repo.TransactionRepo;
+import com.example.et.service.account.AccountService;
+import com.example.et.service.ai.parsetask.AiParseTaskService;
+import com.example.et.service.card.CardService;
+import com.example.et.service.transaction.TransactionContext;
+import com.example.et.service.transaction.TransactionServiceImpl;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.UUID;
+
+@Component
+@RequiredArgsConstructor
+public class ExpenseStrategy implements TransactionStrategy {
+  private final CardService cardService;
+  private final AccountService accountService;
+  private final TransactionRepo transactionRepo;
+  private final AiParseTaskService aiParseTaskService;
+
+  private Account resolveAccount(String userId, UUID accountId, UUID cardId) {
+    if (cardId != null) {
+      final var card = cardService.getUserCard(userId, cardId);
+      if (card.getAccount() == null) {
+        throw new RuntimeException("Card is not linked to any account");
+      }
+      return card.getAccount();
+    }
+    if (accountId != null) {
+      return accountService.getAccount(UUID.fromString(userId), accountId);
+    }
+    throw new RuntimeException("Either accountId or cardId must be provided");
+  }
+
+  @Override
+  public TransactionResponseDto execute(TransactionContext transactionContext) {
+    final var userId = transactionContext.userId();
+    final var user = AppUser.ofId(userId);
+    final var account = resolveAccount(userId, transactionContext.requestDto().accountId(), transactionContext.requestDto().cardId());
+
+    account.debit(transactionContext.requestDto().amount());
+    accountService.saveAccount(account);
+
+    final var transaction = Transaction.builder()
+        .appUser(user)
+        .account(account)
+        .type(transactionContext.requestDto().type())
+        .amount(transactionContext.requestDto().amount())
+        .transactionDate(transactionContext.requestDto().transactionDate())
+        .description(transactionContext.requestDto().description())
+        .paymentMode(transactionContext.paymentMode())
+        .transactionCategory(transactionContext.systemCategory())
+        .build();
+
+    return TransactionServiceImpl.toDto(transactionRepo.save(transaction));
+  }
+
+  @Override
+  public void delete(String userId, Transaction transaction) {
+    if (transaction.getAccount() != null) {
+      final var account = transaction.getAccount();
+      account.credit(transaction.getAmount());
+      accountService.saveAccount(account);
+    }
+
+    aiParseTaskService.unlinkTransaction(transaction.getId());
+    transactionRepo.delete(transaction);
+  }
+
+  @Override
+  public Transaction.TransactionType getType() {
+    return Transaction.TransactionType.EXPENSE;
+  }
+}

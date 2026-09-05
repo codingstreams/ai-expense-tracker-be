@@ -1,6 +1,6 @@
 package com.example.et.repo;
 
-import com.example.et.controller.dto.UserDetailsDto;
+import com.example.et.controller.dto.appuser.UserDetailsDto;
 import com.example.et.model.core.AppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,7 +16,7 @@ public interface AppUserRepo extends JpaRepository<AppUser, UUID> {
   boolean existsByEmailAndIsOnboardingComplete(String email, boolean isOnboardingComplete);
 
   @Query("""
-      select new com.example.et.controller.dto.UserDetailsDto(
+      select new com.example.et.controller.dto.appuser.UserDetailsDto(
           u.email,
           u.name,
           u.isOnboardingComplete,

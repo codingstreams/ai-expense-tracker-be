@@ -1,7 +1,7 @@
 package com.example.et.controller;
 
 
-import com.example.et.controller.dto.*;
+import com.example.et.controller.dto.ai.*;
 import com.example.et.service.ai.AiService;
 import com.example.et.service.ai.chat.AiChatService;
 import lombok.RequiredArgsConstructor;

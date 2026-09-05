@@ -1,6 +1,6 @@
 package com.example.et.controller;
 
-import com.example.et.controller.dto.*;
+import com.example.et.controller.dto.dashboard.*;
 import com.example.et.model.core.AppUserConfig;
 import com.example.et.service.dashboard.DashboardService;
 import com.example.et.service.transaction.TransactionService;

@@ -1,13 +1,12 @@
 package com.example.et.controller;
 
-import com.example.et.controller.dto.AuthResponse;
-import com.example.et.controller.dto.LoginRequest;
-import com.example.et.controller.dto.UserRegistrationRequest;
+import com.example.et.controller.dto.auth.AuthResponse;
+import com.example.et.controller.dto.auth.LoginRequest;
+import com.example.et.controller.dto.auth.UserRegistrationRequest;
 import com.example.et.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

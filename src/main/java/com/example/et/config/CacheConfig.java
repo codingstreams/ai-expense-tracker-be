@@ -10,9 +10,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
@@ -26,7 +23,7 @@ public class CacheConfig {
 
     // 2. Build explicit Lettuce configuration ensuring SSL is bound
     LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-        .useSsl() // Forces secure SSL/TLS wrapper on the client side
+//        .useSsl() // Forces secure SSL/TLS wrapper on the client side
         .build();
 
     // 3. Create standalone configuration matching your parsed URI parameters

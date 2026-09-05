@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -19,5 +20,12 @@ public class SysCategoryServiceImpl implements SysCategoryService {
     @Cacheable("systemCategories")
     public List<SystemCategory> getAllSystemCategories() {
         return sysCategoryRepo.findAll();
+    }
+
+    @Override
+    @Cacheable(value = "systemCategories", key = "#id")
+    public SystemCategory getSystemCategoryById(UUID id) {
+        return sysCategoryRepo.findById(id)
+            .orElseThrow(() -> new RuntimeException("SystemCategory ID: %s not found".formatted(id)));
     }
 }
