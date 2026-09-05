@@ -3,6 +3,7 @@ package com.example.et.config;
 import com.example.et.security.JwtAuthFilter;
 import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -32,6 +33,7 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(h -> h
             .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
+            .requestMatchers(EndpointRequest.to("metrics", "prometheus", "health")).permitAll()
             .requestMatchers("/api/auth/register", "/api/auth/login", "/error")
             .permitAll()
             .anyRequest()

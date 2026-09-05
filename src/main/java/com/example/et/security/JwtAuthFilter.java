@@ -23,6 +23,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   private final AuthenticationManager authenticationManager;
   private final ExpireTokenService expireTokenService;
 
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    return request.getServletPath().startsWith("/actuator");
+  }
+
   public static Optional<String> extractToken(String authorizationHeader) {
     if (StringUtils.isBlank(authorizationHeader)) {
       return Optional.empty();
