@@ -1,11 +1,11 @@
 package com.example.et.service.paymentmode;
 
-import com.example.et.model.core.PaymentMode;
+import com.example.et.controller.dto.paymentmode.PaymentModeDto;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface PaymentModeService {
-  List<PaymentMode> getAllPaymentModes();
-  PaymentMode getPaymentModeById(UUID id);
+  List<PaymentModeDto> getAllPaymentModes();
+  PaymentModeDto getPaymentModeById(UUID id);
 }

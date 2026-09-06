@@ -1,6 +1,7 @@
 package com.example.et.service.paymentmode;
 
-import com.example.et.model.core.PaymentMode;
+import com.example.et.controller.dto.paymentmode.PaymentModeDto;
+import com.example.et.mapper.PaymentModeMapper;
 import com.example.et.repo.PaymentModeRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -13,17 +14,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PaymentModeServiceImpl implements PaymentModeService {
   private final PaymentModeRepo paymentModeRepo;
+  private final PaymentModeMapper paymentModeMapper;
 
   @Override
   @Cacheable("paymentModes")
-  public List<PaymentMode> getAllPaymentModes() {
-    return paymentModeRepo.findAll();
+  public List<PaymentModeDto> getAllPaymentModes() {
+    return paymentModeRepo.findAll()
+        .parallelStream()
+        .map(paymentModeMapper::toDto)
+        .toList();
   }
 
   @Override
   @Cacheable(value = "paymentModes", key = "#id")
-  public PaymentMode getPaymentModeById(UUID id) {
+  public PaymentModeDto getPaymentModeById(UUID id) {
     return paymentModeRepo.findById(id)
+        .map(paymentModeMapper::toDto)
         .orElseThrow(() -> new RuntimeException("PaymentMode ID: %s not found".formatted(id)));
   }
 }

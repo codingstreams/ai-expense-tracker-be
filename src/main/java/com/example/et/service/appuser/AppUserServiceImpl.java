@@ -2,7 +2,7 @@ package com.example.et.service.appuser;
 
 import com.example.et.controller.dto.appuser.AppUserDto;
 import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
-import com.example.et.controller.dto.appuser.UpdateUserDetailsReq;
+import com.example.et.controller.dto.appuser.UpdateUserConfigReq;
 import com.example.et.controller.dto.appuser.UserDetailsDto;
 import com.example.et.mapper.AppUserConfigMapper;
 import com.example.et.mapper.AppUserMapper;
@@ -11,6 +11,7 @@ import com.example.et.repo.AppUserConfigRepo;
 import com.example.et.repo.AppUserRepo;
 import com.example.et.repo.PaymentModeRepo;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -100,7 +101,7 @@ public class AppUserServiceImpl implements AppUserService {
 
   @Override
   @CachePut(value = "appUserDetails", key = "#userId")
-  public AppUserDto updateUserConfigV2(String userId, UpdateUserDetailsReq userDetailsDto) {
+  public AppUserDto updateUserConfigV2(String userId, UpdateUserConfigReq userDetailsDto) {
     final var appUser = appUserRepo.findById(UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("User Id: %s not found.".formatted(userId)));
 
@@ -131,7 +132,7 @@ public class AppUserServiceImpl implements AppUserService {
   }
 
   @Override
-  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+  public @NonNull UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
     final var appUser = appUserRepo.findByEmail(email)
         .orElseThrow(() -> new UsernameNotFoundException("Email %s not found.".formatted(email)));
 

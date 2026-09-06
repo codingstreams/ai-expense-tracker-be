@@ -1,5 +1,6 @@
 package com.example.et.service.transaction;
 
+import com.example.et.controller.dto.paymentmode.PaymentModeDto;
 import com.example.et.controller.dto.transaction.PagedTransactionsDto;
 import com.example.et.controller.dto.transaction.TransactionFilterParams;
 import com.example.et.controller.dto.transaction.TransactionRequestDto;
@@ -61,7 +62,7 @@ public class TransactionServiceImpl implements TransactionService {
   @Override
   @Transactional
   public TransactionResponseDto createTransaction(String userId, TransactionRequestDto requestBody) {
-    PaymentMode paymentMode = null;
+    PaymentModeDto paymentMode = null;
     SystemCategory category = null;
 
     if (requestBody.type() == Transaction.TransactionType.EXPENSE) {

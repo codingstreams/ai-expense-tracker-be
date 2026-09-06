@@ -2,7 +2,7 @@ package com.example.et.service.dataseeder;
 
 import com.example.et.controller.dto.account.AccountDtoOld;
 import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
-import com.example.et.controller.dto.auth.UserRegistrationRequest;
+import com.example.et.controller.dto.auth.CreateUserReq;
 import com.example.et.controller.dto.card.CardDto;
 import com.example.et.controller.dto.card.UserCards;
 import com.example.et.controller.dto.dashboard.OnboardUserDto;
@@ -44,7 +44,7 @@ public class DataSeederServiceImpl implements DataSeederService {
   @Transactional
   public int seedUsers(int count) {
     for (int i = 0; i < count; i++) {
-      final var request = new UserRegistrationRequest(
+      final var request = new CreateUserReq(
           faker.name().fullName(),
           faker.internet().emailAddress(),
           "Password@123"
@@ -73,7 +73,7 @@ public class DataSeederServiceImpl implements DataSeederService {
 
   public void seedUserFullJourney(String name, String email, int monthsOfTransactions) {
     // 1. Register User (AuthController method -> AuthService)
-    final var regRequest = new UserRegistrationRequest(name, email, "test@1234");
+    final var regRequest = new CreateUserReq(name, email, "test@1234");
     authService.register(regRequest);
 
     final var appUser = appUserService.getUserByEmail(email);

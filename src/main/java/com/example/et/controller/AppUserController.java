@@ -3,7 +3,7 @@ package com.example.et.controller;
 
 import com.example.et.controller.dto.appuser.AppUserDto;
 import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
-import com.example.et.controller.dto.appuser.UpdateUserDetailsReq;
+import com.example.et.controller.dto.appuser.UpdateUserConfigReq;
 import com.example.et.controller.dto.appuser.UserDetailsDto;
 import com.example.et.service.appuser.AppUserService;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +18,10 @@ import org.springframework.web.bind.annotation.*;
 public class AppUserController {
   private final AppUserService appUserService;
 
+  // Version 1
   @GetMapping("/me")
   public ResponseEntity<UserDetailsDto> getCurrentUserDetails(@AuthenticationPrincipal String userId) {
     final var appUser = appUserService.getUserByUserIdWithConfig(userId);
-    return ResponseEntity.ok(appUser);
-  }
-
-  @GetMapping(value = "/me", version = "2")
-  public ResponseEntity<AppUserDto> getCurrentUserDetailsV2(@AuthenticationPrincipal String userId) {
-    final var appUser = appUserService.getUserByUserIdWithConfigV2(userId);
     return ResponseEntity.ok(appUser);
   }
 
@@ -36,9 +31,16 @@ public class AppUserController {
     return ResponseEntity.ok(appUser);
   }
 
+  // Version 2
+  @GetMapping(value = "/me", version = "2")
+  public ResponseEntity<AppUserDto> getCurrentUserDetailsV2(@AuthenticationPrincipal String userId) {
+    final var appUser = appUserService.getUserByUserIdWithConfigV2(userId);
+    return ResponseEntity.ok(appUser);
+  }
+
   @PutMapping(value = "/me/config", version = "2")
-  public ResponseEntity<AppUserDto> updateUserConfigV2(@AuthenticationPrincipal String userId, @RequestBody UpdateUserDetailsReq userDetailsDto) {
-    final var appUser = appUserService.updateUserConfigV2(userId, userDetailsDto);
+  public ResponseEntity<AppUserDto> updateUserConfigV2(@AuthenticationPrincipal String userId, @RequestBody UpdateUserConfigReq updateUserConfigReq) {
+    final var appUser = appUserService.updateUserConfigV2(userId, updateUserConfigReq);
     return ResponseEntity.ok(appUser);
   }
 }

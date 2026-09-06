@@ -1,6 +1,7 @@
 package com.example.et.service.transaction.strategy;
 
 import com.example.et.controller.dto.transaction.TransactionResponseDto;
+import com.example.et.mapper.PaymentModeMapper;
 import com.example.et.model.core.AppUser;
 import com.example.et.model.core.Transaction;
 import com.example.et.repo.TransactionRepo;
@@ -19,6 +20,7 @@ public class IncomeStrategy implements  TransactionStrategy {
   private final AccountService accountService;
   private final TransactionRepo transactionRepo;
   private final AiParseTaskService aiParseTaskService;
+  private final PaymentModeMapper paymentModeMapper;
 
   @Override
   public TransactionResponseDto execute(TransactionContext transactionContext) {
@@ -36,7 +38,7 @@ public class IncomeStrategy implements  TransactionStrategy {
         .amount(transactionContext.requestDto().amount())
         .transactionDate(transactionContext.requestDto().transactionDate())
         .description(transactionContext.requestDto().description())
-        .paymentMode(transactionContext.paymentMode())
+        .paymentMode(paymentModeMapper.toEntity(transactionContext.paymentMode()))
         .transactionCategory(transactionContext.systemCategory())
         .build();
 

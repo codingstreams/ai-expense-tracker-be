@@ -2,8 +2,8 @@ package com.example.et.service.auth;
 
 import com.example.et.config.props.JwtProps;
 import com.example.et.controller.dto.auth.AuthResponse;
-import com.example.et.controller.dto.auth.LoginRequest;
-import com.example.et.controller.dto.auth.UserRegistrationRequest;
+import com.example.et.controller.dto.auth.LoginReq;
+import com.example.et.controller.dto.auth.CreateUserReq;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
 import com.example.et.model.core.AppUserConfig;
@@ -40,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
   private final PaymentModeRepo paymentModeRepo;
 
   @Override
-  public AuthResponse register(UserRegistrationRequest request) {
+  public AuthResponse register(CreateUserReq request) {
     final var userExists = appUserService.checkUserExists(request.email());
 
     if (userExists) {
@@ -83,11 +83,11 @@ public class AuthServiceImpl implements AuthService {
 
     accountService.saveAccount(cashAccount);
 
-    return login(new LoginRequest(request.email(), request.password()));
+    return login(new LoginReq(request.email(), request.password()));
   }
 
   @Override
-  public AuthResponse login(LoginRequest request) {
+  public AuthResponse login(LoginReq request) {
     final var unauthenticatedToken = UsernamePasswordAuthenticationToken.unauthenticated(request.email(),
         request.password());
 

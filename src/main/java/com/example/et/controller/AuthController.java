@@ -1,14 +1,17 @@
 package com.example.et.controller;
 
 import com.example.et.controller.dto.auth.AuthResponse;
-import com.example.et.controller.dto.auth.LoginRequest;
-import com.example.et.controller.dto.auth.UserRegistrationRequest;
+import com.example.et.controller.dto.auth.LoginReq;
+import com.example.et.controller.dto.auth.CreateUserReq;
 import com.example.et.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -16,20 +19,32 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/register")
-  public ResponseEntity<AuthResponse> registerUser(@RequestBody UserRegistrationRequest userRegistrationRequest) {
-    final var authResponse = authService.register(userRegistrationRequest);
+  public ResponseEntity<AuthResponse> registerUser(@RequestBody CreateUserReq createUserReq) {
+    log.info("Received user registration request for email: {}", createUserReq.email());
+
+    final var authResponse = authService.register(createUserReq);
+
+    log.info("Successfully registered user with email: {}", createUserReq.email());
     return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
-    final var authResponse = authService.login(loginRequest);
+  public ResponseEntity<AuthResponse> login(@RequestBody LoginReq loginReq) {
+    log.info("Received login request for user: {}", loginReq.email());
+
+    final var authResponse = authService.login(loginReq);
+
+    log.info("User logged in successfully: {}", loginReq.email());
     return ResponseEntity.ok(authResponse);
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<Void> logout(@RequestHeader("AUTHORIZATION") String token) {
+  public ResponseEntity<Void> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+    log.info("Received logout request");
+
     authService.logout(token);
+
+    log.info("User logged out successfully");
     return ResponseEntity.noContent().build();
   }
 }
