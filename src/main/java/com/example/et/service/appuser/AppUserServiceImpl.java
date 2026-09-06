@@ -2,6 +2,7 @@ package com.example.et.service.appuser;
 
 import com.example.et.controller.dto.appuser.AppUserDto;
 import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
+import com.example.et.controller.dto.appuser.UpdateUserDetailsReq;
 import com.example.et.controller.dto.appuser.UserDetailsDto;
 import com.example.et.mapper.AppUserConfigMapper;
 import com.example.et.mapper.AppUserMapper;
@@ -99,7 +100,7 @@ public class AppUserServiceImpl implements AppUserService {
 
   @Override
   @CachePut(value = "appUserDetails", key = "#userId")
-  public AppUserDto updateUserConfigV2(String userId, UpdateUserDetailsDto userDetailsDto) {
+  public AppUserDto updateUserConfigV2(String userId, UpdateUserDetailsReq userDetailsDto) {
     final var appUser = appUserRepo.findById(UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("User Id: %s not found.".formatted(userId)));
 
@@ -122,8 +123,8 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     // Check for payment mode
-    final var paymentMode = paymentModeRepo.findByNameIgnoreCase(userDetailsDto.paymentMode())
-        .orElseThrow(() -> new RuntimeException("PaymentMode: %s not found.".formatted(userDetailsDto.paymentMode())));
+    final var paymentMode = paymentModeRepo.findById(UUID.fromString(userDetailsDto.paymentModeId()))
+        .orElseThrow(() -> new RuntimeException("PaymentMode: %s not found.".formatted(userDetailsDto.paymentModeId())));
 
     appUserConfig.setPaymentMode(paymentMode);
     return appUserMapper.toDto(appUserRepo.save(appUser));

@@ -5,6 +5,7 @@ import com.example.et.model.core.AppUserConfig;
 import com.example.et.service.dashboard.DashboardService;
 import com.example.et.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -16,20 +17,31 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
+@Slf4j
 public class DashboardController {
   private final DashboardService dashboardService;
   private final TransactionService transactionService;
 
   @GetMapping(value = "/overview", version = "2")
   public ResponseEntity<DashboardOverviewResponseDto> getDashboardOverview(@AuthenticationPrincipal String userId){
+    log.info("Fetching dashboard overview for userId: {}", userId);
+
     final var userSummary = dashboardService.getSummary(userId);
+    log.debug("Fetched user summary for userId: {}", userId);
+
     final var monthlyTrend = dashboardService.getMonthlyTrend(userId);
+    log.debug("Fetched monthly trend for userId: {}", userId);
+
     final var recentTransactions = transactionService.getRecentTransactions(userId);
+    log.debug("Fetched recent transactions for userId: {}", userId);
+
     final var categoryBreakdown = dashboardService.getCategoryBreakdown(userId, null, null);
+    log.debug("Fetched category breakdown for userId: {}", userId);
 
     final var result = new DashboardOverviewResponseDto(userSummary, monthlyTrend, recentTransactions, categoryBreakdown);
 
-    return  ResponseEntity.ok(result);
+    log.info("Successfully generated dashboard overview response for userId: {}", userId);
+    return ResponseEntity.ok(result);
   }
 
   @GetMapping("/language-preferences")

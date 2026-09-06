@@ -3,6 +3,7 @@ package com.example.et.controller;
 
 import com.example.et.controller.dto.appuser.AppUserDto;
 import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
+import com.example.et.controller.dto.appuser.UpdateUserDetailsReq;
 import com.example.et.controller.dto.appuser.UserDetailsDto;
 import com.example.et.service.appuser.AppUserService;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class AppUserController {
   }
 
   @PutMapping(value = "/me/config", version = "2")
-  public ResponseEntity<AppUserDto> updateUserConfigV2(@AuthenticationPrincipal String userId, @RequestBody UpdateUserDetailsDto userDetailsDto) {
+  public ResponseEntity<AppUserDto> updateUserConfigV2(@AuthenticationPrincipal String userId, @RequestBody UpdateUserDetailsReq userDetailsDto) {
     final var appUser = appUserService.updateUserConfigV2(userId, userDetailsDto);
     return ResponseEntity.ok(appUser);
   }
