@@ -1,17 +1,17 @@
 package com.example.et.controller.dto.account;
 
-import com.example.et.controller.dto.bank.BankDto;
 import com.example.et.model.core.Account;
+import com.example.et.model.core.Bank;
 
 import java.util.UUID;
 
-public record AccountDto(
+public record AccountDtoOld(
     UUID id,
     String lastFourDigits,
     Float balance,
     Account.AccountType accountType,
-    boolean isUpiEnabled,
-    boolean isNetBankingEnabled,
-    BankDto bank,
-    Boolean isActive
-) {}
+    Bank bank,
+    Boolean isUpiEnabled,
+    Boolean isNetBankingEnabled
+) {
+}

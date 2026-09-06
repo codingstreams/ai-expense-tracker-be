@@ -1,6 +1,7 @@
 package com.example.et.controller;
 
 import com.example.et.controller.dto.account.AccountDto;
+import com.example.et.controller.dto.account.AccountDtoOld;
 import com.example.et.controller.dto.account.UpdateCashDto;
 import com.example.et.controller.dto.account.UserBankAccounts;
 import com.example.et.service.account.AccountService;
@@ -18,44 +19,50 @@ public class AccountController {
   private final AccountService accountService;
 
   @GetMapping
-  public ResponseEntity<List<AccountDto>> getUserAccounts(@AuthenticationPrincipal String userId) {
+  public ResponseEntity<List<AccountDtoOld>> getUserAccounts(@AuthenticationPrincipal String userId) {
     final var accounts = accountService.getUserAccounts(userId);
     return ResponseEntity.ok(accounts);
   }
 
+  @GetMapping(version = "3")
+  public ResponseEntity<List<AccountDto>> getUserAccountsV3(@AuthenticationPrincipal String userId) {
+    final var accounts = accountService.getUserAccountsV3(userId);
+    return ResponseEntity.ok(accounts);
+  }
+
   @GetMapping(version = "2")
-  public ResponseEntity<List<AccountDto>> getUserAccountsV2(@AuthenticationPrincipal String userId, @RequestParam(required = false) String paymentMode) {
+  public ResponseEntity<List<AccountDtoOld>> getUserAccountsV2(@AuthenticationPrincipal String userId, @RequestParam(required = false) String paymentMode) {
     final var accounts = accountService.getUserAccountsV2(userId, paymentMode);
     return ResponseEntity.ok(accounts);
   }
 
   @PostMapping
-  public ResponseEntity<List<AccountDto>> addAccounts(@AuthenticationPrincipal String userId, @RequestBody UserBankAccounts accounts) {
+  public ResponseEntity<List<AccountDtoOld>> addAccounts(@AuthenticationPrincipal String userId, @RequestBody UserBankAccounts accounts) {
     final var createdAccounts = accountService.addAccounts(userId, accounts);
     return ResponseEntity.ok(createdAccounts);
   }
 
   @GetMapping("/{accountId}")
-  public ResponseEntity<AccountDto> getUserAccountDetails(@AuthenticationPrincipal String userId, @PathVariable String accountId) {
+  public ResponseEntity<AccountDtoOld> getUserAccountDetails(@AuthenticationPrincipal String userId, @PathVariable String accountId) {
     final var account = accountService.getUserAccountDetails(userId, accountId);
     return ResponseEntity.ok(account);
   }
 
   @GetMapping("/cash")
-  public ResponseEntity<AccountDto> getUserCashAccountDetails(@AuthenticationPrincipal String userId) {
+  public ResponseEntity<AccountDtoOld> getUserCashAccountDetails(@AuthenticationPrincipal String userId) {
     final var account = accountService.getUserCashAccountDetails(userId);
     return ResponseEntity.ok(account);
   }
 
   @PutMapping("/cash")
-  public ResponseEntity<AccountDto> updateCashBalance(@AuthenticationPrincipal String userId, @RequestBody UpdateCashDto requestBody) {
+  public ResponseEntity<AccountDtoOld> updateCashBalance(@AuthenticationPrincipal String userId, @RequestBody UpdateCashDto requestBody) {
     final var account = accountService.updateCashBalance(userId, requestBody);
     return ResponseEntity.ok(account);
   }
 
   @PutMapping("/{accountId}")
-  public ResponseEntity<AccountDto> updateAccount(@AuthenticationPrincipal String userId, @PathVariable String accountId, @RequestBody AccountDto accountDto) {
-    final var account = accountService.updateAccount(userId, accountId, accountDto);
+  public ResponseEntity<AccountDtoOld> updateAccount(@AuthenticationPrincipal String userId, @PathVariable String accountId, @RequestBody AccountDtoOld accountDtoOld) {
+    final var account = accountService.updateAccount(userId, accountId, accountDtoOld);
     return ResponseEntity.ok(account);
   }
 

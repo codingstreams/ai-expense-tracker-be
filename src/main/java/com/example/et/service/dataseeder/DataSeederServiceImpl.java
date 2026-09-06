@@ -1,6 +1,6 @@
 package com.example.et.service.dataseeder;
 
-import com.example.et.controller.dto.account.AccountDto;
+import com.example.et.controller.dto.account.AccountDtoOld;
 import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
 import com.example.et.controller.dto.auth.UserRegistrationRequest;
 import com.example.et.controller.dto.card.CardDto;
@@ -108,7 +108,7 @@ public class DataSeederServiceImpl implements DataSeederService {
         .orElse(upiPaymentMode);
 
     // 3. Onboard User (DashboardController method -> DashboardService)
-    final var savingsAccountDto = new AccountDto(
+    final var savingsAccountDto = new AccountDtoOld(
         null,
         String.valueOf(faker.number().numberBetween(1000, 9999)),
         (float) faker.number().randomDouble(2, 50000, 150000),

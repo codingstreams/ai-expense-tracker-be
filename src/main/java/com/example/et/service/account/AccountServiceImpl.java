@@ -1,8 +1,10 @@
 package com.example.et.service.account;
 
 import com.example.et.controller.dto.account.AccountDto;
+import com.example.et.controller.dto.account.AccountDtoOld;
 import com.example.et.controller.dto.account.UpdateCashDto;
 import com.example.et.controller.dto.account.UserBankAccounts;
+import com.example.et.mapper.AccountMapper;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
 import com.example.et.model.core.Bank;
@@ -24,9 +26,10 @@ import java.util.function.Function;
 public class AccountServiceImpl implements AccountService {
   private final AccountRepo accountRepo;
   private final BankRepo bankRepo;
+  private final AccountMapper accountMapper;
 
-  private static Function<Account, AccountDto> toDto() {
-    return account -> new AccountDto(
+  private static Function<Account, AccountDtoOld> toDto() {
+    return account -> new AccountDtoOld(
         account.getId(),
         account.getLastFourDigits(),
         account.getBalance(),
@@ -39,7 +42,7 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
 //  @Cacheable(value = "userAccounts", key = "#userId")
-  public List<AccountDto> getUserAccounts(String userId) {
+  public List<AccountDtoOld> getUserAccounts(String userId) {
     return accountRepo.findByAppUserId(UUID.fromString(userId))
         .stream().map(toDto())
         .toList();
@@ -52,10 +55,10 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
   @CachePut(value = "userAccounts", key = "#userId")
-  public List<AccountDto> addAccounts(String userId, UserBankAccounts requestBody) {
+  public List<AccountDtoOld> addAccounts(String userId, UserBankAccounts requestBody) {
     final var bankIds = requestBody.accounts()
         .stream()
-        .map(AccountDto::bank)
+        .map(AccountDtoOld::bank)
         .map(Bank::getId)
         .toList();
 
@@ -92,12 +95,12 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
 //  @CachePut(value = "userAccounts", key = "#account.id")
-  public AccountDto getUserAccountDetails(String userId, String accountId) {
+  public AccountDtoOld getUserAccountDetails(String userId, String accountId) {
     return accountRepo.findByUserIdAndAccountId(UUID.fromString(userId), UUID.fromString(accountId));
   }
 
   @Override
-  public AccountDto updateAccount(String userId, String accountId, AccountDto account) {
+  public AccountDtoOld updateAccount(String userId, String accountId, AccountDtoOld account) {
     final var existingAccount = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Account not found."));
 
@@ -152,7 +155,8 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public AccountDto updateCashBalance(String userId, UpdateCashDto updateCashDto) {
+  @CachePut(value = "userAccounts", key = "#userId")
+  public AccountDtoOld updateCashBalance(String userId, UpdateCashDto updateCashDto) {
     final var cashAccount = accountRepo.findCashAccountByUserId(UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Account not found."));
 
@@ -165,7 +169,7 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public List<AccountDto> getUserAccountsV2(String userId, String paymentMode) {
+  public List<AccountDtoOld> getUserAccountsV2(String userId, String paymentMode) {
     return accountRepo.findByAppUserId(UUID.fromString(userId))
         .stream()
         .filter(account -> (account.getAccountType() == Account.AccountType.CASH) || (Objects.nonNull(paymentMode) && paymentMode.toLowerCase().contains("upi")
@@ -176,7 +180,8 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public AccountDto getUserCashAccountDetails(String userId) {
+  @Cacheable(value = "userAccounts", key = "#userId")
+  public AccountDtoOld getUserCashAccountDetails(String userId) {
     return accountRepo.findByUserIdAndAccountType(UUID.fromString(userId), Account.AccountType.CASH);
   }
 
@@ -184,5 +189,14 @@ public class AccountServiceImpl implements AccountService {
   public Account getUserAccount(String userId, UUID accountId) {
     return accountRepo.findByIdAndAppUserId(accountId, UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Account not found."));
+  }
+
+  @Override
+  @Cacheable(value = "userAccounts", key = "#userId")
+  public List<AccountDto> getUserAccountsV3(String userId) {
+    return accountRepo.findByAppUserId(UUID.fromString(userId))
+        .stream()
+        .map(accountMapper::toDto)
+        .toList();
   }
 }
