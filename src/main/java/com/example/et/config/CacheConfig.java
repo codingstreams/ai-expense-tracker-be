@@ -20,15 +20,16 @@ import java.time.Duration;
 public class CacheConfig {
   @Bean
   LettuceConnectionFactory lettuceConnectionFactory(@Value("${redis.url}") String url) {
-    // 1. Convert your string URL explicitly into a Lettuce compatible RedisURI
     RedisURI redisUri = RedisURI.create(url);
 
-    // 2. Build explicit Lettuce configuration ensuring SSL is bound
-    LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-//        .useSsl() // Forces secure SSL/TLS wrapper on the client side
-        .build();
+    LettuceClientConfiguration.LettuceClientConfigurationBuilder clientConfigBuilder =
+        LettuceClientConfiguration.builder();
 
-    // 3. Create standalone configuration matching your parsed URI parameters
+    if (redisUri.isSsl()) {
+      clientConfigBuilder.useSsl();
+    }
+
+    LettuceClientConfiguration clientConfig = clientConfigBuilder.build();
     final var config = LettuceConnectionFactory.createRedisConfiguration(redisUri);
 
     return new LettuceConnectionFactory(config, clientConfig);
