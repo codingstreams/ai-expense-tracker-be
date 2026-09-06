@@ -34,4 +34,10 @@ public class AppUserController {
     final var appUser = appUserService.updateUserConfig(userId, userDetailsDto);
     return ResponseEntity.ok(appUser);
   }
+
+  @PutMapping(value = "/me/config", version = "2")
+  public ResponseEntity<AppUserDto> updateUserConfigV2(@AuthenticationPrincipal String userId, @RequestBody UpdateUserDetailsDto userDetailsDto) {
+    final var appUser = appUserService.updateUserConfigV2(userId, userDetailsDto);
+    return ResponseEntity.ok(appUser);
+  }
 }

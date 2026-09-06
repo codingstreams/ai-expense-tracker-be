@@ -3,12 +3,15 @@ package com.example.et.service.appuser;
 import com.example.et.controller.dto.appuser.AppUserDto;
 import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
 import com.example.et.controller.dto.appuser.UserDetailsDto;
+import com.example.et.mapper.AppUserConfigMapper;
 import com.example.et.mapper.AppUserMapper;
 import com.example.et.model.core.AppUser;
 import com.example.et.repo.AppUserConfigRepo;
 import com.example.et.repo.AppUserRepo;
 import com.example.et.repo.PaymentModeRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +28,7 @@ public class AppUserServiceImpl implements AppUserService {
   private final AppUserConfigRepo appUserConfigRepo;
   private final PaymentModeRepo paymentModeRepo;
   private final AppUserMapper appUserMapper;
+  private final AppUserConfigMapper appUserConfigMapper;
 
   @Override
   public boolean checkUserExists(String email) {
@@ -85,11 +89,44 @@ public class AppUserServiceImpl implements AppUserService {
   }
 
   @Override
+  @Cacheable(value = "appUserDetails", key = "#userId")
   public AppUserDto getUserByUserIdWithConfigV2(String userId) {
     final var appUser = appUserRepo.findById(UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("User Id: %s not found.".formatted(userId)));
 
     return appUserMapper.toDto(appUser);
+  }
+
+  @Override
+  @CachePut(value = "appUserDetails", key = "#userId")
+  public AppUserDto updateUserConfigV2(String userId, UpdateUserDetailsDto userDetailsDto) {
+    final var appUser = appUserRepo.findById(UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("User Id: %s not found.".formatted(userId)));
+
+    final var appUserConfig = appUser.getAppUserConfig();
+
+    if (userDetailsDto.currency() != null) {
+      appUserConfig.setCurrency(userDetailsDto.currency());
+    }
+
+    if (userDetailsDto.languagePreference() != null) {
+      appUserConfig.setLanguagePreference(userDetailsDto.languagePreference());
+    }
+
+    if (userDetailsDto.spendLimit() != null) {
+      appUserConfig.setSpendLimit(userDetailsDto.spendLimit());
+    }
+
+    if (userDetailsDto.isOnboardingComplete() != null) {
+      appUserConfig.getAppUser().setOnboardingComplete(userDetailsDto.isOnboardingComplete());
+    }
+
+    // Check for payment mode
+    final var paymentMode = paymentModeRepo.findByNameIgnoreCase(userDetailsDto.paymentMode())
+        .orElseThrow(() -> new RuntimeException("PaymentMode: %s not found.".formatted(userDetailsDto.paymentMode())));
+
+    appUserConfig.setPaymentMode(paymentMode);
+    return appUserMapper.toDto(appUserRepo.save(appUser));
   }
 
   @Override
