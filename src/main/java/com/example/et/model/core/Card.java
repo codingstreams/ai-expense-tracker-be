@@ -13,10 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class Card extends BaseAudit implements Serializable {
-  @Serial
-  private static final long serialVersionUID = 1L;
-
+public class Card extends BaseAudit {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;

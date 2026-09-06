@@ -13,10 +13,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SystemCategory extends BaseAudit implements Serializable {
-  @Serial
-  private static final long serialVersionUID = 1L;
-
+public class SystemCategory extends BaseAudit {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;

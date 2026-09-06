@@ -13,10 +13,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentMode extends BaseAudit implements Serializable {
-  @Serial
-  private static final long serialVersionUID = 1L;
-
+public class PaymentMode extends BaseAudit {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
