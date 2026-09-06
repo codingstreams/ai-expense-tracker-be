@@ -1,6 +1,7 @@
 package com.example.et.controller;
 
 
+import com.example.et.controller.dto.appuser.AppUserDto;
 import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
 import com.example.et.controller.dto.appuser.UserDetailsDto;
 import com.example.et.service.appuser.AppUserService;
@@ -19,6 +20,12 @@ public class AppUserController {
   @GetMapping("/me")
   public ResponseEntity<UserDetailsDto> getCurrentUserDetails(@AuthenticationPrincipal String userId) {
     final var appUser = appUserService.getUserByUserIdWithConfig(userId);
+    return ResponseEntity.ok(appUser);
+  }
+
+  @GetMapping(value = "/me", version = "2")
+  public ResponseEntity<AppUserDto> getCurrentUserDetailsV2(@AuthenticationPrincipal String userId) {
+    final var appUser = appUserService.getUserByUserIdWithConfigV2(userId);
     return ResponseEntity.ok(appUser);
   }
 

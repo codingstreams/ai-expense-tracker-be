@@ -27,9 +27,8 @@ public class AppUser extends BaseAudit{
   @Column(name = "password", nullable = false)
   private String password;
 
-  @Builder.Default
   @Column(name = "is_onboarding_complete", nullable = false)
-  private boolean isOnboardingComplete = false;
+  private boolean onboardingComplete;
 
   @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
   private AppUserConfig appUserConfig;

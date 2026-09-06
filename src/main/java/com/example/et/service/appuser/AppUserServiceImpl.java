@@ -1,7 +1,9 @@
 package com.example.et.service.appuser;
 
+import com.example.et.controller.dto.appuser.AppUserDto;
 import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
 import com.example.et.controller.dto.appuser.UserDetailsDto;
+import com.example.et.mapper.AppUserMapper;
 import com.example.et.model.core.AppUser;
 import com.example.et.repo.AppUserConfigRepo;
 import com.example.et.repo.AppUserRepo;
@@ -22,6 +24,7 @@ public class AppUserServiceImpl implements AppUserService {
   private final AppUserRepo appUserRepo;
   private final AppUserConfigRepo appUserConfigRepo;
   private final PaymentModeRepo paymentModeRepo;
+  private final AppUserMapper appUserMapper;
 
   @Override
   public boolean checkUserExists(String email) {
@@ -35,7 +38,7 @@ public class AppUserServiceImpl implements AppUserService {
 
   @Override
   public boolean checkIsUserOnboardedByEmail(String email) {
-    return appUserRepo.existsByEmailAndIsOnboardingComplete(email, true);
+    return appUserRepo.existsByEmailAndOnboardingComplete(email, true);
   }
 
   @Override
@@ -79,6 +82,14 @@ public class AppUserServiceImpl implements AppUserService {
   public AppUser getUserByEmail(String email) {
     return appUserRepo.findByEmail(email)
         .orElseThrow(() -> new UsernameNotFoundException("Username: %s not found.".formatted(email)));
+  }
+
+  @Override
+  public AppUserDto getUserByUserIdWithConfigV2(String userId) {
+    final var appUser = appUserRepo.findById(UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("User Id: %s not found.".formatted(userId)));
+
+    return appUserMapper.toDto(appUser);
   }
 
   @Override

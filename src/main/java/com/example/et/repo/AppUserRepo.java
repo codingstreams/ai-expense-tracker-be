@@ -13,13 +13,13 @@ public interface AppUserRepo extends JpaRepository<AppUser, UUID> {
 
   Optional<AppUser> findByEmail(String email);
 
-  boolean existsByEmailAndIsOnboardingComplete(String email, boolean isOnboardingComplete);
+  boolean existsByEmailAndOnboardingComplete(String email, boolean isOnboardingComplete);
 
   @Query("""
       select new com.example.et.controller.dto.appuser.UserDetailsDto(
           u.email,
           u.name,
-          u.isOnboardingComplete,
+          u.onboardingComplete,
           c.languagePreference,
           c.spendLimit,
           c.currency,
@@ -32,5 +32,4 @@ public interface AppUserRepo extends JpaRepository<AppUser, UUID> {
       """)
   UserDetailsDto findByIdWithUserConfig(UUID userId);
 
-  boolean existsByIdAndIsOnboardingComplete(UUID userId, boolean isOnboarded);
 }

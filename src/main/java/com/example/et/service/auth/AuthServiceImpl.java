@@ -54,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
         .name(request.name())
         .email(request.email())
         .password(passwordEncoder.encode(request.password()))
-        .isOnboardingComplete(false)
+        .onboardingComplete(false)
         .build();
 
     final var userConfig = AppUserConfig.builder()

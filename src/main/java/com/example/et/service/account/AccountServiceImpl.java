@@ -9,6 +9,8 @@ import com.example.et.model.core.Bank;
 import com.example.et.repo.AccountRepo;
 import com.example.et.repo.BankRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,6 +38,7 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
+//  @Cacheable(value = "userAccounts", key = "#userId")
   public List<AccountDto> getUserAccounts(String userId) {
     return accountRepo.findByAppUserId(UUID.fromString(userId))
         .stream().map(toDto())
@@ -48,6 +51,7 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
+  @CachePut(value = "userAccounts", key = "#userId")
   public List<AccountDto> addAccounts(String userId, UserBankAccounts requestBody) {
     final var bankIds = requestBody.accounts()
         .stream()
@@ -81,11 +85,13 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
+//  @CachePut(value = "userAccounts", key = "#account.id")
   public Account saveAccount(Account account) {
     return accountRepo.save(account);
   }
 
   @Override
+//  @CachePut(value = "userAccounts", key = "#account.id")
   public AccountDto getUserAccountDetails(String userId, String accountId) {
     return accountRepo.findByUserIdAndAccountId(UUID.fromString(userId), UUID.fromString(accountId));
   }
