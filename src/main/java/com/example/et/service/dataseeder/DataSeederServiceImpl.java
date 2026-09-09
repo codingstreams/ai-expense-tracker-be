@@ -1,7 +1,6 @@
 package com.example.et.service.dataseeder;
 
 import com.example.et.controller.dto.account.AccountDto;
-import com.example.et.controller.dto.account.AccountDtoOld;
 import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
 import com.example.et.controller.dto.auth.CreateUserReq;
 import com.example.et.controller.dto.card.CardDto;
@@ -9,7 +8,12 @@ import com.example.et.controller.dto.card.UserCards;
 import com.example.et.controller.dto.dashboard.OnboardUserDto;
 import com.example.et.controller.dto.transaction.TransactionRequestDto;
 import com.example.et.mapper.BankMapper;
-import com.example.et.model.core.*;
+import com.example.et.model.core.Account;
+import com.example.et.model.core.AppUserConfig;
+import com.example.et.model.core.Card;
+import com.example.et.model.core.PaymentMode;
+import com.example.et.model.core.SystemCategory;
+import com.example.et.model.core.Transaction;
 import com.example.et.repo.BankRepo;
 import com.example.et.repo.PaymentModeRepo;
 import com.example.et.repo.SysCategoryRepo;
@@ -19,20 +23,26 @@ import com.example.et.service.auth.AuthService;
 import com.example.et.service.card.CardService;
 import com.example.et.service.dashboard.DashboardService;
 import com.example.et.service.transaction.TransactionService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class DataSeederServiceImpl implements DataSeederService {
+
+  private static final String DEFAULT_USER_PASSWORD = "Password@123";
+  private static final String DEFAULT_JOURNEY_PASSWORD = "test@1234";
+
   private final Faker faker = new Faker();
+  private final ExpenseCatalog expenseCatalog = new ExpenseCatalog(faker);
+
   private final AuthService authService;
   private final AppUserService appUserService;
   private final DashboardService dashboardService;
@@ -44,77 +54,69 @@ public class DataSeederServiceImpl implements DataSeederService {
   private final SysCategoryRepo systemCategoryRepo;
   private final BankMapper bankMapper;
 
-  @Transactional
+  @Override
   public int seedUsers(int count) {
+    log.info("Starting bulk creation of {} users", count);
     for (int i = 0; i < count; i++) {
       final var request = new CreateUserReq(
           faker.name().fullName(),
           faker.internet().emailAddress(),
-          "Password@123"
+          DEFAULT_USER_PASSWORD
       );
       authService.register(request);
     }
+    log.info("Completed bulk creation of {} users", count);
     return count;
   }
 
   @Override
   public int seedData(int noOfUsers, int monthsOfTransactions) {
+    final long startTime = System.currentTimeMillis();
+    log.info("Beginning full data seeding: {} users, {} months each", noOfUsers, monthsOfTransactions);
+
+    // Cache static reference data once for the entire batch to eliminate redundant cloud DB queries
+    final SeedReferenceData refData = loadReferenceData();
+
     int seededUsers = 0;
     for (int i = 0; i < noOfUsers; i++) {
+      final String name = faker.name().fullName();
+      final String email = faker.internet().emailAddress();
       try {
-        final var name = faker.name().fullName();
-        final var email = faker.internet().emailAddress();
-        seedUserFullJourney(name, email, monthsOfTransactions);
+        log.info("Seeding user {}/{} [{} - {}]", i + 1, noOfUsers, name, email);
+        seedUserFullJourney(name, email, monthsOfTransactions, refData);
         seededUsers++;
       } catch (Exception e) {
-        log.error("Failed seeding full data for user: ", e);
+        log.error("Failed seeding full data for user: {} ({})", email, e.getMessage(), e);
       }
     }
-    return seededUsers;
 
+    final long duration = System.currentTimeMillis() - startTime;
+    log.info("Finished data seeding: {}/{} users seeded successfully in {} ms", seededUsers, noOfUsers, duration);
+    return seededUsers;
   }
 
   public void seedUserFullJourney(String name, String email, int monthsOfTransactions) {
-    // 1. Register User (AuthController method -> AuthService)
-    final var regRequest = new CreateUserReq(name, email, "test@1234");
-    authService.register(regRequest);
+    seedUserFullJourney(name, email, monthsOfTransactions, loadReferenceData());
+  }
 
+  public void seedUserFullJourney(String name, String email, int monthsOfTransactions, SeedReferenceData refData) {
+    // 1. Register User & resolve UUID
+    authService.register(new CreateUserReq(name, email, DEFAULT_JOURNEY_PASSWORD));
     final var appUser = appUserService.getUserByEmail(email);
     final var userId = appUser.getId().toString();
 
-    // 2. Prepare Banks, Payment Modes, Categories
-    final var banks = bankRepo.findAll().stream().map(bankMapper::toDto).toList();
-    final var paymentModes = paymentModeRepo.findAll();
-    final var categories = systemCategoryRepo.findAll();
+    // 2. Select Banks from pre-cached reference data
+    final var primaryBank = refData.getRandomBank(faker);
+    final var secondaryBank = refData.getSecondaryBank(primaryBank);
 
-    final var primaryBank = !banks.isEmpty() ? banks.get(faker.random().nextInt(banks.size())) : null;
-    final var secondaryBank = banks.size() > 1 ? banks.get((banks.indexOf(primaryBank) + 1) % banks.size()) : primaryBank;
+    // 3. Onboard User with Savings Account & User Config
+    final float initialSavingsBalance = (float) faker.number().randomDouble(2, 50000, 150000);
+    final float initialCashBalance = (float) faker.number().randomDouble(2, 3000, 10000);
 
-    final var upiPaymentMode = paymentModes.stream()
-        .filter(pm -> pm.getName().equalsIgnoreCase("UPI / NetBanking"))
-        .findFirst()
-        .orElse(!paymentModes.isEmpty() ? paymentModes.get(0) : null);
-
-    final var cashPaymentMode = paymentModes.stream()
-        .filter(pm -> pm.getName().equalsIgnoreCase("Cash"))
-        .findFirst()
-        .orElse(upiPaymentMode);
-
-    final var debitCardPaymentMode = paymentModes.stream()
-        .filter(pm -> pm.getName().equalsIgnoreCase("Debit Card"))
-        .findFirst()
-        .orElse(upiPaymentMode);
-
-    final var creditCardPaymentMode = paymentModes.stream()
-        .filter(pm -> pm.getName().equalsIgnoreCase("Credit Card"))
-        .findFirst()
-        .orElse(upiPaymentMode);
-
-    // 3. Onboard User (DashboardController method -> DashboardService)
     final var savingsAccountDto = new AccountDto(
         null,
         String.valueOf(faker.number().numberBetween(1000, 9999)),
-        (float) faker.number().randomDouble(2, 50000, 150000),
+        initialSavingsBalance,
         Account.AccountType.SAVINGS,
         true,
         true,
@@ -126,79 +128,85 @@ public class DataSeederServiceImpl implements DataSeederService {
         AppUserConfig.LanguagePreference.EN,
         faker.number().numberBetween(30000, 80000),
         AppUserConfig.Currency.INR,
-        upiPaymentMode != null ? upiPaymentMode.getName() : "Cash",
+        refData.upiPaymentMode() != null ? refData.upiPaymentMode().getName() : "Cash",
         true
     );
 
-    final var initialCashBalance = (float) faker.number().randomDouble(2, 3000, 10000);
-    dashboardService.onboardUser(userId, new OnboardUserDto(userConfig, initialCashBalance, List.of(savingsAccountDto)));
+    final var onboardResult = dashboardService.onboardUser(
+        userId,
+        new OnboardUserDto(userConfig, initialCashBalance, List.of(savingsAccountDto))
+    );
 
-    // 4. Retrieve created accounts and Add Cards (CardController method -> CardService)
-    final var userAccounts = accountService.getUserAccounts(userId);
-    final var savingsAccount = userAccounts.stream()
-        .filter(acc -> acc.accountType() == Account.AccountType.SAVINGS)
+    final var savingsAccount = onboardResult.accounts() != null
+        ? onboardResult.accounts().stream()
+            .filter(acc -> acc.accountType() == Account.AccountType.SAVINGS)
+            .findFirst()
+            .orElse(null)
+        : null;
+
+    if (savingsAccount == null || primaryBank == null) {
+      log.warn("Skipping card and transaction seeding for {} due to missing savings account or bank", userId);
+      return;
+    }
+
+    // 4. Issue Debit and Credit Cards
+    final float initialCreditLimit = (float) faker.number().randomDouble(2, 75000, 200000);
+
+    final var debitCardDto = new CardDto(
+        null,
+        Card.CardType.DEBIT_CARD,
+        String.valueOf(faker.number().numberBetween(1000, 9999)),
+        savingsAccount.id(),
+        null,
+        bankMapper.toEntity(primaryBank)
+    );
+
+    final var creditCardDto = new CardDto(
+        null,
+        Card.CardType.CREDIT_CARD,
+        String.valueOf(faker.number().numberBetween(1000, 9999)),
+        null,
+        initialCreditLimit,
+        bankMapper.toEntity(secondaryBank != null ? secondaryBank : primaryBank)
+    );
+
+    // Reuse returned card list to avoid redundant remote read queries
+    final var createdCards = cardService.addCards(userId, new UserCards(List.of(debitCardDto, creditCardDto)));
+
+    final UUID debitCardId = createdCards.stream()
+        .filter(c -> c.cardType() == Card.CardType.DEBIT_CARD)
+        .map(CardDto::id)
         .findFirst()
         .orElse(null);
 
-    if (savingsAccount != null && primaryBank != null) {
-      final var debitCardDto = new CardDto(
-          null,
-          Card.CardType.DEBIT_CARD,
-          String.valueOf(faker.number().numberBetween(1000, 9999)),
-          savingsAccount.id(),
-          null,
-          bankMapper.toEntity(primaryBank)
-      );
+    final UUID creditCardId = createdCards.stream()
+        .filter(c -> c.cardType() == Card.CardType.CREDIT_CARD)
+        .map(CardDto::id)
+        .findFirst()
+        .orElse(null);
 
-      final var creditCardDto = new CardDto(
-          null,
-          Card.CardType.CREDIT_CARD,
-          String.valueOf(faker.number().numberBetween(1000, 9999)),
-          null,
-          (float) faker.number().randomDouble(2, 75000, 200000),
-          bankMapper.toEntity(secondaryBank != null ? secondaryBank : primaryBank)
-      );
-
-      cardService.addCards(userId, new UserCards(List.of(debitCardDto, creditCardDto)));
-    }
-
-    // 5. Retrieve all user cards & accounts for transaction seeding
-    final var debitCard = cardService.getUserCards(userId, Card.CardType.DEBIT_CARD).stream().findFirst().orElse(null);
-    final var creditCard = cardService.getUserCards(userId, Card.CardType.CREDIT_CARD).stream().findFirst().orElse(null);
+    // 5. Query Cash Account (single read)
     final var cashAccountDto = accountService.getUserCashAccountDetails(userId);
+    final UUID cashAccountId = cashAccountDto != null ? cashAccountDto.id() : null;
 
-    // 6. Generate Realistic Multi-Month Transactions (TransactionsController method -> TransactionsService)
-    seedTransactionsForUser(
+    // 6. Initialize In-Memory Ledger for O(1) balance tracking without cloud DB round-trips
+    final var userState = new UserSeedState(
         userId,
-        savingsAccount != null ? savingsAccount.id() : null,
-        cashAccountDto != null ? cashAccountDto.id() : null,
-        debitCard != null ? debitCard.id() : null,
-        creditCard != null ? creditCard.id() : null,
-        upiPaymentMode,
-        cashPaymentMode,
-        debitCardPaymentMode,
-        creditCardPaymentMode,
-        categories,
-        monthsOfTransactions
+        savingsAccount.id(),
+        initialSavingsBalance,
+        cashAccountId,
+        initialCashBalance,
+        debitCardId,
+        creditCardId,
+        initialCreditLimit
     );
 
-    return;
+    // 7. Seed Multi-Month Transactions
+    seedTransactionsForUser(userState, refData, monthsOfTransactions);
   }
 
-  private void seedTransactionsForUser(
-      String userId,
-      UUID savingsAccountId,
-      UUID cashAccountId,
-      UUID debitCardId,
-      UUID creditCardId,
-      PaymentMode upiPaymentMode,
-      PaymentMode cashPaymentMode,
-      PaymentMode debitCardPaymentMode,
-      PaymentMode creditCardPaymentMode,
-      List<SystemCategory> categories,
-      int months
-  ) {
-    if (savingsAccountId == null) return;
+  private void seedTransactionsForUser(UserSeedState state, SeedReferenceData refData, int months) {
+    if (state.getSavingsAccountId() == null) return;
 
     final var now = LocalDate.now();
     final var startMonth = now.minusMonths(Math.max(1, months));
@@ -211,226 +219,190 @@ public class DataSeederServiceImpl implements DataSeederService {
           ? now.getDayOfMonth()
           : currentMonthDate.lengthOfMonth();
 
-      // --- Income Transactions (Always credit salary at start of month to maintain healthy balance) ---
-      // 1. Monthly Salary (Day 1)
+      // Day 1: Monthly Salary Credit
       final var salaryDate = LocalDate.of(year, month, Math.min(1, daysInMonth));
-      final var salaryCategory = findCategory(categories, "Investments", "Miscellaneous");
-      transactionsService.createTransaction(userId, new TransactionRequestDto(
+      final var salaryCategory = refData.findCategoryByKeywords("Investments", "Miscellaneous");
+      final float salaryAmount = (float) faker.number().randomDouble(2, 80000, 140000);
+
+      transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
           null,
           Transaction.TransactionType.INCOME,
-          (float) faker.number().randomDouble(2, 80000, 140000),
+          salaryAmount,
           salaryDate,
           "Monthly Salary Credit",
-          savingsAccountId,
+          state.getSavingsAccountId(),
           null,
           null,
-          upiPaymentMode != null ? upiPaymentMode.getId() : null,
+          refData.upiPaymentMode() != null ? refData.upiPaymentMode().getId() : null,
           salaryCategory != null ? salaryCategory.getId() : null,
           null
       ));
+      state.creditSavings(salaryAmount);
 
-      // 2. ATM Cash Withdrawal (Day 2 - ensure cash account has sufficient balance)
-      if (cashAccountId != null && daysInMonth >= 2) {
+      // Day 2: ATM Cash Withdrawal (transfer savings -> cash)
+      if (state.getCashAccountId() != null && daysInMonth >= 2 && state.getSavingsBalance() >= 10000.0f) {
         final var transferDate = LocalDate.of(year, month, 2);
-        final var savingsAcc = accountService.getUserAccount(userId, savingsAccountId);
-        if (savingsAcc.getBalance() != null && savingsAcc.getBalance() >= 10000.0f) {
-          transactionsService.createTransaction(userId, new TransactionRequestDto(
-              null,
-              Transaction.TransactionType.TRANSFER,
-              5000.0f,
-              transferDate,
-              "ATM Cash Withdrawal",
-              savingsAccountId,
-              null,
-              cashAccountId,
-              cashPaymentMode != null ? cashPaymentMode.getId() : null,
-              null,
-              null
-          ));
-        }
+        final float withdrawalAmount = 5000.0f;
+
+        transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
+            null,
+            Transaction.TransactionType.TRANSFER,
+            withdrawalAmount,
+            transferDate,
+            "ATM Cash Withdrawal",
+            state.getSavingsAccountId(),
+            null,
+            state.getCashAccountId(),
+            refData.cashPaymentMode() != null ? refData.cashPaymentMode().getId() : null,
+            null,
+            null
+        ));
+        state.transferSavingsToCash(withdrawalAmount);
       }
 
-      // 3. Rent / EMI Expense (Day 3)
+      // Day 3: Rent / EMI
       if (daysInMonth >= 3) {
-        final var rentCategory = findCategory(categories, "Rent/EMI", "Utilities");
+        final var rentCategory = refData.findCategoryByKeywords("Rent/EMI", "Utilities");
         safeCreateExpense(
-            userId,
-            savingsAccountId,
-            cashAccountId,
-            debitCardId,
-            creditCardId,
-            upiPaymentMode,
-            cashPaymentMode,
-            debitCardPaymentMode,
-            creditCardPaymentMode,
+            state,
+            refData,
             rentCategory,
-            new ExpenseDetail("Monthly House Rent", (float) faker.number().randomDouble(2, 15000, 30000)),
+            new ExpenseCatalog.ExpenseDetail("Monthly House Rent", (float) faker.number().randomDouble(2, 15000, 30000)),
             LocalDate.of(year, month, 3)
         );
       }
 
-      // 4. Utilities Expense (Day 10)
+      // Day 10: Utilities
       if (daysInMonth >= 10) {
-        final var utilCategory = findCategory(categories, "Utilities (Electricity/Water)", "Utilities");
+        final var utilCategory = refData.findCategoryByKeywords("Utilities (Electricity/Water)", "Utilities");
         safeCreateExpense(
-            userId,
-            savingsAccountId,
-            cashAccountId,
-            debitCardId,
-            creditCardId,
-            upiPaymentMode,
-            cashPaymentMode,
-            debitCardPaymentMode,
-            creditCardPaymentMode,
+            state,
+            refData,
             utilCategory,
-            new ExpenseDetail("Electricity & Water Bill", (float) faker.number().randomDouble(2, 1200, 4500)),
+            new ExpenseCatalog.ExpenseDetail("Electricity & Water Bill", (float) faker.number().randomDouble(2, 1200, 4500)),
             LocalDate.of(year, month, 10)
         );
       }
 
-      // 5. Mid-month Freelance / Bonus Income (Day 15)
+      // Day 15: Freelance / Bonus Income
       if (daysInMonth >= 15) {
         final var bonusDate = LocalDate.of(year, month, 15);
-        transactionsService.createTransaction(userId, new TransactionRequestDto(
+        final float bonusAmount = (float) faker.number().randomDouble(2, 15000, 35000);
+
+        transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
             null,
             Transaction.TransactionType.INCOME,
-            (float) faker.number().randomDouble(2, 15000, 35000),
+            bonusAmount,
             bonusDate,
             "Freelance Project Payout",
-            savingsAccountId,
+            state.getSavingsAccountId(),
             null,
             null,
-            upiPaymentMode != null ? upiPaymentMode.getId() : null,
+            refData.upiPaymentMode() != null ? refData.upiPaymentMode().getId() : null,
             salaryCategory != null ? salaryCategory.getId() : null,
             null
         ));
+        state.creditSavings(bonusAmount);
       }
 
-      // 6. Multiple variable expenses throughout the month (safely managed with balance check)
+      // Random variable expenses across the month
       final int expenseCount = faker.number().numberBetween(8, 16);
       for (int k = 0; k < expenseCount; k++) {
         final int day = faker.number().numberBetween(1, daysInMonth + 1);
         final var txnDate = LocalDate.of(year, month, Math.min(day, daysInMonth));
-        final var category = !categories.isEmpty() ? categories.get(faker.random().nextInt(categories.size())) : null;
+        final var category = refData.getRandomCategory(faker);
         final var categoryName = category != null ? category.getName() : "Miscellaneous";
-        final var expenseInfo = generateExpenseInfo(categoryName);
+        final var expenseInfo = expenseCatalog.generateExpense(categoryName);
 
-        safeCreateExpense(
-            userId,
-            savingsAccountId,
-            cashAccountId,
-            debitCardId,
-            creditCardId,
-            upiPaymentMode,
-            cashPaymentMode,
-            debitCardPaymentMode,
-            creditCardPaymentMode,
-            category,
-            expenseInfo,
-            txnDate
-        );
+        safeCreateExpense(state, refData, category, expenseInfo, txnDate);
       }
     }
   }
 
   private void safeCreateExpense(
-      String userId,
-      UUID savingsAccountId,
-      UUID cashAccountId,
-      UUID debitCardId,
-      UUID creditCardId,
-      PaymentMode upiPaymentMode,
-      PaymentMode cashPaymentMode,
-      PaymentMode debitCardPaymentMode,
-      PaymentMode creditCardPaymentMode,
+      UserSeedState state,
+      SeedReferenceData refData,
       SystemCategory category,
-      ExpenseDetail expenseInfo,
+      ExpenseCatalog.ExpenseDetail expenseInfo,
       LocalDate txnDate
   ) {
-    UUID accountId = savingsAccountId;
+    UUID accountId = state.getSavingsAccountId();
     UUID cardId = null;
-    UUID paymentModeId = upiPaymentMode != null ? upiPaymentMode.getId() : null;
+    UUID paymentModeId = refData.upiPaymentMode() != null ? refData.upiPaymentMode().getId() : null;
 
-    int choice = faker.number().numberBetween(0, 4);
-    if (choice == 0 && creditCardId != null && creditCardPaymentMode != null) {
+    final int choice = faker.number().numberBetween(0, 4);
+    if (choice == 0 && state.getCreditCardId() != null && refData.creditCardPaymentMode() != null) {
       accountId = null;
-      cardId = creditCardId;
-      paymentModeId = creditCardPaymentMode.getId();
-    } else if (choice == 1 && debitCardId != null && debitCardPaymentMode != null) {
+      cardId = state.getCreditCardId();
+      paymentModeId = refData.creditCardPaymentMode().getId();
+    } else if (choice == 1 && state.getDebitCardId() != null && refData.debitCardPaymentMode() != null) {
       accountId = null;
-      cardId = debitCardId;
-      paymentModeId = debitCardPaymentMode.getId();
-    } else if (choice == 2 && cashAccountId != null && cashPaymentMode != null) {
-      accountId = cashAccountId;
-      paymentModeId = cashPaymentMode.getId();
+      cardId = state.getDebitCardId();
+      paymentModeId = refData.debitCardPaymentMode().getId();
+    } else if (choice == 2 && state.getCashAccountId() != null && refData.cashPaymentMode() != null) {
+      accountId = state.getCashAccountId();
+      paymentModeId = refData.cashPaymentMode().getId();
     }
 
-    // Resolve target account to check live balance
-    Account targetAccount = getTargetAccount(userId, accountId, cardId);
-    float amount = expenseInfo.amount();
+    final float amount = expenseInfo.amount();
 
-    if (targetAccount != null) {
-      float currentBalance = targetAccount.getBalance() != null ? targetAccount.getBalance() : 0.0f;
-
-      // If cash account has insufficient balance
-      if (targetAccount.getAccountType() == Account.AccountType.CASH && currentBalance - amount < 200.0f) {
-        // Try to withdraw from savings to cash first
-        final var savingsAccount = accountService.getUserAccount(userId, savingsAccountId);
-        if (savingsAccount.getBalance() != null && savingsAccount.getBalance() >= 6000.0f) {
-          transactionsService.createTransaction(userId, new TransactionRequestDto(
-              null,
-              Transaction.TransactionType.TRANSFER,
-              5000.0f,
-              txnDate,
-              "ATM Cash Withdrawal",
-              savingsAccountId,
-              null,
-              cashAccountId,
-              cashPaymentMode != null ? cashPaymentMode.getId() : null,
-              null,
-              null
-          ));
-          targetAccount = accountService.getUserAccount(userId, cashAccountId);
-          currentBalance = targetAccount.getBalance() != null ? targetAccount.getBalance() : 0.0f;
-        } else {
-          // Fallback to UPI from savings
-          accountId = savingsAccountId;
-          cardId = null;
-          paymentModeId = upiPaymentMode != null ? upiPaymentMode.getId() : null;
-          targetAccount = savingsAccount;
-          currentBalance = targetAccount.getBalance() != null ? targetAccount.getBalance() : 0.0f;
-        }
-      }
-
-      // If credit card account has insufficient limit/balance
-      if (targetAccount.getAccountType() == Account.AccountType.CREDIT && currentBalance - amount < 500.0f) {
-        // Fallback to UPI from savings
-        accountId = savingsAccountId;
-        cardId = null;
-        paymentModeId = upiPaymentMode != null ? upiPaymentMode.getId() : null;
-        targetAccount = accountService.getUserAccount(userId, savingsAccountId);
-        currentBalance = targetAccount.getBalance() != null ? targetAccount.getBalance() : 0.0f;
-      }
-
-      // If savings account balance is getting low, inject an income top-up before the expense
-      if (currentBalance - amount < 1000.0f) {
-        transactionsService.createTransaction(userId, new TransactionRequestDto(
+    // 1. Cash account low balance guard (< 200 remaining)
+    if (accountId != null && accountId.equals(state.getCashAccountId()) && state.getCashBalance() - amount < 200.0f) {
+      if (state.getSavingsBalance() >= 6000.0f) {
+        final float withdrawal = 5000.0f;
+        transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
             null,
-            Transaction.TransactionType.INCOME,
-            60000.0f,
+            Transaction.TransactionType.TRANSFER,
+            withdrawal,
             txnDate,
-            "Consulting Payout / Returns",
-            savingsAccountId,
+            "ATM Cash Withdrawal",
+            state.getSavingsAccountId(),
             null,
-            null,
-            upiPaymentMode != null ? upiPaymentMode.getId() : null,
+            state.getCashAccountId(),
+            refData.cashPaymentMode() != null ? refData.cashPaymentMode().getId() : null,
             null,
             null
         ));
+        state.transferSavingsToCash(withdrawal);
+      } else {
+        // Fallback to UPI from savings
+        accountId = state.getSavingsAccountId();
+        cardId = null;
+        paymentModeId = refData.upiPaymentMode() != null ? refData.upiPaymentMode().getId() : null;
       }
     }
 
-    transactionsService.createTransaction(userId, new TransactionRequestDto(
+    // 2. Credit card low limit guard (< 500 remaining)
+    if (cardId != null && cardId.equals(state.getCreditCardId()) && state.getCreditBalance() - amount < 500.0f) {
+      accountId = state.getSavingsAccountId();
+      cardId = null;
+      paymentModeId = refData.upiPaymentMode() != null ? refData.upiPaymentMode().getId() : null;
+    }
+
+    // 3. Savings account low balance guard (< 1000 remaining)
+    final boolean isSavingsTarget = (accountId != null && accountId.equals(state.getSavingsAccountId()))
+        || (cardId != null && cardId.equals(state.getDebitCardId()));
+
+    if (isSavingsTarget && state.getSavingsBalance() - amount < 1000.0f) {
+      final float topUp = 60000.0f;
+      transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
+          null,
+          Transaction.TransactionType.INCOME,
+          topUp,
+          txnDate,
+          "Consulting Payout / Returns",
+          state.getSavingsAccountId(),
+          null,
+          null,
+          refData.upiPaymentMode() != null ? refData.upiPaymentMode().getId() : null,
+          null,
+          null
+      ));
+      state.creditSavings(topUp);
+    }
+
+    // 4. Create the Expense Transaction
+    transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
         null,
         Transaction.TransactionType.EXPENSE,
         amount,
@@ -443,75 +415,41 @@ public class DataSeederServiceImpl implements DataSeederService {
         category != null ? category.getId() : null,
         null
     ));
-  }
 
-  private Account getTargetAccount(String userId, UUID accountId, UUID cardId) {
-    if (cardId != null) {
-      final var card = cardService.getUserCard(userId, cardId);
-      return card.getAccount();
-    }
-    if (accountId != null) {
-      return accountService.getUserAccount(userId, accountId);
-    }
-    return null;
-  }
-
-  private SystemCategory findCategory(List<SystemCategory> categories, String... names) {
-    for (String name : names) {
-      for (SystemCategory category : categories) {
-        if (category.getName().toLowerCase().contains(name.toLowerCase())) {
-          return category;
-        }
-      }
-    }
-    return categories.isEmpty() ? null : categories.get(0);
-  }
-
-  private record ExpenseDetail(String description, Float amount) {
-  }
-
-  private ExpenseDetail generateExpenseInfo(String categoryName) {
-    final String cat = categoryName.toLowerCase();
-    if (cat.contains("grocer")) {
-      return new ExpenseDetail(
-          faker.options().option("Supermarket Grocery", "Fresh Vegetables & Fruits", "Organic Store", "Hypermarket Run"),
-          (float) faker.number().randomDouble(2, 400, 3500)
-      );
-    } else if (cat.contains("dining")) {
-      return new ExpenseDetail(
-          faker.options().option("Dinner with Friends", "Cafe Coffee & Pastry", "Weekend Brunch", "Takeout Order", "Italian Restaurant"),
-          (float) faker.number().randomDouble(2, 250, 2200)
-      );
-    } else if (cat.contains("fuel") || cat.contains("transport")) {
-      return new ExpenseDetail(
-          faker.options().option("Petrol Refill", "Uber Ride", "Metro Card Recharge", "Auto Rickshaw Fare"),
-          (float) faker.number().randomDouble(2, 150, 1800)
-      );
-    } else if (cat.contains("shopping")) {
-      return new ExpenseDetail(
-          faker.options().option("Apparel & Clothing", "Amazon Online Purchase", "Electronics Accessories", "Home Decor Item"),
-          (float) faker.number().randomDouble(2, 800, 6000)
-      );
-    } else if (cat.contains("entertainment")) {
-      return new ExpenseDetail(
-          faker.options().option("Movie Tickets & Popcorn", "Netflix Subscription", "Spotify Premium", "Concert Pass"),
-          (float) faker.number().randomDouble(2, 199, 1500)
-      );
-    } else if (cat.contains("health") || cat.contains("medical")) {
-      return new ExpenseDetail(
-          faker.options().option("Pharmacy Medicines", "Doctor Consultation", "Dental Checkup", "Diagnostic Lab Test"),
-          (float) faker.number().randomDouble(2, 300, 3000)
-      );
-    } else if (cat.contains("invest")) {
-      return new ExpenseDetail(
-          faker.options().option("Mutual Fund SIP", "Stock Purchase", "Gold Accumulation", "Fixed Deposit Deposit"),
-          (float) faker.number().randomDouble(2, 2000, 15000)
-      );
+    // 5. Update local in-memory ledger in O(1)
+    if (cardId != null && cardId.equals(state.getCreditCardId())) {
+      state.chargeCredit(amount);
+    } else if (accountId != null && accountId.equals(state.getCashAccountId())) {
+      state.chargeCash(amount);
     } else {
-      return new ExpenseDetail(
-          faker.options().option("Daily Needs Expense", "Local Store Purchase", "Stationery & Supplies", "Courier Delivery"),
-          (float) faker.number().randomDouble(2, 100, 1200)
-      );
+      state.chargeSavings(amount);
     }
+  }
+
+  private SeedReferenceData loadReferenceData() {
+    final var banks = bankRepo.findAll().stream().map(bankMapper::toDto).toList();
+    final var paymentModes = paymentModeRepo.findAll();
+    final var categories = systemCategoryRepo.findAll();
+
+    final var upiMode = findPaymentModeByName(paymentModes, "UPI / NetBanking");
+    final var cashMode = findPaymentModeByName(paymentModes, "Cash");
+    final var debitCardMode = findPaymentModeByName(paymentModes, "Debit Card");
+    final var creditCardMode = findPaymentModeByName(paymentModes, "Credit Card");
+
+    return new SeedReferenceData(
+        banks,
+        upiMode,
+        cashMode != null ? cashMode : upiMode,
+        debitCardMode != null ? debitCardMode : upiMode,
+        creditCardMode != null ? creditCardMode : upiMode,
+        categories
+    );
+  }
+
+  private PaymentMode findPaymentModeByName(List<PaymentMode> modes, String name) {
+    return modes.stream()
+        .filter(pm -> pm.getName() != null && pm.getName().equalsIgnoreCase(name))
+        .findFirst()
+        .orElse(!modes.isEmpty() ? modes.get(0) : null);
   }
 }
