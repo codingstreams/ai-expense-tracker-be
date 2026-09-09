@@ -14,7 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/generate-data")
 @RequiredArgsConstructor
-//@Profile("dev")
+@Profile("dev")
 public class DataSeederController {
   private final DataSeederService dataSeederService;
 
@@ -28,7 +28,7 @@ public class DataSeederController {
   public ResponseEntity<Map<String, Object>> generateFullData(
       @RequestParam(defaultValue = "5") Integer usersCount,
       @RequestParam(defaultValue = "3") Integer months) {
-    int seededCount = dataSeederService.seedData(usersCount, months);
+    int seededCount = dataSeederService.seedData(usersCount, months)+1;
     return ResponseEntity.ok(Map.of(
         "usersSeeded", seededCount,
         "monthsPerUser", months,
