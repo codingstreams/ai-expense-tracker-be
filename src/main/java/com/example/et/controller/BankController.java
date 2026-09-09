@@ -17,15 +17,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BankController {
   private final BankService bankService;
-  private final BankRepo bankRepo;
 
   @GetMapping
-  public ResponseEntity<List<Bank>> getBanks() {
-    return ResponseEntity.ok().body(bankRepo.findAll());
-  }
-
-  @GetMapping(version = "2")
-  public ResponseEntity<List<BankDto>> getBanksV2() {
+  public ResponseEntity<List<BankDto>> getBanks() {
     return ResponseEntity.ok().body(bankService.getSupportedBanks());
   }
 }

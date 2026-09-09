@@ -14,7 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/generate-data")
 @RequiredArgsConstructor
-@Profile("dev")
+//@Profile("dev")
 public class DataSeederController {
   private final DataSeederService dataSeederService;
 

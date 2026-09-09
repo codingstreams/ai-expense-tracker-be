@@ -1,5 +1,6 @@
 package com.example.et.service.dataseeder;
 
+import com.example.et.controller.dto.account.AccountDto;
 import com.example.et.controller.dto.account.AccountDtoOld;
 import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
 import com.example.et.controller.dto.auth.CreateUserReq;
@@ -7,6 +8,7 @@ import com.example.et.controller.dto.card.CardDto;
 import com.example.et.controller.dto.card.UserCards;
 import com.example.et.controller.dto.dashboard.OnboardUserDto;
 import com.example.et.controller.dto.transaction.TransactionRequestDto;
+import com.example.et.mapper.BankMapper;
 import com.example.et.model.core.*;
 import com.example.et.repo.BankRepo;
 import com.example.et.repo.PaymentModeRepo;
@@ -40,6 +42,7 @@ public class DataSeederServiceImpl implements DataSeederService {
   private final BankRepo bankRepo;
   private final PaymentModeRepo paymentModeRepo;
   private final SysCategoryRepo systemCategoryRepo;
+  private final BankMapper bankMapper;
 
   @Transactional
   public int seedUsers(int count) {
@@ -80,7 +83,7 @@ public class DataSeederServiceImpl implements DataSeederService {
     final var userId = appUser.getId().toString();
 
     // 2. Prepare Banks, Payment Modes, Categories
-    final var banks = bankRepo.findAll();
+    final var banks = bankRepo.findAll().stream().map(bankMapper::toDto).toList();
     final var paymentModes = paymentModeRepo.findAll();
     final var categories = systemCategoryRepo.findAll();
 
@@ -108,13 +111,14 @@ public class DataSeederServiceImpl implements DataSeederService {
         .orElse(upiPaymentMode);
 
     // 3. Onboard User (DashboardController method -> DashboardService)
-    final var savingsAccountDto = new AccountDtoOld(
+    final var savingsAccountDto = new AccountDto(
         null,
         String.valueOf(faker.number().numberBetween(1000, 9999)),
         (float) faker.number().randomDouble(2, 50000, 150000),
         Account.AccountType.SAVINGS,
-        primaryBank,
         true,
+        true,
+        primaryBank,
         true
     );
 
@@ -143,7 +147,7 @@ public class DataSeederServiceImpl implements DataSeederService {
           String.valueOf(faker.number().numberBetween(1000, 9999)),
           savingsAccount.id(),
           null,
-          primaryBank
+          bankMapper.toEntity(primaryBank)
       );
 
       final var creditCardDto = new CardDto(
@@ -152,7 +156,7 @@ public class DataSeederServiceImpl implements DataSeederService {
           String.valueOf(faker.number().numberBetween(1000, 9999)),
           null,
           (float) faker.number().randomDouble(2, 75000, 200000),
-          secondaryBank != null ? secondaryBank : primaryBank
+          bankMapper.toEntity(secondaryBank != null ? secondaryBank : primaryBank)
       );
 
       cardService.addCards(userId, new UserCards(List.of(debitCardDto, creditCardDto)));
@@ -178,6 +182,7 @@ public class DataSeederServiceImpl implements DataSeederService {
         monthsOfTransactions
     );
 
+    return;
   }
 
   private void seedTransactionsForUser(

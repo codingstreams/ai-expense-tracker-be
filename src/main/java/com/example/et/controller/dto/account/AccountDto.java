@@ -10,8 +10,8 @@ public record AccountDto(
     String lastFourDigits,
     Float balance,
     Account.AccountType accountType,
-    boolean isUpiEnabled,
-    boolean isNetBankingEnabled,
+    Boolean upiEnabled,
+    Boolean netBankingEnabled,
     BankDto bank,
     Boolean isActive
 ) {}

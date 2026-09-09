@@ -3,7 +3,7 @@ package com.example.et.controller;
 import com.example.et.controller.dto.account.AccountDto;
 import com.example.et.controller.dto.account.AccountDtoOld;
 import com.example.et.controller.dto.account.UpdateCashDto;
-import com.example.et.controller.dto.account.UserBankAccounts;
+import com.example.et.controller.dto.account.CreateAccountsReq;
 import com.example.et.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,25 +19,19 @@ public class AccountController {
   private final AccountService accountService;
 
   @GetMapping
-  public ResponseEntity<List<AccountDtoOld>> getUserAccounts(@AuthenticationPrincipal String userId) {
-    final var accounts = accountService.getUserAccounts(userId);
-    return ResponseEntity.ok(accounts);
-  }
-
-  @GetMapping(version = "3")
-  public ResponseEntity<List<AccountDto>> getUserAccountsV3(@AuthenticationPrincipal String userId) {
-    final var accounts = accountService.getUserAccountsV3(userId);
+  public ResponseEntity<List<AccountDtoOld>> getUserAccounts(@AuthenticationPrincipal String userId, @RequestParam(required = false) String paymentMode) {
+    final var accounts = accountService.getUserAccounts(userId, paymentMode);
     return ResponseEntity.ok(accounts);
   }
 
   @GetMapping(version = "2")
-  public ResponseEntity<List<AccountDtoOld>> getUserAccountsV2(@AuthenticationPrincipal String userId, @RequestParam(required = false) String paymentMode) {
-    final var accounts = accountService.getUserAccountsV2(userId, paymentMode);
+  public ResponseEntity<List<AccountDto>> getUserAccountsV2(@AuthenticationPrincipal String userId) {
+    final var accounts = accountService.getUserAccountsV2(userId);
     return ResponseEntity.ok(accounts);
   }
 
   @PostMapping
-  public ResponseEntity<List<AccountDtoOld>> addAccounts(@AuthenticationPrincipal String userId, @RequestBody UserBankAccounts accounts) {
+  public ResponseEntity<List<AccountDto>> addAccounts(@AuthenticationPrincipal String userId, @RequestBody CreateAccountsReq accounts) {
     final var createdAccounts = accountService.addAccounts(userId, accounts);
     return ResponseEntity.ok(createdAccounts);
   }

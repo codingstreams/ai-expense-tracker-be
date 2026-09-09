@@ -3,11 +3,12 @@ package com.example.et.service.account;
 import com.example.et.controller.dto.account.AccountDto;
 import com.example.et.controller.dto.account.AccountDtoOld;
 import com.example.et.controller.dto.account.UpdateCashDto;
-import com.example.et.controller.dto.account.UserBankAccounts;
+import com.example.et.controller.dto.account.CreateAccountsReq;
+import com.example.et.controller.dto.bank.BankDto;
 import com.example.et.mapper.AccountMapper;
+import com.example.et.mapper.BankMapper;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
-import com.example.et.model.core.Bank;
 import com.example.et.repo.AccountRepo;
 import com.example.et.repo.BankRepo;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class AccountServiceImpl implements AccountService {
   private final AccountRepo accountRepo;
   private final BankRepo bankRepo;
   private final AccountMapper accountMapper;
+  private final BankMapper bankMapper;
 
   private static Function<Account, AccountDtoOld> toDto() {
     return account -> new AccountDtoOld(
@@ -41,7 +44,6 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-//  @Cacheable(value = "userAccounts", key = "#userId")
   public List<AccountDtoOld> getUserAccounts(String userId) {
     return accountRepo.findByAppUserId(UUID.fromString(userId))
         .stream().map(toDto())
@@ -55,12 +57,12 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
   @CachePut(value = "userAccounts", key = "#userId")
-  public List<AccountDtoOld> addAccounts(String userId, UserBankAccounts requestBody) {
+  public List<AccountDto> addAccounts(String userId, CreateAccountsReq requestBody) {
     final var bankIds = requestBody.accounts()
         .stream()
-        .map(AccountDtoOld::bank)
-        .map(Bank::getId)
-        .toList();
+        .map(AccountDto::bank)
+        .map(BankDto::id)
+        .collect(Collectors.toSet());
 
     if (bankRepo.countByIdIn(bankIds) != bankIds.size()) {
       throw new RuntimeException("Invalid bank ids.");
@@ -73,30 +75,63 @@ public class AccountServiceImpl implements AccountService {
             .accountType(accountDto.accountType())
             .balance(accountDto.balance())
             .lastFourDigits(accountDto.lastFourDigits())
-            .bank(accountDto.bank())
+            .bank(bankMapper.toEntity(accountDto.bank()))
             .isActive(true)
-            .isUpiEnabled(Optional.ofNullable(accountDto.isUpiEnabled()).orElse(true))
-            .isNetBankingEnabled(Optional.ofNullable(accountDto.isNetBankingEnabled()).orElse(true))
+            .upiEnabled(Optional.ofNullable(accountDto.upiEnabled()).orElse(true))
+            .netBankingEnabled(Optional.ofNullable(accountDto.netBankingEnabled()).orElse(true))
             .build())
         .toList();
 
-    final var accountsCreated = accountRepo.saveAll(accountToBeCreated);
+    accountRepo.saveAll(accountToBeCreated);
 
-    return accountsCreated.stream()
-        .map(toDto())
-        .toList();
+    return getUserAccountsV2(userId);
   }
 
   @Override
-//  @CachePut(value = "userAccounts", key = "#account.id")
   public Account saveAccount(Account account) {
     return accountRepo.save(account);
   }
 
   @Override
-//  @CachePut(value = "userAccounts", key = "#account.id")
   public AccountDtoOld getUserAccountDetails(String userId, String accountId) {
     return accountRepo.findByUserIdAndAccountId(UUID.fromString(userId), UUID.fromString(accountId));
+  }
+
+  @Override
+  @Cacheable(value = "userAccounts", key = "#userId+'_'+#accountId")
+  public AccountDto getUserAccountDetailsV2(String userId, String accountId) {
+    return accountRepo.findByIdAndAppUserId(UUID.fromString(userId), UUID.fromString(accountId))
+        .map(accountMapper::toDto)
+        .orElseThrow(() -> new RuntimeException("Account not found."));
+  }
+
+  @Override
+  @Cacheable(value = "userAccounts", key = "#userId+'_'+#accountId")
+  public AccountDto updateAccount(String userId, String accountId, AccountDto account) {
+    final var existingAccount = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
+        .orElseThrow(() -> new RuntimeException("Account not found."));
+
+    if (account != null) {
+      if (account.balance() != null) {
+        existingAccount.setBalance(account.balance());
+      }
+      if (account.lastFourDigits() != null) {
+        existingAccount.setLastFourDigits(account.lastFourDigits());
+      }
+      if (account.accountType() != null) {
+        existingAccount.setAccountType(account.accountType());
+      }
+      // Disable Bank Update
+/*      if (account.bank() != null) {
+        existingAccount.setBank(account.bank());
+      }*/
+
+      existingAccount.setUpiEnabled(Optional.ofNullable(account.upiEnabled()).orElse(existingAccount.isUpiEnabled()));
+      existingAccount.setNetBankingEnabled(Optional.ofNullable(account.netBankingEnabled()).orElse(existingAccount.isNetBankingEnabled()));
+    }
+
+    final var updatedAccount = accountRepo.save(existingAccount);
+    return accountMapper.toDto(updatedAccount);
   }
 
   @Override
@@ -169,7 +204,7 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public List<AccountDtoOld> getUserAccountsV2(String userId, String paymentMode) {
+  public List<AccountDtoOld> getUserAccounts(String userId, String paymentMode) {
     return accountRepo.findByAppUserId(UUID.fromString(userId))
         .stream()
         .filter(account -> (account.getAccountType() == Account.AccountType.CASH) || (Objects.nonNull(paymentMode) && paymentMode.toLowerCase().contains("upi")
@@ -193,10 +228,10 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
   @Cacheable(value = "userAccounts", key = "#userId")
-  public List<AccountDto> getUserAccountsV3(String userId) {
+  public List<AccountDto> getUserAccountsV2(String userId) {
     return accountRepo.findByAppUserId(UUID.fromString(userId))
         .stream()
         .map(accountMapper::toDto)
-        .toList();
+        .collect(Collectors.toList());
   }
 }

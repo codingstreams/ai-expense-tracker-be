@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,9 +21,9 @@ public class PaymentModeServiceImpl implements PaymentModeService {
   @Cacheable("paymentModes")
   public List<PaymentModeDto> getAllPaymentModes() {
     return paymentModeRepo.findAll()
-        .parallelStream()
+        .stream()
         .map(paymentModeMapper::toDto)
-        .toList();
+        .collect(Collectors.toList());
   }
 
   @Override

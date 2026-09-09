@@ -76,8 +76,8 @@ public class AuthServiceImpl implements AuthService {
         .accountType(Account.AccountType.CASH)
         .balance(0.0f)
         .lastFourDigits("CASH")
-        .isUpiEnabled(false)
-        .isNetBankingEnabled(false)
+        .upiEnabled(false)
+        .netBankingEnabled(false)
         .isActive(true)
         .build();
 

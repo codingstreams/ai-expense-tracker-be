@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,6 @@ public class BankServiceImpl implements BankService {
   public List<BankDto> getSupportedBanks() {
     return bankRepo.findAll()
         .stream().map(bankMapper::toDto)
-        .toList();
+        .collect(Collectors.toList());
   }
 }

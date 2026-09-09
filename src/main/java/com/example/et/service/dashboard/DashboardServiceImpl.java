@@ -1,6 +1,6 @@
 package com.example.et.service.dashboard;
 
-import com.example.et.controller.dto.account.UserBankAccounts;
+import com.example.et.controller.dto.account.CreateAccountsReq;
 import com.example.et.controller.dto.dashboard.CategoryBreakdownDto;
 import com.example.et.controller.dto.dashboard.MonthlyTrendDto;
 import com.example.et.controller.dto.dashboard.OnboardUserDto;
@@ -31,7 +31,7 @@ public class DashboardServiceImpl implements DashboardService {
 
   @Override
   public OnboardUserDto onboardUser(String userId, OnboardUserDto requestBody) {
-    final var accounts = accountService.addAccounts(userId, new UserBankAccounts(requestBody.accounts()));
+    final var accounts = accountService.addAccounts(userId, new CreateAccountsReq(requestBody.accounts()));
     final var cashBalance = accountService.updateCashBalance(userId, requestBody.cashBalance());
     final var userConfig = appUserService.updateUserConfig(userId, requestBody.userConfig());
 
