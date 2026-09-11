@@ -40,9 +40,6 @@ out/
 /apis.md
 /commands.md
 
-.env.local
-/apis.md
-/commands.md
 /target/
 /.learnings/
 /setup_db.sh

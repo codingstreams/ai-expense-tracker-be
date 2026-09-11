@@ -55,14 +55,13 @@ class AuthServiceImplTest {
   private PaymentModeRepo paymentModeRepo;
 
   private SecretKey secretKey;
-  private JwtProps jwtProps;
   private AuthServiceImpl authService;
 
   @BeforeEach
   void setUp() {
     String testKey = "1234567890123456789012345678901234567890";
     secretKey = Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8));
-    jwtProps = new JwtProps();
+    JwtProps jwtProps = new JwtProps();
     jwtProps.setSecretKey(testKey);
     jwtProps.setExpirationTimeAccessTokenInMinutes(10);
     jwtProps.setExpirationTimeRefreshTokenInDays(7);

@@ -154,4 +154,8 @@ public class AppUserServiceImpl implements AppUserService {
 
     return new User(appUser.getId().toString(), appUser.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_USER")));
   }
+
+  public AppUserConfigMapper getAppUserConfigMapper() {
+    return appUserConfigMapper;
+  }
 }

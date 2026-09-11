@@ -24,7 +24,7 @@ public class SecurityConfig {
   private List<String> allowedOrigins;
 
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter, AuthenticationEntryPoint authenticationEntryPoint) throws Exception {
+  SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter, AuthenticationEntryPoint authenticationEntryPoint) {
 
     http
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))

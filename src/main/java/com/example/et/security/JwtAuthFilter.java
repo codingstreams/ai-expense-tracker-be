@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
@@ -24,7 +25,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   private final ExpireTokenService expireTokenService;
 
   @Override
-  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+  protected boolean shouldNotFilter(HttpServletRequest request) {
     return request.getServletPath().startsWith("/actuator");
   }
 
@@ -37,7 +38,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+  protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
     final var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
     final var token = extractToken(authHeader);

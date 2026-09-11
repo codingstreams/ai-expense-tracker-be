@@ -64,6 +64,7 @@ class AuthControllerTest {
     ResponseEntity<AuthResponse> response = authController.refresh(req);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
+    assert response.getBody() != null;
     assertEquals("new-at", response.getBody().accessToken());
     assertEquals("new-rt", response.getBody().refreshToken());
   }
