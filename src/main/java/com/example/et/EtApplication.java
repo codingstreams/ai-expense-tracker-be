@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableScheduling
-//@EnableCaching
+@EnableCaching
 public class EtApplication {
 
   public static void main(String[] args) {

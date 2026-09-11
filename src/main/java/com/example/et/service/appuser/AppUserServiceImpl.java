@@ -4,7 +4,6 @@ import com.example.et.controller.dto.appuser.AppUserDto;
 import com.example.et.controller.dto.appuser.UpdateUserConfigReq;
 import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
 import com.example.et.controller.dto.appuser.UserDetailsDto;
-import com.example.et.mapper.AppUserConfigMapper;
 import com.example.et.mapper.AppUserMapper;
 import com.example.et.model.core.AppUser;
 import com.example.et.repo.AppUserConfigRepo;
@@ -30,7 +29,6 @@ public class AppUserServiceImpl implements AppUserService {
   private final AppUserConfigRepo appUserConfigRepo;
   private final PaymentModeRepo paymentModeRepo;
   private final AppUserMapper appUserMapper;
-  private final AppUserConfigMapper appUserConfigMapper;
 
   @Override
   public boolean checkUserExists(String email) {
@@ -153,9 +151,5 @@ public class AppUserServiceImpl implements AppUserService {
     }
 
     return new User(appUser.getId().toString(), appUser.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_USER")));
-  }
-
-  public AppUserConfigMapper getAppUserConfigMapper() {
-    return appUserConfigMapper;
   }
 }
