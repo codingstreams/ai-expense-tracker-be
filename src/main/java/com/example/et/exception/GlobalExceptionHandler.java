@@ -3,6 +3,7 @@ package com.example.et.exception;
 import com.example.et.controller.dto.error.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -10,6 +11,12 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ApiErrorResponse> handleAuthenticationException(AuthenticationException e) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(new ApiErrorResponse(HttpStatus.UNAUTHORIZED.value(), e.getMessage(), LocalDateTime.now().toString()));
+  }
 
   @ExceptionHandler(RuntimeException.class)
   public ResponseEntity<ApiErrorResponse> handleException(RuntimeException e) {

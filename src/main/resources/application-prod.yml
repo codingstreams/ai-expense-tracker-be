@@ -50,6 +50,8 @@ spring:
 jwt:
   secret-key: ${JWT_KEY}
   expiration-time-access-token-in-minutes: ${JWT_TOKEN_EXPIRE}
+  expiration-time-refresh-token-in-days: ${JWT_REFRESH_TOKEN_EXPIRE:7}
+  latency-buffer-in-seconds: ${JWT_LATENCY_BUFFER:60}
 
 server:
   port: ${PORT:8080}

@@ -1,8 +1,8 @@
 package com.example.et.service.appuser;
 
 import com.example.et.controller.dto.appuser.AppUserDto;
-import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
 import com.example.et.controller.dto.appuser.UpdateUserConfigReq;
+import com.example.et.controller.dto.appuser.UpdateUserDetailsDto;
 import com.example.et.controller.dto.appuser.UserDetailsDto;
 import com.example.et.mapper.AppUserConfigMapper;
 import com.example.et.mapper.AppUserMapper;
@@ -91,6 +91,12 @@ public class AppUserServiceImpl implements AppUserService {
   }
 
   @Override
+  public AppUser getUserById(String userId) {
+    return appUserRepo.findById(UUID.fromString(userId))
+        .orElseThrow(() -> new UsernameNotFoundException("User Id: %s not found.".formatted(userId)));
+  }
+
+  @Override
   @Cacheable(value = "appUserDetails", key = "#userId")
   public AppUserDto getUserByUserIdWithConfigV2(String userId) {
     final var appUser = appUserRepo.findById(UUID.fromString(userId))
@@ -132,9 +138,19 @@ public class AppUserServiceImpl implements AppUserService {
   }
 
   @Override
-  public @NonNull UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
-    final var appUser = appUserRepo.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("Email %s not found.".formatted(email)));
+  public @NonNull UserDetails loadUserByUsername(@NonNull String identifier) throws UsernameNotFoundException {
+    AppUser appUser = null;
+    try {
+      final var uuid = UUID.fromString(identifier);
+      appUser = appUserRepo.findById(uuid).orElse(null);
+    } catch (IllegalArgumentException ignored) {
+      // not a UUID, proceed with email
+    }
+
+    if (appUser == null) {
+      appUser = appUserRepo.findByEmail(identifier)
+          .orElseThrow(() -> new UsernameNotFoundException("User %s not found.".formatted(identifier)));
+    }
 
     return new User(appUser.getId().toString(), appUser.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_USER")));
   }

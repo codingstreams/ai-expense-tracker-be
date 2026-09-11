@@ -7,7 +7,6 @@ import org.springframework.boot.security.autoconfigure.actuate.web.servlet.Endpo
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -34,7 +33,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(h -> h
             .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
             .requestMatchers(EndpointRequest.to("metrics", "prometheus", "health")).permitAll()
-            .requestMatchers("/api/auth/register", "/api/auth/login", "/error")
+            .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/error")
             .permitAll()
             .anyRequest()
             .authenticated())

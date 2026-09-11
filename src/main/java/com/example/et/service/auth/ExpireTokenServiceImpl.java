@@ -1,22 +1,34 @@
 package com.example.et.service.auth;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.time.Duration;
 
 @Service
-public class ExpireTokenServiceImpl implements ExpireTokenService{
-  private final List<String> store = new CopyOnWriteArrayList<>();
+@RequiredArgsConstructor
+@Slf4j
+public class ExpireTokenServiceImpl implements ExpireTokenService {
+  private static final String BLACKLIST_PREFIX = "bl:at:";
+  private static final Duration DEFAULT_TTL = Duration.ofMinutes(15);
+
+  private final StringRedisTemplate redisTemplate;
+
   @Override
   public void addExpireToken(String token) {
-    if(!isExpireToken(token)){
-      store.add(token);
-    }
+    addExpireToken(token, DEFAULT_TTL);
+  }
+
+  @Override
+  public void addExpireToken(String token, Duration ttl) {
+    redisTemplate.opsForValue().set(BLACKLIST_PREFIX + token, "revoked", ttl);
+    log.debug("Token blacklisted with TTL: {}s", ttl.toSeconds());
   }
 
   @Override
   public boolean isExpireToken(String token) {
-    return store.contains(token);
+    return Boolean.TRUE.equals(redisTemplate.hasKey(BLACKLIST_PREFIX + token));
   }
 }

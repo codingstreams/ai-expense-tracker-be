@@ -43,6 +43,8 @@ spring:
 jwt:
   secret-key: ${JWT_KEY}
   expiration-time-access-token-in-minutes: 10
+  expiration-time-refresh-token-in-days: 7
+  latency-buffer-in-seconds: 60
 
 cors:
   allowed-origins: ${APP_URL:http://localhost:3000}

@@ -29,10 +29,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   }
 
   public static Optional<String> extractToken(String authorizationHeader) {
-    if (StringUtils.isBlank(authorizationHeader)) {
+    if (StringUtils.isBlank(authorizationHeader) || !authorizationHeader.startsWith("Bearer ")) {
       return Optional.empty();
     }
-    return Optional.of(authorizationHeader.substring(7));
+    return Optional.of(authorizationHeader.substring(7).trim());
   }
 
 

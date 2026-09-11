@@ -1,8 +1,6 @@
 package com.example.et.controller;
 
-import com.example.et.controller.dto.auth.AuthResponse;
-import com.example.et.controller.dto.auth.LoginReq;
-import com.example.et.controller.dto.auth.CreateUserReq;
+import com.example.et.controller.dto.auth.*;
 import com.example.et.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,11 +36,23 @@ public class AuthController {
     return ResponseEntity.ok(authResponse);
   }
 
+  @PostMapping("/refresh")
+  public ResponseEntity<AuthResponse> refresh(@RequestBody RefreshTokenReq refreshTokenReq) {
+    log.info("Received token refresh request");
+
+    final var authResponse = authService.refreshToken(refreshTokenReq);
+
+    log.info("Token refreshed successfully");
+    return ResponseEntity.ok(authResponse);
+  }
+
   @PostMapping("/logout")
-  public ResponseEntity<Void> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+  public ResponseEntity<Void> logout(
+      @RequestHeader(HttpHeaders.AUTHORIZATION) String token,
+      @RequestBody(required = false) LogoutReq logoutReq) {
     log.info("Received logout request");
 
-    authService.logout(token);
+    authService.logout(token, logoutReq);
 
     log.info("User logged out successfully");
     return ResponseEntity.noContent().build();
