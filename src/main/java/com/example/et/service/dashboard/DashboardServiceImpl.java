@@ -1,5 +1,6 @@
 package com.example.et.service.dashboard;
 
+import com.example.et.config.CacheConfig;
 import com.example.et.controller.dto.account.CreateAccountsReq;
 import com.example.et.controller.dto.dashboard.CategoryBreakdownDto;
 import com.example.et.controller.dto.dashboard.MonthlyTrendDto;
@@ -13,12 +14,16 @@ import com.example.et.service.account.AccountService;
 import com.example.et.service.appuser.AppUserService;
 import com.example.et.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +44,7 @@ public class DashboardServiceImpl implements DashboardService {
   }
 
   @Override
+  @Cacheable(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, key = "{#userId,#year,#month}")
   public List<CategoryBreakdownDto> getCategoryBreakdown(String userId, Integer year, Integer month) {
     final var now = LocalDate.now();
     final var targetYear = year != null ? year : now.getYear();
@@ -80,6 +86,7 @@ public class DashboardServiceImpl implements DashboardService {
   }
 
   @Override
+  @Cacheable(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, key = "{#userId,'summary'}")
   public UserSummaryDto getSummary(String userId) {
     final var accounts = accountService.getUserAccountList(userId);
 
@@ -93,28 +100,37 @@ public class DashboardServiceImpl implements DashboardService {
     final var startDate = now.withDayOfMonth(1);
     final var endDate = now.withDayOfMonth(now.lengthOfMonth());
 
-    final var transactions = transactionService.getAllTransactions(userId, TransactionFilterParams.dateRange(startDate, endDate), Pageable.unpaged())
-        .content();
+    try {
+      final var transactions = transactionService.getAllTransactions(userId, TransactionFilterParams.dateRange(startDate, endDate), Pageable.unpaged())
+          .content();
 
-    final var totalExpense = transactions.stream()
-        .filter(t -> t.type() == Transaction.TransactionType.EXPENSE)
-        .mapToDouble(t -> Math.abs(t.amount()))
-        .sum();
+      if (transactions.isEmpty()) {
+        return UserSummaryDto.empty();
+      }
 
-    // Total Income
-    final var totalIncome = transactions.stream()
-        .filter(t -> t.type() == Transaction.TransactionType.INCOME)
-        .mapToDouble(t -> Math.abs(t.amount()))
-        .sum();
+      final var totalExpense = transactions.stream()
+          .filter(t -> t.type() == Transaction.TransactionType.EXPENSE)
+          .mapToDouble(t -> Math.abs(t.amount()))
+          .sum();
 
-    // Daily Burn Rate
-    final var netSavings = totalIncome - totalExpense;
-    final var dailyBurnRate = totalExpense / now.getDayOfMonth();
+      // Total Income
+      final var totalIncome = transactions.stream()
+          .filter(t -> t.type() == Transaction.TransactionType.INCOME)
+          .mapToDouble(t -> Math.abs(t.amount()))
+          .sum();
 
-    return new UserSummaryDto(netWorth, totalIncome, totalExpense, netSavings, dailyBurnRate);
+      // Daily Burn Rate
+      final var netSavings = totalIncome - totalExpense;
+      final var dailyBurnRate = totalExpense / now.getDayOfMonth();
+
+      return new UserSummaryDto(netWorth, totalIncome, totalExpense, netSavings, dailyBurnRate);
+    } catch (Exception e) {
+      return UserSummaryDto.empty();
+    }
   }
 
   @Override
+  @Cacheable(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, key = "{#userId,#months}")
   public List<MonthlyTrendDto> getMonthlyTrend(String userId, Integer months) {
     final var count = (months != null && months > 0) ? months : 6;
     final var now = YearMonth.now();
@@ -161,6 +177,7 @@ public class DashboardServiceImpl implements DashboardService {
   }
 
   @Override
+  @Cacheable(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, key = "{#userId,#months}")
   public List<MonthlyTrendDto> getMonthlyTrend(String userId) {
     return getMonthlyTrend(userId, 6);
   }

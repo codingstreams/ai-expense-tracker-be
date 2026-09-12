@@ -38,7 +38,12 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId")
+  @Caching(
+      evict = {
+          @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId"),
+          @CacheEvict(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, allEntries = true)
+      }
+  )
   public List<AccountDto> addAccounts(String userId, CreateAccountsReq requestBody) {
     final var bankIds = requestBody.accounts()
         .stream()
@@ -74,7 +79,8 @@ public class AccountServiceImpl implements AccountService {
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#account.appUser.id", condition = "#account.appUser != null && #account.appUser.id != null"),
       @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#account.appUser.id, #account.id}", condition = "#account.appUser != null && #account.appUser.id != null && #account.id != null"),
-      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#account.appUser.id, 'cash'}", condition = "#account.appUser != null && #account.appUser.id != null && #account.accountType != null && #account.accountType.name() == 'CASH'")
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#account.appUser.id, 'cash'}", condition = "#account.appUser != null && #account.appUser.id != null && #account.accountType != null && #account.accountType.name() == 'CASH'"),
+      @CacheEvict(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, allEntries = true)
   })
   public Account saveAccount(Account account) {
     return accountRepo.save(account);
@@ -92,7 +98,8 @@ public class AccountServiceImpl implements AccountService {
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId"),
       @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, #accountId}"),
-      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}")
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}"),
+      @CacheEvict(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, allEntries = true)
   })
   public AccountDto updateAccount(String userId, String accountId, AccountDto account) {
     final var existingAccount = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
@@ -136,7 +143,8 @@ public class AccountServiceImpl implements AccountService {
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId"),
       @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, #accountId}"),
-      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}")
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}"),
+      @CacheEvict(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, allEntries = true)
   })
   public void deleteAccount(String userId, String accountId) {
     final var existingAccount = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
@@ -159,7 +167,8 @@ public class AccountServiceImpl implements AccountService {
   @Override
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId"),
-      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}")
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}"),
+      @CacheEvict(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, allEntries = true)
   })
   public Float updateCashBalance(String userId, Float cashBalance) {
     final var cashAccount = accountRepo.findCashAccountByUserId(UUID.fromString(userId)).orElseThrow(() -> new RuntimeException("Account not found."));
@@ -175,7 +184,8 @@ public class AccountServiceImpl implements AccountService {
   @Override
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId"),
-      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}")
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}"),
+      @CacheEvict(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, allEntries = true)
   })
   public AccountDto updateCashBalance(String userId, UpdateCashDto updateCashDto) {
     final var cashAccount = accountRepo.findCashAccountByUserId(UUID.fromString(userId))

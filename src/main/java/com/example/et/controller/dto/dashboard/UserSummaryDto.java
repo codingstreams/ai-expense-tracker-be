@@ -6,4 +6,8 @@ public record UserSummaryDto(
     Double totalExpense,
     Double netSavings,
     Double dailyBurnRate
-) {}
+) {
+  public static UserSummaryDto empty() {
+    return new UserSummaryDto(0.0, 0.0, 0.0, 0.0, 0.0);
+  }
+}

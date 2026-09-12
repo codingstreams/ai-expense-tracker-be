@@ -24,9 +24,9 @@ public class CacheConfig {
   public static final String BANKS_CACHE = "banks";
   public static final String PAYMENT_MODES_CACHE = "payment-modes";
   public static final String SYSTEM_CATEGORIES_CACHE = "system-categories";
-  public static final String USER_DEBIT_CARDS_CACHE = "user-debit-cards";
-  public static final String USER_CREDIT_CARDS_CACHE = "user-credit-cards";
+  public static final String USER_CARDS_CACHE = "user-cards";
   public static final String USER_FINANCIAL_SUMMARY_CACHE = "user-financial-summary";
+  public static final String USER_TRANSACTIONS_CACHE = "user-transactions";
 
   @Bean
   LettuceConnectionFactory lettuceConnectionFactory(@Value("${redis.url}") String url) {

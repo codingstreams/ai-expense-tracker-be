@@ -1,46 +1,41 @@
 package com.example.et.service.card;
 
+import com.example.et.config.CacheConfig;
 import com.example.et.controller.dto.card.CardDto;
 import com.example.et.controller.dto.card.UserCards;
+import com.example.et.mapper.CardMapper;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
 import com.example.et.model.core.Card;
 import com.example.et.repo.card.CardRepo;
 import com.example.et.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
 public class CardServiceImpl implements CardService {
   private final CardRepo cardRepo;
   private final AccountService accountService;
-
-  private static Function<Card, CardDto> toDto() {
-    return card -> new CardDto(
-        card.getId(),
-        card.getCardType(),
-        card.getLastFourDigits(),
-        card.getAccount() != null ? card.getAccount().getId() : null,
-        card.getAccount() != null ? card.getAccount().getBalance() : null,
-        card.getAccount() != null ? card.getAccount().getBank() : null
-    );
-  }
+  private final CardMapper cardMapper;
 
   @Override
+  @Cacheable(value = CacheConfig.USER_CARDS_CACHE, key = "{#userId, #cardType}", unless = "#result == null || #result.isEmpty()")
   public List<CardDto> getUserCards(String userId, Card.CardType cardType) {
     return cardRepo.findByAppUserId(UUID.fromString(userId))
         .stream()
         .filter(card -> cardType == null || card.getCardType() == cardType)
-        .map(toDto())
+        .map(cardMapper::toDto)
         .toList();
   }
 
   @Override
+  @CacheEvict(value = CacheConfig.USER_CARDS_CACHE, key = "#userId")
   public List<CardDto> addCards(String userId, UserCards userCards) {
     final var user = AppUser.ofId(userId);
 
@@ -70,12 +65,12 @@ public class CardServiceImpl implements CardService {
 
     return cardRepo.saveAll(cardsToSave)
         .stream()
-        .map(toDto())
+        .map(cardMapper::toDto)
         .toList();
   }
 
   @Override
-//  @Cacheable(value = "userCards", key = "#userId.#cardId")
+  @Cacheable(value = CacheConfig.USER_CARDS_CACHE, key = "{#userId, #cardId}")
   public Card getUserCard(String userId, UUID cardId) {
     return cardRepo.findByIdAndAppUserId(cardId, UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Card not found."));

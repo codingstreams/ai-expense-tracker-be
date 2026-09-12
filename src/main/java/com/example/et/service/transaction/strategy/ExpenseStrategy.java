@@ -2,6 +2,7 @@ package com.example.et.service.transaction.strategy;
 
 import com.example.et.controller.dto.transaction.TransactionResponseDto;
 import com.example.et.mapper.PaymentModeMapper;
+import com.example.et.mapper.TransactionMapper;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
 import com.example.et.model.core.Transaction;
@@ -10,7 +11,6 @@ import com.example.et.service.account.AccountService;
 import com.example.et.service.ai.parsetask.AiParseTaskService;
 import com.example.et.service.card.CardService;
 import com.example.et.service.transaction.TransactionContext;
-import com.example.et.service.transaction.TransactionServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +24,7 @@ public class ExpenseStrategy implements TransactionStrategy {
   private final TransactionRepo transactionRepo;
   private final AiParseTaskService aiParseTaskService;
   private final PaymentModeMapper paymentModeMapper;
+  private final TransactionMapper transactionMapper;
 
   private Account resolveAccount(String userId, UUID accountId, UUID cardId) {
     if (cardId != null) {
@@ -59,7 +60,7 @@ public class ExpenseStrategy implements TransactionStrategy {
         .transactionCategory(transactionContext.systemCategory())
         .build();
 
-    return TransactionServiceImpl.toDto(transactionRepo.save(transaction));
+    return transactionMapper.toResponseDto(transactionRepo.save(transaction));
   }
 
   @Override
