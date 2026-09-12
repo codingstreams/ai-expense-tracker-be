@@ -33,6 +33,18 @@ public class AiController {
                                                 @AuthenticationPrincipal String userId) {
     return ResponseEntity.ok(aiChatService.chat(userId, request));
   }
+
+  @DeleteMapping("/chat")
+  public ResponseEntity<Void> clearChat(@AuthenticationPrincipal String userId) {
+    aiChatService.clearSession(userId);
+    return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/chat/clear")
+  public ResponseEntity<Void> restartChat(@AuthenticationPrincipal String userId) {
+    aiChatService.clearSession(userId);
+    return ResponseEntity.noContent().build();
+  }
   @PostMapping("/insights/generate")
   public ResponseEntity<AiInsightDto> generateInsights(@AuthenticationPrincipal String userId) {
     return ResponseEntity.ok(aiService.generateInsights(userId));

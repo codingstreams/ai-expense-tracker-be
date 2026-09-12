@@ -1,5 +1,6 @@
 package com.example.et.config;
 
+import com.example.et.service.ai.chat.StoredChatMessage;
 import io.lettuce.core.RedisURI;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -37,10 +38,11 @@ public class CacheConfig {
   }
 
   @Bean
-  RedisTemplate<String, Object> redisTemplate(LettuceConnectionFactory connectionFactory){
-    final var template = new RedisTemplate<String, Object>();
+  RedisTemplate<String, StoredChatMessage> redisTemplate(LettuceConnectionFactory connectionFactory){
+    final var template = new RedisTemplate<String, StoredChatMessage>();
     template.setConnectionFactory(connectionFactory);
-    template.setDefaultSerializer(StringRedisSerializer.UTF_8);
+    template.setKeySerializer(RedisSerializer.string());
+    template.setValueSerializer(RedisSerializer.json());
     template.afterPropertiesSet();
 
     return template;
