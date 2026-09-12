@@ -1,5 +1,6 @@
 package com.example.et.service.paymentmode;
 
+import com.example.et.config.CacheConfig;
 import com.example.et.controller.dto.paymentmode.PaymentModeDto;
 import com.example.et.mapper.PaymentModeMapper;
 import com.example.et.repo.PaymentModeRepo;
@@ -18,7 +19,7 @@ public class PaymentModeServiceImpl implements PaymentModeService {
   private final PaymentModeMapper paymentModeMapper;
 
   @Override
-  @Cacheable("paymentModes")
+  @Cacheable(value = CacheConfig.PAYMENT_MODES_CACHE)
   public List<PaymentModeDto> getAllPaymentModes() {
     return paymentModeRepo.findAll()
         .stream()
@@ -27,7 +28,7 @@ public class PaymentModeServiceImpl implements PaymentModeService {
   }
 
   @Override
-  @Cacheable(value = "paymentModes", key = "#id")
+  @Cacheable(value = CacheConfig.PAYMENT_MODES_CACHE, key = "#id", condition = "#id != null")
   public PaymentModeDto getPaymentModeById(UUID id) {
     return paymentModeRepo.findById(id)
         .map(paymentModeMapper::toDto)
