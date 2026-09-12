@@ -1,6 +1,6 @@
 package com.example.et.service.transaction;
 
-import com.example.et.controller.dto.transaction.TransactionFilterParams;
+import com.example.et.module.transaction.dto.TransactionFilterParams;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

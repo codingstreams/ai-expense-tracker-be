@@ -1,11 +1,13 @@
 package com.example.et.service.ai.chat;
 
-import com.example.et.controller.dto.account.AccountDto;
-import com.example.et.controller.dto.ai.AiChatRequestDto;
-import com.example.et.controller.dto.ai.AiChatResponseDto;
-import com.example.et.controller.dto.bank.BankDto;
-import com.example.et.model.core.Account;
-import com.example.et.service.account.AccountService;
+import com.example.et.module.account.Account;
+import com.example.et.module.account.AccountService;
+import com.example.et.module.account.dto.AccountDto;
+import com.example.et.module.ai.chat.AiChatServiceImpl;
+import com.example.et.module.ai.chat.StoredChatMessage;
+import com.example.et.module.ai.dto.AiChatRequestDto;
+import com.example.et.module.ai.dto.AiChatResponseDto;
+import com.example.et.module.reference.bank.dto.BankDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

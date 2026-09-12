@@ -1,7 +1,8 @@
 package com.example.et.controller;
 
-import com.example.et.controller.dto.auth.*;
-import com.example.et.service.auth.AuthService;
+import com.example.et.module.auth.AuthController;
+import com.example.et.module.auth.AuthService;
+import com.example.et.module.auth.dto.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

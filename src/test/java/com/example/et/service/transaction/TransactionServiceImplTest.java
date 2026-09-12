@@ -1,14 +1,15 @@
 package com.example.et.service.transaction;
 
-import com.example.et.controller.dto.transaction.PagedTransactionsDto;
-import com.example.et.controller.dto.transaction.TransactionFilterParams;
-import com.example.et.controller.dto.transaction.TransactionResponseDto;
-import com.example.et.mapper.TransactionMapper;
-import com.example.et.model.core.Transaction;
-import com.example.et.repo.TransactionRepo;
-import com.example.et.service.category.SysCategoryService;
-import com.example.et.service.paymentmode.PaymentModeService;
-import com.example.et.service.transaction.strategy.TransactionStrategyFactory;
+import com.example.et.module.reference.category.SysCategoryService;
+import com.example.et.module.reference.paymentmode.PaymentModeService;
+import com.example.et.module.transaction.Transaction;
+import com.example.et.module.transaction.TransactionMapper;
+import com.example.et.module.transaction.dto.PagedTransactionsDto;
+import com.example.et.module.transaction.dto.TransactionFilterParams;
+import com.example.et.module.transaction.dto.TransactionResponseDto;
+import com.example.et.module.transaction.internal.TransactionRepo;
+import com.example.et.module.transaction.internal.TransactionServiceImpl;
+import com.example.et.module.transaction.internal.strategy.TransactionStrategyFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

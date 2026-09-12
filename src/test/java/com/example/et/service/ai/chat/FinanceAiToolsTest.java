@@ -1,7 +1,8 @@
 package com.example.et.service.ai.chat;
 
-import com.example.et.controller.dto.dashboard.CategoryBreakdownDto;
-import com.example.et.service.dashboard.DashboardService;
+import com.example.et.module.ai.tool.FinanceAiTools;
+import com.example.et.module.dashboard.DashboardService;
+import com.example.et.module.dashboard.dto.CategoryBreakdownDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

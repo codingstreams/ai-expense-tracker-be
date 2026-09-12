@@ -1,5 +1,6 @@
 package com.example.et.service.auth;
 
+import com.example.et.module.auth.internal.ExpireTokenServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
