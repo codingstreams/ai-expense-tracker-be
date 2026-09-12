@@ -72,9 +72,9 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
   @Caching(evict = {
-      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#account.appUser.id.toString()", condition = "#account.appUser != null && #account.appUser.id != null"),
-      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#account.appUser.id.toString(), #account.id.toString()}", condition = "#account.appUser != null && #account.appUser.id != null && #account.id != null"),
-      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#account.appUser.id.toString(), 'cash'}", condition = "#account.appUser != null && #account.appUser.id != null && #account.accountType != null && #account.accountType.name() == 'CASH'")
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#account.appUser.id", condition = "#account.appUser != null && #account.appUser.id != null"),
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#account.appUser.id, #account.id}", condition = "#account.appUser != null && #account.appUser.id != null && #account.id != null"),
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#account.appUser.id, 'cash'}", condition = "#account.appUser != null && #account.appUser.id != null && #account.accountType != null && #account.accountType.name() == 'CASH'")
   })
   public Account saveAccount(Account account) {
     return accountRepo.save(account);

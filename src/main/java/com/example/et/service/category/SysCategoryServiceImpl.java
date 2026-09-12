@@ -1,5 +1,6 @@
 package com.example.et.service.category;
 
+import com.example.et.config.CacheConfig;
 import com.example.et.model.core.SystemCategory;
 import com.example.et.repo.SysCategoryRepo;
 import jakarta.transaction.Transactional;
@@ -17,13 +18,13 @@ public class SysCategoryServiceImpl implements SysCategoryService {
 
     @Override
     @Transactional
-    @Cacheable("systemCategories")
+    @Cacheable(value = CacheConfig.SYSTEM_CATEGORIES_CACHE)
     public List<SystemCategory> getAllSystemCategories() {
         return sysCategoryRepo.findAll();
     }
 
     @Override
-    @Cacheable(value = "systemCategories", key = "#id")
+    @Cacheable(value = CacheConfig.SYSTEM_CATEGORIES_CACHE, key = "#id")
     public SystemCategory getSystemCategoryById(UUID id) {
         return sysCategoryRepo.findById(id)
             .orElseThrow(() -> new RuntimeException("SystemCategory ID: %s not found".formatted(id)));
