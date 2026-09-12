@@ -4,24 +4,21 @@ import com.example.et.controller.dto.account.AccountDto;
 import com.example.et.controller.dto.ai.AiChatRequestDto;
 import com.example.et.controller.dto.ai.AiChatResponseDto;
 import com.example.et.controller.dto.bank.BankDto;
-import com.example.et.controller.dto.transaction.PagedTransactionsDto;
-import com.example.et.controller.dto.transaction.TransactionFilterParams;
 import com.example.et.model.core.Account;
 import com.example.et.service.account.AccountService;
-import com.example.et.service.transaction.TransactionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -40,9 +38,6 @@ class AiChatServiceImplTest {
 
   @Mock
   private AccountService accountService;
-
-  @Mock
-  private TransactionService transactionService;
 
   @Mock
   private ChatClient chatClient;
@@ -65,7 +60,6 @@ class AiChatServiceImplTest {
   void setUp() {
     aiChatService = new AiChatServiceImpl(
         accountService,
-        transactionService,
         chatClient,
         redisTemplate
     );
@@ -90,11 +84,10 @@ class AiChatServiceImplTest {
         true
     );
     when(accountService.getUserAccountsV2(userId)).thenReturn(List.of(mockAccount));
-    when(transactionService.getAllTransactions(eq(userId), any(TransactionFilterParams.class), eq(PageRequest.of(0, 100))))
-        .thenReturn(new PagedTransactionsDto(Collections.emptyList(), 0, 100, 0L, 1, true));
 
     when(chatClient.prompt()).thenReturn(requestSpec);
     when(requestSpec.system(anyString())).thenReturn(requestSpec);
+    when(requestSpec.toolContext(anyMap())).thenReturn(requestSpec);
     when(requestSpec.messages(anyList())).thenReturn(requestSpec);
     when(requestSpec.call()).thenReturn(callResponseSpec);
     when(callResponseSpec.content()).thenReturn("Here is your finance advice");
@@ -105,6 +98,7 @@ class AiChatServiceImplTest {
     assertEquals("Here is your finance advice", response.reply());
     assertEquals(userId, response.sessionId());
 
+    verify(requestSpec).toolContext(Map.of("userId", userId));
     verify(listOperations).rightPushAll(eq(sessionKey), anyList());
     verify(redisTemplate).expire(sessionKey, Duration.ofDays(7));
   }

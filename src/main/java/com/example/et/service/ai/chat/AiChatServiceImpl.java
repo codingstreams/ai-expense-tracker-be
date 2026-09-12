@@ -2,9 +2,7 @@ package com.example.et.service.ai.chat;
 
 import com.example.et.controller.dto.ai.AiChatRequestDto;
 import com.example.et.controller.dto.ai.AiChatResponseDto;
-import com.example.et.controller.dto.transaction.TransactionFilterParams;
 import com.example.et.service.account.AccountService;
-import com.example.et.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -13,9 +11,9 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import java.util.Map;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -32,7 +30,6 @@ public class AiChatServiceImpl implements AiChatService {
   private static final Duration CHAT_SESSION_TTL = Duration.ofDays(7);
 
   private final AccountService accountService;
-  private final TransactionService transactionService;
   private final ChatClient chatClient;
   private final RedisTemplate<String, StoredChatMessage> redisTemplate;
 
@@ -46,22 +43,12 @@ public class AiChatServiceImpl implements AiChatService {
     final var history = loadChatHistory(sessionKey);
 
     final var accounts = accountService.getUserAccountsV2(userId);
-    final var transactions = transactionService.getAllTransactions(userId, TransactionFilterParams.empty(), PageRequest.of(0, 100));
 
     final var accountsSummary = accounts.stream()
         .map(a -> String.format("- Account: %s (%s), Balance: %.2f",
             a.bank() != null && a.bank().name() != null ? a.bank().name() + " *" + a.lastFourDigits() : a.lastFourDigits(),
             a.accountType(),
             a.balance() != null ? a.balance() : 0.0f))
-        .collect(Collectors.joining("\n"));
-
-    final var transactionsSummary = transactions.content().stream()
-        .map(t -> String.format("- %s: %.2f | %s | Category: %s | Description: %s",
-            t.transactionDate(),
-            Math.abs(t.amount()),
-            t.type(),
-            t.category() != null ? t.category() : "Uncategorized",
-            t.description()))
         .collect(Collectors.joining("\n"));
 
     final var systemPrompt = """
@@ -71,11 +58,9 @@ public class AiChatServiceImpl implements AiChatService {
         User Accounts:
         %s
 
-        Recent Transactions (Up to last 100):
-        %s
-
-        Answer the user's financial questions accurately based on this data. Keep responses clear and concise.
-        """.formatted(LocalDate.now(), accountsSummary, transactionsSummary);
+        When the user asks questions about their expenses, spending, or category breakdowns, ALWAYS use the getCategorySpendingSummary tool to fetch accurate real-time data.
+        Answer clearly and concisely based on the tool results.
+        """.formatted(LocalDate.now(), accountsSummary);
 
     final var userMessage = new UserMessage(request.message());
     final var promptMessages = new ArrayList<>(history);
@@ -83,6 +68,7 @@ public class AiChatServiceImpl implements AiChatService {
 
     final var promptSpec = chatClient.prompt()
         .system(systemPrompt)
+        .toolContext(Map.of("userId", userId))
         .messages(promptMessages);
 
     final var reply = promptSpec.call().content();
@@ -125,17 +111,8 @@ public class AiChatServiceImpl implements AiChatService {
   }
 
   private void saveMessages(String sessionKey, List<StoredChatMessage> newMessages) {
-    final var serializedList = new ArrayList<StoredChatMessage>(newMessages.size());
-    for (final var msg : newMessages) {
-      try {
-        serializedList.add(msg);
-      } catch (Exception e) {
-        log.error("Failed to serialize chat message for Redis: {}", msg, e);
-      }
-    }
-
-    if (!serializedList.isEmpty()) {
-      redisTemplate.opsForList().rightPushAll(sessionKey, serializedList);
+    if (newMessages != null && !newMessages.isEmpty()) {
+      redisTemplate.opsForList().rightPushAll(sessionKey, newMessages);
       redisTemplate.expire(sessionKey, CHAT_SESSION_TTL);
     }
   }
