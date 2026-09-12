@@ -1,13 +1,11 @@
 package com.example.et.controller;
 
-import com.example.et.config.CacheConfig;
 import com.example.et.controller.dto.account.AccountDto;
 import com.example.et.controller.dto.account.AccountDtoOld;
 import com.example.et.controller.dto.account.CreateAccountsReq;
 import com.example.et.controller.dto.account.UpdateCashDto;
 import com.example.et.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +55,6 @@ public class AccountController {
   }
 
   @DeleteMapping("/{accountId}")
-  @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId", allEntries = true)
   public ResponseEntity<Void> deleteAccount(@AuthenticationPrincipal String userId, @PathVariable String accountId) {
     accountService.deleteAccount(userId, accountId);
     return ResponseEntity.noContent().build();

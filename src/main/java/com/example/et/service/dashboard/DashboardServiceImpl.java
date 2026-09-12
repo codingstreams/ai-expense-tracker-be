@@ -44,7 +44,10 @@ public class DashboardServiceImpl implements DashboardService {
   }
 
   @Override
-  @Cacheable(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, key = "{#userId,#year,#month}")
+  @Cacheable(
+      value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE,
+      key = "#userId + ':breakdown:' + (#year != null ? #year : T(java.time.LocalDate).now().getYear()) + ':' + (#month != null ? #month : T(java.time.LocalDate).now().getMonthValue())"
+  )
   public List<CategoryBreakdownDto> getCategoryBreakdown(String userId, Integer year, Integer month) {
     final var now = LocalDate.now();
     final var targetYear = year != null ? year : now.getYear();
@@ -86,27 +89,26 @@ public class DashboardServiceImpl implements DashboardService {
   }
 
   @Override
-  @Cacheable(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, key = "{#userId,'summary'}")
+  @Cacheable(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, key = "#userId + ':summary'")
   public UserSummaryDto getSummary(String userId) {
-    final var accounts = accountService.getUserAccountList(userId);
-
-    // Net worth
-    final var netWorth = accounts.stream()
-        .mapToDouble(a -> a.getAccountType() == Account.AccountType.CREDIT ? -a.getBalance() : a.getBalance())
-        .sum();
-
-    // Total Expense
-    final var now = LocalDate.now();
-    final var startDate = now.withDayOfMonth(1);
-    final var endDate = now.withDayOfMonth(now.lengthOfMonth());
-
     try {
-      final var transactions = transactionService.getAllTransactions(userId, TransactionFilterParams.dateRange(startDate, endDate), Pageable.unpaged())
+      final var accounts = accountService.getUserAccountList(userId);
+
+      // Net worth
+      final var netWorth = accounts.stream()
+          .mapToDouble(a -> a.getAccountType() == Account.AccountType.CREDIT ? -a.getBalance() : a.getBalance())
+          .sum();
+
+      // Total Expense
+      final var now = LocalDate.now();
+      final var startDate = now.withDayOfMonth(1);
+      final var endDate = now.withDayOfMonth(now.lengthOfMonth());
+
+
+      final var filterParams = TransactionFilterParams.dateRange(startDate, endDate);
+      final var transactions = transactionService.getAllTransactions(userId, filterParams, Pageable.unpaged())
           .content();
 
-      if (transactions.isEmpty()) {
-        return UserSummaryDto.empty();
-      }
 
       final var totalExpense = transactions.stream()
           .filter(t -> t.type() == Transaction.TransactionType.EXPENSE)
@@ -130,7 +132,7 @@ public class DashboardServiceImpl implements DashboardService {
   }
 
   @Override
-  @Cacheable(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, key = "{#userId,#months}")
+  @Cacheable(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, key = "#userId + ':trend:' + (#months != null && #months > 0 ? #months : 6)")
   public List<MonthlyTrendDto> getMonthlyTrend(String userId, Integer months) {
     final var count = (months != null && months > 0) ? months : 6;
     final var now = YearMonth.now();
@@ -177,7 +179,7 @@ public class DashboardServiceImpl implements DashboardService {
   }
 
   @Override
-  @Cacheable(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, key = "{#userId,#months}")
+  @Cacheable(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, key = "#userId + ':trend:6'")
   public List<MonthlyTrendDto> getMonthlyTrend(String userId) {
     return getMonthlyTrend(userId, 6);
   }

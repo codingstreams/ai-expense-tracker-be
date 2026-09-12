@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -37,14 +38,14 @@ public class TransactionServiceImpl implements TransactionService {
   @Override
   @Cacheable(
       value = CacheConfig.USER_TRANSACTIONS_CACHE,
-      key = "{#userId, #filterParams, #pageable.getPageNumber(), #pageable.getPageSize()}",
+      key = "#userId + ':' + (#filterParams != null ? #filterParams.toCacheKey() : 'all') + ':' + (#pageable.isPaged() ? (#pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort) : 'unpaged')",
       unless = "#result == null || #result.content().isEmpty()"
   )
   public PagedTransactionsDto getAllTransactions(String userId, TransactionFilterParams filterParams, Pageable pageable) {
     final var parsedUserId = UUID.fromString(userId);
     final var spec = TransactionSpecification.withFilters(parsedUserId, filterParams);
 
-    final var page = transactionRepo.findAll(spec, pageable)
+    final Page<TransactionResponseDto> page = transactionRepo.findAll(spec, pageable)
         .map(transactionMapper::toResponseDto);
 
     return PagedTransactionsDto.from(page);
@@ -54,14 +55,9 @@ public class TransactionServiceImpl implements TransactionService {
   @Transactional
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId"),
-      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, #accountId}"),
       @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}"),
       @CacheEvict(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, allEntries = true),
-      @CacheEvict(value = CacheConfig.USER_TRANSACTIONS_CACHE, key = "#userId"),
-      @CacheEvict(
-          value = CacheConfig.USER_TRANSACTIONS_CACHE,
-          key = "{#userId, #filterParams, #pageable.getPageNumber(), #pageable.getPageSize()}"
-      )
+      @CacheEvict(value = CacheConfig.USER_TRANSACTIONS_CACHE, allEntries = true)
   })
   public TransactionResponseDto createTransaction(String userId, TransactionRequestDto requestBody) {
     PaymentModeDto paymentMode = null;
@@ -81,14 +77,9 @@ public class TransactionServiceImpl implements TransactionService {
   @Transactional
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId"),
-      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, #accountId}"),
       @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}"),
       @CacheEvict(value = CacheConfig.USER_FINANCIAL_SUMMARY_CACHE, allEntries = true),
-      @CacheEvict(value = CacheConfig.USER_TRANSACTIONS_CACHE, key = "#userId"),
-      @CacheEvict(
-          value = CacheConfig.USER_TRANSACTIONS_CACHE,
-          key = "{#userId, #filterParams, #pageable.getPageNumber(), #pageable.getPageSize()}"
-      )
+      @CacheEvict(value = CacheConfig.USER_TRANSACTIONS_CACHE, allEntries = true)
   })
   public void deleteTransaction(String userId, UUID transactionId) {
     final var userUuid = UUID.fromString(userId);

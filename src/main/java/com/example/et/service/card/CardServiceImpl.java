@@ -12,6 +12,7 @@ import com.example.et.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +26,11 @@ public class CardServiceImpl implements CardService {
   private final CardMapper cardMapper;
 
   @Override
-  @Cacheable(value = CacheConfig.USER_CARDS_CACHE, key = "{#userId, #cardType}", unless = "#result == null || #result.isEmpty()")
+  @Cacheable(
+      value = CacheConfig.USER_CARDS_CACHE,
+      key = "#userId + ':' + (#cardType != null ? #cardType : 'ALL')",
+      unless = "#result == null || #result.isEmpty()"
+  )
   public List<CardDto> getUserCards(String userId, Card.CardType cardType) {
     return cardRepo.findByAppUserId(UUID.fromString(userId))
         .stream()
@@ -35,7 +40,12 @@ public class CardServiceImpl implements CardService {
   }
 
   @Override
-  @CacheEvict(value = CacheConfig.USER_CARDS_CACHE, key = "#userId")
+  @Caching(evict = {
+      @CacheEvict(value = CacheConfig.USER_CARDS_CACHE, key = "#userId + ':ALL'"),
+      @CacheEvict(value = CacheConfig.USER_CARDS_CACHE, key = "#userId + ':CREDIT_CARD'"),
+      @CacheEvict(value = CacheConfig.USER_CARDS_CACHE, key = "#userId + ':DEBIT_CARD'"),
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId")
+  })
   public List<CardDto> addCards(String userId, UserCards userCards) {
     final var user = AppUser.ofId(userId);
 
@@ -48,7 +58,7 @@ public class CardServiceImpl implements CardService {
             .accountType(Account.AccountType.CREDIT)
             .balance(cardDto.limit() != null ? cardDto.limit() : 0.0f)
             .lastFourDigits(cardDto.lastFourDigits())
-                .isActive(true)
+            .isActive(true)
             .bank(cardDto.bank())
             .build());
       } else {
@@ -70,7 +80,7 @@ public class CardServiceImpl implements CardService {
   }
 
   @Override
-  @Cacheable(value = CacheConfig.USER_CARDS_CACHE, key = "{#userId, #cardId}")
+  @Cacheable(value = CacheConfig.USER_CARDS_CACHE, key = "#userId + ':card:' + #cardId")
   public Card getUserCard(String userId, UUID cardId) {
     return cardRepo.findByIdAndAppUserId(cardId, UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Card not found."));
