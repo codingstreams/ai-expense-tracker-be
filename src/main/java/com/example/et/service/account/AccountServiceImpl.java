@@ -1,9 +1,10 @@
 package com.example.et.service.account;
 
+import com.example.et.config.CacheConfig;
 import com.example.et.controller.dto.account.AccountDto;
 import com.example.et.controller.dto.account.AccountDtoOld;
-import com.example.et.controller.dto.account.UpdateCashDto;
 import com.example.et.controller.dto.account.CreateAccountsReq;
+import com.example.et.controller.dto.account.UpdateCashDto;
 import com.example.et.controller.dto.bank.BankDto;
 import com.example.et.mapper.AccountMapper;
 import com.example.et.mapper.BankMapper;
@@ -12,15 +13,15 @@ import com.example.et.model.core.AppUser;
 import com.example.et.repo.AccountRepo;
 import com.example.et.repo.BankRepo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,32 +32,13 @@ public class AccountServiceImpl implements AccountService {
   private final AccountMapper accountMapper;
   private final BankMapper bankMapper;
 
-  private static Function<Account, AccountDtoOld> toDto() {
-    return account -> new AccountDtoOld(
-        account.getId(),
-        account.getLastFourDigits(),
-        account.getBalance(),
-        account.getAccountType(),
-        account.getBank(),
-        account.isUpiEnabled(),
-        account.isNetBankingEnabled()
-    );
-  }
-
-  @Override
-  public List<AccountDtoOld> getUserAccounts(String userId) {
-    return accountRepo.findByAppUserId(UUID.fromString(userId))
-        .stream().map(toDto())
-        .toList();
-  }
-
   @Override
   public List<Account> getUserAccountList(String userId) {
     return accountRepo.findByAppUserId(UUID.fromString(userId));
   }
 
   @Override
-  @CachePut(value = "userAccounts", key = "#userId")
+  @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId")
   public List<AccountDto> addAccounts(String userId, CreateAccountsReq requestBody) {
     final var bankIds = requestBody.accounts()
         .stream()
@@ -82,90 +64,87 @@ public class AccountServiceImpl implements AccountService {
             .build())
         .toList();
 
-    accountRepo.saveAll(accountToBeCreated);
-
-    return getUserAccountsV2(userId);
+    return accountRepo.saveAll(accountToBeCreated)
+        .stream()
+        .map(accountMapper::toDto)
+        .collect(Collectors.toList());
   }
 
   @Override
+  @Caching(evict = {
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#account.appUser.id.toString()", condition = "#account.appUser != null && #account.appUser.id != null"),
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#account.appUser.id.toString(), #account.id.toString()}", condition = "#account.appUser != null && #account.appUser.id != null && #account.id != null"),
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#account.appUser.id.toString(), 'cash'}", condition = "#account.appUser != null && #account.appUser.id != null && #account.accountType != null && #account.accountType.name() == 'CASH'")
+  })
   public Account saveAccount(Account account) {
     return accountRepo.save(account);
   }
 
   @Override
-  public AccountDtoOld getUserAccountDetails(String userId, String accountId) {
-    return accountRepo.findByUserIdAndAccountId(UUID.fromString(userId), UUID.fromString(accountId));
-  }
-
-  @Override
-  @Cacheable(value = "userAccounts", key = "#userId+'_'+#accountId")
-  public AccountDto getUserAccountDetailsV2(String userId, String accountId) {
-    return accountRepo.findByIdAndAppUserId(UUID.fromString(userId), UUID.fromString(accountId))
+  @Cacheable(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, #accountId}")
+  public AccountDto getUserAccountDetails(String userId, String accountId) {
+    return accountRepo.findByUserIdAndAccountId(UUID.fromString(userId), UUID.fromString(accountId))
         .map(accountMapper::toDto)
-        .orElseThrow(() -> new RuntimeException("Account not found."));
+        .orElseThrow();
   }
 
   @Override
-  @Cacheable(value = "userAccounts", key = "#userId+'_'+#accountId")
+  @Caching(evict = {
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId"),
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, #accountId}"),
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}")
+  })
   public AccountDto updateAccount(String userId, String accountId, AccountDto account) {
     final var existingAccount = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Account not found."));
 
+    boolean isUpdateRequired = false;
+
     if (account != null) {
-      if (account.balance() != null) {
+      if (account.balance() != null && (existingAccount.getBalance() == null || account.balance().compareTo(existingAccount.getBalance()) > 0)) {
         existingAccount.setBalance(account.balance());
+        isUpdateRequired = true;
       }
-      if (account.lastFourDigits() != null) {
+      if (account.lastFourDigits() != null && !Objects.equals(account.lastFourDigits(), existingAccount.getLastFourDigits())) {
         existingAccount.setLastFourDigits(account.lastFourDigits());
+        isUpdateRequired = true;
       }
-      if (account.accountType() != null) {
+      if (account.accountType() != null && !Objects.equals(account.accountType(), existingAccount.getAccountType())) {
         existingAccount.setAccountType(account.accountType());
+        isUpdateRequired = true;
       }
       // Disable Bank Update
 /*      if (account.bank() != null) {
         existingAccount.setBank(account.bank());
       }*/
 
-      existingAccount.setUpiEnabled(Optional.ofNullable(account.upiEnabled()).orElse(existingAccount.isUpiEnabled()));
-      existingAccount.setNetBankingEnabled(Optional.ofNullable(account.netBankingEnabled()).orElse(existingAccount.isNetBankingEnabled()));
+      if (account.upiEnabled() != null && !Objects.equals(account.upiEnabled(), existingAccount.isUpiEnabled())) {
+        existingAccount.setUpiEnabled(account.upiEnabled());
+        isUpdateRequired = true;
+      }
+      if (account.netBankingEnabled() != null && !Objects.equals(account.netBankingEnabled(), existingAccount.isNetBankingEnabled())) {
+        existingAccount.setNetBankingEnabled(account.netBankingEnabled());
+        isUpdateRequired = true;
+      }
     }
 
-    final var updatedAccount = accountRepo.save(existingAccount);
+    final var updatedAccount = isUpdateRequired ? accountRepo.save(existingAccount) : existingAccount;
     return accountMapper.toDto(updatedAccount);
   }
 
   @Override
-  public AccountDtoOld updateAccount(String userId, String accountId, AccountDtoOld account) {
-    final var existingAccount = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
-        .orElseThrow(() -> new RuntimeException("Account not found."));
-
-    if (account != null) {
-      if (account.balance() != null) {
-        existingAccount.setBalance(account.balance());
-      }
-      if (account.lastFourDigits() != null) {
-        existingAccount.setLastFourDigits(account.lastFourDigits());
-      }
-      if (account.accountType() != null) {
-        existingAccount.setAccountType(account.accountType());
-      }
-      if (account.bank() != null) {
-        existingAccount.setBank(account.bank());
-      }
-
-      existingAccount.setUpiEnabled(Optional.ofNullable(account.isUpiEnabled()).orElse(existingAccount.isUpiEnabled()));
-      existingAccount.setNetBankingEnabled(Optional.ofNullable(account.isNetBankingEnabled()).orElse(existingAccount.isNetBankingEnabled()));
-    }
-
-    final var updatedAccount = accountRepo.save(existingAccount);
-
-    return toDto().apply(updatedAccount);
-  }
-
-  @Override
+  @Caching(evict = {
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId"),
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, #accountId}"),
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}")
+  })
   public void deleteAccount(String userId, String accountId) {
     final var existingAccount = accountRepo.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Account not found."));
+
+    if (existingAccount.getAccountType().compareTo(Account.AccountType.CASH) == 0) {
+      throw new RuntimeException("Cannot delete cash account");
+    }
 
     existingAccount.setIsActive(false);
     accountRepo.save(existingAccount);
@@ -178,6 +157,10 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
+  @Caching(evict = {
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId"),
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}")
+  })
   public Float updateCashBalance(String userId, Float cashBalance) {
     final var cashAccount = accountRepo.findCashAccountByUserId(UUID.fromString(userId)).orElseThrow(() -> new RuntimeException("Account not found."));
 
@@ -190,8 +173,11 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  @CachePut(value = "userAccounts", key = "#userId")
-  public AccountDtoOld updateCashBalance(String userId, UpdateCashDto updateCashDto) {
+  @Caching(evict = {
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId"),
+      @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}")
+  })
+  public AccountDto updateCashBalance(String userId, UpdateCashDto updateCashDto) {
     final var cashAccount = accountRepo.findCashAccountByUserId(UUID.fromString(userId))
         .orElseThrow(() -> new RuntimeException("Account not found."));
 
@@ -199,23 +185,23 @@ public class AccountServiceImpl implements AccountService {
       cashAccount.setBalance(updateCashDto.cashBalance());
     }
 
-    accountRepo.save(cashAccount);
-    return toDto().apply(cashAccount);
+    return accountMapper.toDto(accountRepo.save(cashAccount));
   }
 
   @Override
-  public List<AccountDtoOld> getUserAccounts(String userId, String paymentMode) {
+  @Cacheable(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId")
+  public List<AccountDto> getUserAccounts(String userId, String paymentMode) {
     return accountRepo.findByAppUserId(UUID.fromString(userId))
         .stream()
         .filter(account -> (account.getAccountType() == Account.AccountType.CASH) || (Objects.nonNull(paymentMode) && paymentMode.toLowerCase().contains("upi")
             ? account.isUpiEnabled()
             : account.isNetBankingEnabled()))
-        .map(toDto())
-        .toList();
+        .map(accountMapper::toDto)
+        .collect(Collectors.toList());
   }
 
   @Override
-  @Cacheable(value = "userAccounts", key = "#userId")
+  @Cacheable(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "{#userId, 'cash'}")
   public AccountDtoOld getUserCashAccountDetails(String userId) {
     return accountRepo.findByUserIdAndAccountType(UUID.fromString(userId), Account.AccountType.CASH);
   }
@@ -227,8 +213,8 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  @Cacheable(value = "userAccounts", key = "#userId")
-  public List<AccountDto> getUserAccountsV2(String userId) {
+  @Cacheable(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId")
+  public List<AccountDto> getUserAccounts(String userId) {
     return accountRepo.findByAppUserId(UUID.fromString(userId))
         .stream()
         .map(accountMapper::toDto)

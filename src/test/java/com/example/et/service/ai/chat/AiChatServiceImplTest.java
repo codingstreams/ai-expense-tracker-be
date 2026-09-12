@@ -75,7 +75,7 @@ class AiChatServiceImplTest {
         new BankDto(UUID.randomUUID(), "Chase"),
         true
     );
-    when(accountService.getUserAccountsV2(userId)).thenReturn(List.of(mockAccount));
+    when(accountService.getUserAccounts(userId)).thenReturn(List.of(mockAccount));
 
     when(chatClient.prompt()).thenReturn(requestSpec);
     when(requestSpec.system(anyString())).thenReturn(requestSpec);

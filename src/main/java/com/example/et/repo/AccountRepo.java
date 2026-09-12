@@ -16,13 +16,13 @@ public interface AccountRepo extends JpaRepository<Account, UUID> {
   List<Account> findByAppUserId(UUID userId);
 
   @Query("""
-          select new com.example.et.controller.dto.account.AccountDtoOld(a.id, a.lastFourDigits, a.balance, a.accountType, b, a.upiEnabled, a.netBankingEnabled)
+          select a
            from Account a
            join a.appUser u
            left join a.bank b
            where u.id = :userId and a.id = :accountId and a.isActive = true
       """)
-  AccountDtoOld findByUserIdAndAccountId(UUID userId, UUID accountId);
+  Optional<Account> findByUserIdAndAccountId(UUID userId, UUID accountId);
 
   @Query("""
       select a

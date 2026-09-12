@@ -1,5 +1,6 @@
 package com.example.et.service.bank;
 
+import com.example.et.config.CacheConfig;
 import com.example.et.controller.dto.bank.BankDto;
 import com.example.et.mapper.BankMapper;
 import com.example.et.repo.BankRepo;
@@ -17,7 +18,7 @@ public class BankServiceImpl implements BankService {
   private final BankMapper bankMapper;
 
   @Override
-  @Cacheable(value = "banks")
+  @Cacheable(value = CacheConfig.BANKS_CACHE)
   public List<BankDto> getSupportedBanks() {
     return bankRepo.findAll()
         .stream().map(bankMapper::toDto)

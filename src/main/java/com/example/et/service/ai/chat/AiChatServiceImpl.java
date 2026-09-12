@@ -6,20 +6,16 @@ import com.example.et.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.MessageType;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.messages.*;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import java.util.Map;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,7 +38,7 @@ public class AiChatServiceImpl implements AiChatService {
     final var sessionKey = CHAT_KEY_PREFIX + userId;
     final var history = loadChatHistory(sessionKey);
 
-    final var accounts = accountService.getUserAccountsV2(userId);
+    final var accounts = accountService.getUserAccounts(userId);
 
     final var accountsSummary = accounts.stream()
         .map(a -> String.format("- Account: %s (%s), Balance: %.2f",

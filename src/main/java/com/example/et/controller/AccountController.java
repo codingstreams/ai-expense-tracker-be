@@ -1,11 +1,13 @@
 package com.example.et.controller;
 
+import com.example.et.config.CacheConfig;
 import com.example.et.controller.dto.account.AccountDto;
 import com.example.et.controller.dto.account.AccountDtoOld;
-import com.example.et.controller.dto.account.UpdateCashDto;
 import com.example.et.controller.dto.account.CreateAccountsReq;
+import com.example.et.controller.dto.account.UpdateCashDto;
 import com.example.et.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,14 +21,8 @@ public class AccountController {
   private final AccountService accountService;
 
   @GetMapping
-  public ResponseEntity<List<AccountDtoOld>> getUserAccounts(@AuthenticationPrincipal String userId, @RequestParam(required = false) String paymentMode) {
-    final var accounts = accountService.getUserAccounts(userId, paymentMode);
-    return ResponseEntity.ok(accounts);
-  }
-
-  @GetMapping(version = "2")
-  public ResponseEntity<List<AccountDto>> getUserAccountsV2(@AuthenticationPrincipal String userId) {
-    final var accounts = accountService.getUserAccountsV2(userId);
+  public ResponseEntity<List<AccountDto>> getUserAccounts(@AuthenticationPrincipal String userId) {
+    final var accounts = accountService.getUserAccounts(userId);
     return ResponseEntity.ok(accounts);
   }
 
@@ -37,7 +33,7 @@ public class AccountController {
   }
 
   @GetMapping("/{accountId}")
-  public ResponseEntity<AccountDtoOld> getUserAccountDetails(@AuthenticationPrincipal String userId, @PathVariable String accountId) {
+  public ResponseEntity<AccountDto> getUserAccountDetails(@AuthenticationPrincipal String userId, @PathVariable String accountId) {
     final var account = accountService.getUserAccountDetails(userId, accountId);
     return ResponseEntity.ok(account);
   }
@@ -49,18 +45,19 @@ public class AccountController {
   }
 
   @PutMapping("/cash")
-  public ResponseEntity<AccountDtoOld> updateCashBalance(@AuthenticationPrincipal String userId, @RequestBody UpdateCashDto requestBody) {
+  public ResponseEntity<AccountDto> updateCashBalance(@AuthenticationPrincipal String userId, @RequestBody UpdateCashDto requestBody) {
     final var account = accountService.updateCashBalance(userId, requestBody);
     return ResponseEntity.ok(account);
   }
 
   @PutMapping("/{accountId}")
-  public ResponseEntity<AccountDtoOld> updateAccount(@AuthenticationPrincipal String userId, @PathVariable String accountId, @RequestBody AccountDtoOld accountDtoOld) {
-    final var account = accountService.updateAccount(userId, accountId, accountDtoOld);
+  public ResponseEntity<AccountDto> updateAccount(@AuthenticationPrincipal String userId, @PathVariable String accountId, @RequestBody AccountDto accountDto) {
+    final var account = accountService.updateAccount(userId, accountId, accountDto);
     return ResponseEntity.ok(account);
   }
 
   @DeleteMapping("/{accountId}")
+  @CacheEvict(value = CacheConfig.USER_BANK_ACCOUNTS_CACHE, key = "#userId", allEntries = true)
   public ResponseEntity<Void> deleteAccount(@AuthenticationPrincipal String userId, @PathVariable String accountId) {
     accountService.deleteAccount(userId, accountId);
     return ResponseEntity.noContent().build();
