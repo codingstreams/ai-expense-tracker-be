@@ -218,7 +218,7 @@ public class DataSeederServiceImpl implements DataSeederService {
         null,
         Card.CardType.DEBIT_CARD,
         String.valueOf(faker.number().numberBetween(1000, 9999)),
-        savingsAccount.id(),
+        savingsAccount.id().toString(),
         null,
         bankMapper.toEntity(primaryBank)
     );

@@ -28,8 +28,8 @@ public class TransferStrategy implements TransactionStrategy {
     final var userId = transactionContext.userId();
     final var user = AppUser.ofId(userId);
 
-    final var sourceAccount = accountService.getAccount(UUID.fromString(userId), transactionContext.requestDto().accountId());
-    final var destAccount = accountService.getAccount(UUID.fromString(userId), transactionContext.requestDto().toAccountId());
+    final var sourceAccount = accountService.getAccountEntity(userId, transactionContext.requestDto().accountId().toString());
+    final var destAccount = accountService.getAccountEntity(userId, transactionContext.requestDto().toAccountId().toString());
 
     final var transferId = UUID.randomUUID();
 

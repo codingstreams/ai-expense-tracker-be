@@ -1,5 +1,6 @@
 package com.example.et.module.transaction.internal.strategy;
 
+import com.example.et.module.account.AccountMapper;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.ai.parser.AiParseTaskService;
 import com.example.et.module.reference.paymentmode.PaymentModeMapper;
@@ -12,8 +13,6 @@ import com.example.et.module.user.AppUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Component
 @RequiredArgsConstructor
 public class IncomeStrategy implements TransactionStrategy {
@@ -22,12 +21,13 @@ public class IncomeStrategy implements TransactionStrategy {
   private final AiParseTaskService aiParseTaskService;
   private final PaymentModeMapper paymentModeMapper;
   private final TransactionMapper transactionMapper;
+  private final AccountMapper accountMapper;
 
   @Override
   public TransactionResponseDto execute(TransactionContext transactionContext) {
     final var userId = transactionContext.userId();
     final var user = AppUser.ofId(userId);
-    final var account = accountService.getAccount(UUID.fromString(userId), transactionContext.requestDto().accountId());
+    final var account = accountMapper.toEntity(accountService.getAccount(userId, transactionContext.requestDto().accountId().toString()));
 
     account.credit(transactionContext.requestDto().amount());
     accountService.saveAccount(account);

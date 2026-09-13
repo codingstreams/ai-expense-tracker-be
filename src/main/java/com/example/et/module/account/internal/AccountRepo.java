@@ -30,7 +30,7 @@ public interface AccountRepo extends JpaRepository<Account, UUID> {
           join a.appUser u
           where u.id = :appUserId and a.id = :id and a.isActive = true
       """)
-  Optional<Account> findByIdAndAppUserId(UUID id, UUID appUserId);
+  Optional<Account> findByIdAndAppUserId(String id, String appUserId);
 
   @Query("""
           select a

@@ -1,6 +1,7 @@
 package com.example.et.module.transaction.internal.strategy;
 
 import com.example.et.module.account.Account;
+import com.example.et.module.account.AccountMapper;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.ai.parser.AiParseTaskService;
 import com.example.et.module.card.CardService;
@@ -25,17 +26,18 @@ public class ExpenseStrategy implements TransactionStrategy {
   private final AiParseTaskService aiParseTaskService;
   private final PaymentModeMapper paymentModeMapper;
   private final TransactionMapper transactionMapper;
+  private final AccountMapper accountMapper;
 
-  private Account resolveAccount(String userId, UUID accountId, UUID cardId) {
+  private Account resolveAccount(String userId, String accountId, String cardId) {
     if (cardId != null) {
-      final var card = cardService.getUserCard(userId, cardId);
+      final var card = cardService.getUserCard(userId, UUID.fromString(cardId));
       if (card.getAccount() == null) {
         throw new RuntimeException("Card is not linked to any account");
       }
       return card.getAccount();
     }
     if (accountId != null) {
-      return accountService.getAccount(UUID.fromString(userId), accountId);
+      return accountMapper.toEntity(accountService.getAccount(userId, accountId));
     }
     throw new RuntimeException("Either accountId or cardId must be provided");
   }
@@ -44,7 +46,7 @@ public class ExpenseStrategy implements TransactionStrategy {
   public TransactionResponseDto execute(TransactionContext transactionContext) {
     final var userId = transactionContext.userId();
     final var user = AppUser.ofId(userId);
-    final var account = resolveAccount(userId, transactionContext.requestDto().accountId(), transactionContext.requestDto().cardId());
+    final var account = resolveAccount(userId, transactionContext.requestDto().accountId().toString(), transactionContext.requestDto().cardId().toString());
 
     account.debit(transactionContext.requestDto().amount());
     accountService.saveAccount(account);

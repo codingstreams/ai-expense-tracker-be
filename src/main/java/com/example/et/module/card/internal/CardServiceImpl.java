@@ -2,6 +2,7 @@ package com.example.et.module.card.internal;
 
 import com.example.et.core.config.CacheNames;
 import com.example.et.module.account.Account;
+import com.example.et.module.account.AccountMapper;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.card.Card;
 import com.example.et.module.card.CardMapper;
@@ -24,6 +25,7 @@ public class CardServiceImpl implements CardService {
   private final CardRepo cardRepo;
   private final AccountService accountService;
   private final CardMapper cardMapper;
+  private final AccountMapper accountMapper;
 
   @Override
   @Cacheable(
@@ -64,7 +66,7 @@ public class CardServiceImpl implements CardService {
             .bank(cardDto.bank())
             .build());
       } else {
-        account = accountService.getAccount(UUID.fromString(userId), cardDto.accountId());
+        account = accountMapper.toEntity(accountService.getAccount(userId, cardDto.accountId()));
       }
 
       return Card.builder()

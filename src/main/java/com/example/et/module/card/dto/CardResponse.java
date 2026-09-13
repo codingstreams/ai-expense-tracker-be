@@ -5,6 +5,6 @@ import com.example.et.module.reference.bank.Bank;
 
 import java.util.UUID;
 
-public record CardResponse(UUID id, Card.CardType cardType, String lastFourDigits, UUID accountId, Float limit,
+public record CardResponse(UUID id, Card.CardType cardType, String lastFourDigits, String accountId, Float limit,
                            Bank bank) {
 }

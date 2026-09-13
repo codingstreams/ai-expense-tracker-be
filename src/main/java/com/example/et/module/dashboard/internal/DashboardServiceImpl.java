@@ -93,11 +93,11 @@ public class DashboardServiceImpl implements DashboardService {
   @Cacheable(value = CacheNames.USER_FINANCIAL_SUMMARY, key = "#userId + ':summary'")
   public UserSummaryDto getSummary(String userId) {
     try {
-      final var accounts = accountService.getUserAccountList(userId);
+      final var accounts = accountService.getUserAccounts(userId);
 
       // Net worth
       final var netWorth = accounts.stream()
-          .mapToDouble(a -> a.getAccountType() == Account.AccountType.CREDIT ? -a.getBalance() : a.getBalance())
+          .mapToDouble(a -> a.accountType() == Account.AccountType.CREDIT ? -a.balance() : a.balance())
           .sum();
 
       // Total Expense
