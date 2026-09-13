@@ -6,8 +6,8 @@ import com.example.et.module.account.AccountService;
 import com.example.et.module.card.Card;
 import com.example.et.module.card.CardMapper;
 import com.example.et.module.card.CardService;
-import com.example.et.module.card.dto.CardDto;
-import com.example.et.module.card.dto.UserCards;
+import com.example.et.module.card.dto.AddCardsRequest;
+import com.example.et.module.card.dto.CardsResponse;
 import com.example.et.module.user.AppUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -15,8 +15,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,14 +29,16 @@ public class CardServiceImpl implements CardService {
   @Cacheable(
       value = CacheNames.USER_CARDS,
       key = "#userId + ':' + (#cardType != null ? #cardType : 'ALL')",
-      unless = "#result == null || #result.isEmpty()"
+      unless = "#result == null || #result.cards().isEmpty()"
   )
-  public List<CardDto> getUserCards(String userId, Card.CardType cardType) {
-    return cardRepo.findByAppUserId(UUID.fromString(userId))
+  public CardsResponse getUserCards(String userId, Card.CardType cardType) {
+    final var cards = cardRepo.findByAppUserId(UUID.fromString(userId))
         .stream()
         .filter(card -> cardType == null || card.getCardType() == cardType)
         .map(cardMapper::toDto)
-        .toList();
+        .collect(Collectors.toList());
+
+    return new CardsResponse(cards);
   }
 
   @Override
@@ -46,10 +48,10 @@ public class CardServiceImpl implements CardService {
       @CacheEvict(value = CacheNames.USER_CARDS, key = "#userId + ':DEBIT_CARD'"),
       @CacheEvict(value = CacheNames.USER_BANK_ACCOUNTS, key = "#userId")
   })
-  public List<CardDto> addCards(String userId, UserCards userCards) {
+  public CardsResponse addCards(String userId, AddCardsRequest addCardsRequest) {
     final var user = AppUser.ofId(userId);
 
-    final var cardsToSave = userCards.cards().stream().map(cardDto -> {
+    final var cardsToSave = addCardsRequest.cards().stream().map(cardDto -> {
       Account account;
 
       if (cardDto.cardType() == Card.CardType.CREDIT_CARD) {
@@ -73,10 +75,12 @@ public class CardServiceImpl implements CardService {
           .build();
     }).toList();
 
-    return cardRepo.saveAll(cardsToSave)
+    final var cards = cardRepo.saveAll(cardsToSave)
         .stream()
         .map(cardMapper::toDto)
-        .toList();
+        .collect(Collectors.toList());
+
+    return new CardsResponse(cards);
   }
 
   @Override

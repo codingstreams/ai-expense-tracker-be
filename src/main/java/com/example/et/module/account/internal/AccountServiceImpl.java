@@ -11,7 +11,6 @@ import com.example.et.module.account.dto.UpdateCashDto;
 import com.example.et.module.reference.bank.BankMapper;
 import com.example.et.module.reference.bank.dto.BankDto;
 import com.example.et.module.reference.bank.internal.BankRepo;
-import com.example.et.module.user.AppUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -57,16 +55,7 @@ public class AccountServiceImpl implements AccountService {
 
     final var accountToBeCreated = requestBody.accounts()
         .stream()
-        .map(accountDto -> Account.builder()
-            .appUser(AppUser.ofId(userId))
-            .accountType(accountDto.accountType())
-            .balance(accountDto.balance())
-            .lastFourDigits(accountDto.lastFourDigits())
-            .bank(bankMapper.toEntity(accountDto.bank()))
-            .isActive(true)
-            .upiEnabled(Optional.ofNullable(accountDto.upiEnabled()).orElse(true))
-            .netBankingEnabled(Optional.ofNullable(accountDto.netBankingEnabled()).orElse(true))
-            .build())
+        .map(accountMapper::toEntity)
         .toList();
 
     return accountRepo.saveAll(accountToBeCreated)

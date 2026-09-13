@@ -7,8 +7,8 @@ import com.example.et.module.auth.AuthService;
 import com.example.et.module.auth.dto.RegisterUserRequest;
 import com.example.et.module.card.Card;
 import com.example.et.module.card.CardService;
-import com.example.et.module.card.dto.CardDto;
-import com.example.et.module.card.dto.UserCards;
+import com.example.et.module.card.dto.AddCardsRequest;
+import com.example.et.module.card.dto.CardResponse;
 import com.example.et.module.dashboard.DashboardService;
 import com.example.et.module.dashboard.dto.OnboardUserDto;
 import com.example.et.module.dataseeder.DataSeederService;
@@ -214,7 +214,7 @@ public class DataSeederServiceImpl implements DataSeederService {
         formatAmount(initialCreditLimit)
     );
 
-    final var debitCardDto = new CardDto(
+    final var debitCardDto = new CardResponse(
         null,
         Card.CardType.DEBIT_CARD,
         String.valueOf(faker.number().numberBetween(1000, 9999)),
@@ -223,7 +223,7 @@ public class DataSeederServiceImpl implements DataSeederService {
         bankMapper.toEntity(primaryBank)
     );
 
-    final var creditCardDto = new CardDto(
+    final var creditCardDto = new CardResponse(
         null,
         Card.CardType.CREDIT_CARD,
         String.valueOf(faker.number().numberBetween(1000, 9999)),
@@ -232,17 +232,17 @@ public class DataSeederServiceImpl implements DataSeederService {
         bankMapper.toEntity(secondaryBank != null ? secondaryBank : primaryBank)
     );
 
-    final var createdCards = cardService.addCards(userId, new UserCards(List.of(debitCardDto, creditCardDto)));
+    final var createdCards = cardService.addCards(userId, new AddCardsRequest(List.of(debitCardDto, creditCardDto)));
 
-    final UUID debitCardId = createdCards.stream()
+    final UUID debitCardId = createdCards.cards().stream()
         .filter(c -> c.cardType() == Card.CardType.DEBIT_CARD)
-        .map(CardDto::id)
+        .map(CardResponse::id)
         .findFirst()
         .orElse(null);
 
-    final UUID creditCardId = createdCards.stream()
+    final UUID creditCardId = createdCards.cards().stream()
         .filter(c -> c.cardType() == Card.CardType.CREDIT_CARD)
-        .map(CardDto::id)
+        .map(CardResponse::id)
         .findFirst()
         .orElse(null);
 

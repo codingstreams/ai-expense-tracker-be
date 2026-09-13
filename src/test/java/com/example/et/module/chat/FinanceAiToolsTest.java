@@ -1,4 +1,4 @@
-package com.example.et.service.ai.chat;
+package com.example.et.module.chat;
 
 import com.example.et.module.ai.tool.FinanceAiTools;
 import com.example.et.module.dashboard.DashboardService;

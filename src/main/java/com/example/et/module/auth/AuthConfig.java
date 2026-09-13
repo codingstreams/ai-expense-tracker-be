@@ -33,7 +33,7 @@ import java.util.List;
 
 @Configuration
 @EnableConfigurationProperties(JwtProps.class)
-public class SecurityConfig {
+public class AuthConfig {
   @Value("${cors.allowed-origins}")
   private List<String> allowedOrigins;
 

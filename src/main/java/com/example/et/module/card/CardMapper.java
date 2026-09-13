@@ -1,6 +1,6 @@
 package com.example.et.module.card;
 
-import com.example.et.module.card.dto.CardDto;
+import com.example.et.module.card.dto.CardResponse;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -16,14 +16,14 @@ public interface CardMapper {
   @Mapping(target = "accountId", source = "account.id")
   @Mapping(target = "limit", source = "account.balance")
   @Mapping(target = "bank", source = "account.bank")
-  CardDto toDto(Card entity);
+  CardResponse toDto(Card entity);
 
   // DTO to Entity
   @Mapping(target = "appUser", ignore = true)
   @Mapping(target = "account", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "lastModifiedAt", ignore = true)
-  Card toEntity(CardDto dto);
+  Card toEntity(CardResponse dto);
 
   // Update existing entity from DTO
   @Mapping(target = "id", ignore = true)
@@ -31,5 +31,5 @@ public interface CardMapper {
   @Mapping(target = "account", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "lastModifiedAt", ignore = true)
-  void updateEntityFromDto(CardDto dto, @MappingTarget Card entity);
+  void updateEntityFromDto(CardResponse dto, @MappingTarget Card entity);
 }

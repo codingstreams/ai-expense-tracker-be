@@ -1,4 +1,4 @@
-package com.example.et.service.auth;
+package com.example.et.module.auth;
 
 import com.example.et.module.auth.internal.RefreshTokenRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;

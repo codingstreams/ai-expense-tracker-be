@@ -1,4 +1,4 @@
-package com.example.et.service.transaction;
+package com.example.et.module.transaction;
 
 import com.example.et.module.transaction.dto.TransactionFilterParams;
 import org.junit.jupiter.api.Test;

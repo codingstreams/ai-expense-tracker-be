@@ -16,7 +16,7 @@ public interface AppUserRepo extends JpaRepository<AppUser, UUID> {
   boolean existsByEmailAndOnboardingComplete(String email, boolean isOnboardingComplete);
 
   @Query("""
-      select new com.example.et.controller.dto.appuser.UserDetailsDto(
+      select new com.example.et.module.user.dto.UserDetailsDto(
           u.email,
           u.name,
           u.onboardingComplete,

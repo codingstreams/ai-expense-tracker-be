@@ -17,7 +17,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 @Configuration
-public class CacheConfig {
+public class CommonCacheConfig {
   @Bean
   LettuceConnectionFactory lettuceConnectionFactory(@Value("${redis.url}") String url) {
     RedisURI redisUri = RedisURI.create(url);

@@ -1,7 +1,5 @@
-package com.example.et.controller;
+package com.example.et.module.auth;
 
-import com.example.et.module.auth.AuthController;
-import com.example.et.module.auth.AuthService;
 import com.example.et.module.auth.dto.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

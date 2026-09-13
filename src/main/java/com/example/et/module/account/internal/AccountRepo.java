@@ -42,7 +42,7 @@ public interface AccountRepo extends JpaRepository<Account, UUID> {
   Optional<Account> findCashAccountByUserId(UUID userId);
 
   @Query("""
-          select new com.example.et.controller.dto.account.AccountDtoOld(a.id, a.lastFourDigits, a.balance, a.accountType, b, a.upiEnabled, a.netBankingEnabled)
+          select new com.example.et.module.account.dto.AccountDtoOld(a.id, a.lastFourDigits, a.balance, a.accountType, b, a.upiEnabled, a.netBankingEnabled)
            from Account a
            join a.appUser u
            left join a.bank b

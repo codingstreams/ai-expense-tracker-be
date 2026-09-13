@@ -1,15 +1,14 @@
 package com.example.et.module.card;
 
-import com.example.et.module.card.dto.CardDto;
-import com.example.et.module.card.dto.UserCards;
+import com.example.et.module.card.dto.AddCardsRequest;
+import com.example.et.module.card.dto.CardsResponse;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface CardService {
-  List<CardDto> getUserCards(String userId, Card.CardType cardType);
+  CardsResponse getUserCards(String userId, Card.CardType cardType);
 
-  List<CardDto> addCards(String userId, UserCards userCards);
+  CardsResponse addCards(String userId, AddCardsRequest addCardsRequest);
 
   Card getUserCard(String userId, UUID cardId);
 }
