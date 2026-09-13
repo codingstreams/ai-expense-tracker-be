@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface AccountRepo extends JpaRepository<Account, UUID> {
+public interface AccountRepository extends JpaRepository<Account, UUID> {
   @Query("""
       select a from Account a where a.appUser.id = :userId and a.isActive = true
       """)

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 public class AppUserController {
   private final AppUserService appUserService;
 
-  // Version 1
   @GetMapping("/me")
   public ResponseEntity<UserDetailsDto> getCurrentUserDetails(@AuthenticationPrincipal String userId) {
     final var appUser = appUserService.getUserByUserIdWithConfig(userId);
@@ -30,7 +29,6 @@ public class AppUserController {
     return ResponseEntity.ok(appUser);
   }
 
-  // Version 2
   @GetMapping(value = "/me", version = "2")
   public ResponseEntity<AppUserDto> getCurrentUserDetailsV2(@AuthenticationPrincipal String userId) {
     final var appUser = appUserService.getUserByUserIdWithConfigV2(userId);

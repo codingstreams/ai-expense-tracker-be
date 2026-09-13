@@ -6,7 +6,7 @@ import com.example.et.core.exception.ErrorCode;
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountMapper;
 import com.example.et.module.account.AccountService;
-import com.example.et.module.account.dto.AccountDto;
+import com.example.et.module.account.dto.AccountDetailsResponse;
 import com.example.et.module.account.dto.AccountDtoOld;
 import com.example.et.module.account.dto.CreateAccountsRequest;
 import com.example.et.module.account.dto.UpdateCashBalanceRequest;
@@ -27,13 +27,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
-  private final AccountRepo accountRepo;
+  private final AccountRepository accountRepository;
   private final AccountMapper accountMapper;
   private final BankService bankService;
 
   @Override
   public List<Account> getUserAccountList(String userId) {
-    return accountRepo.findByAppUserId(UUID.fromString(userId));
+    return accountRepository.findByAppUserId(UUID.fromString(userId));
   }
 
   @Override
@@ -43,10 +43,10 @@ public class AccountServiceImpl implements AccountService {
           @CacheEvict(value = CacheNames.USER_FINANCIAL_SUMMARY, allEntries = true)
       }
   )
-  public List<AccountDto> addAccounts(String userId, CreateAccountsRequest requestBody) {
+  public List<AccountDetailsResponse> addAccounts(String userId, CreateAccountsRequest requestBody) {
     final var bankIds = requestBody.accounts()
         .stream()
-        .map(AccountDto::bank)
+        .map(AccountDetailsResponse::bank)
         .map(BankDetailsResponse::id)
         .collect(Collectors.toSet());
 
@@ -57,7 +57,7 @@ public class AccountServiceImpl implements AccountService {
         .map(accountMapper::toEntity)
         .toList();
 
-    return accountRepo.saveAll(accountToBeCreated)
+    return accountRepository.saveAll(accountToBeCreated)
         .stream()
         .map(accountMapper::toDto)
         .collect(Collectors.toList());
@@ -71,13 +71,13 @@ public class AccountServiceImpl implements AccountService {
       @CacheEvict(value = CacheNames.USER_FINANCIAL_SUMMARY, allEntries = true)
   })
   public Account saveAccount(Account account) {
-    return accountRepo.save(account);
+    return accountRepository.save(account);
   }
 
   @Override
   @Cacheable(value = CacheNames.USER_BANK_ACCOUNTS, key = "{#userId, #accountId}")
-  public AccountDto getUserAccountDetails(String userId, String accountId) {
-    return accountRepo.findByUserIdAndAccountId(UUID.fromString(userId), UUID.fromString(accountId))
+  public AccountDetailsResponse getUserAccountDetails(String userId, String accountId) {
+    return accountRepository.findByUserIdAndAccountId(UUID.fromString(userId), UUID.fromString(accountId))
         .map(accountMapper::toDto)
         .orElseThrow(() -> new ApiException(ErrorCode.ACCOUNT_NOT_FOUND));
   }
@@ -89,7 +89,7 @@ public class AccountServiceImpl implements AccountService {
       @CacheEvict(value = CacheNames.USER_BANK_ACCOUNTS, key = "{#userId, 'cash'}"),
       @CacheEvict(value = CacheNames.USER_FINANCIAL_SUMMARY, allEntries = true)
   })
-  public AccountDto updateAccount(String userId, String accountId, AccountDto account) {
+  public AccountDetailsResponse updateAccount(String userId, String accountId, AccountDetailsResponse account) {
     final var existingAccount = getAccountEntity(userId, accountId);
 
     boolean isUpdateRequired = false;
@@ -122,7 +122,7 @@ public class AccountServiceImpl implements AccountService {
       }
     }
 
-    final var updatedAccount = isUpdateRequired ? accountRepo.save(existingAccount) : existingAccount;
+    final var updatedAccount = isUpdateRequired ? accountRepository.save(existingAccount) : existingAccount;
     return accountMapper.toDto(updatedAccount);
   }
 
@@ -141,7 +141,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     existingAccount.setIsActive(false);
-    accountRepo.save(existingAccount);
+    accountRepository.save(existingAccount);
   }
 
   @Override
@@ -150,8 +150,8 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public AccountDto getAccount(String userId, String accountId) {
-    return accountRepo.findByIdAndAppUserId(accountId, userId)
+  public AccountDetailsResponse getAccount(String userId, String accountId) {
+    return accountRepository.findByIdAndAppUserId(accountId, userId)
         .map(accountMapper::toDto)
         .orElseThrow(() -> new ApiException(ErrorCode.ACCOUNT_NOT_FOUND));
   }
@@ -169,12 +169,12 @@ public class AccountServiceImpl implements AccountService {
       cashAccount.setBalance(cashBalance);
     }
 
-    accountRepo.save(cashAccount);
+    accountRepository.save(cashAccount);
     return cashBalance;
   }
 
   private @NonNull Account getCashAccount(String userId) {
-    return accountRepo.findCashAccountByUserId(UUID.fromString(userId))
+    return accountRepository.findCashAccountByUserId(UUID.fromString(userId))
         .orElseThrow(() -> new ApiException(ErrorCode.ACCOUNT_NOT_FOUND));
   }
 
@@ -184,26 +184,26 @@ public class AccountServiceImpl implements AccountService {
       @CacheEvict(value = CacheNames.USER_BANK_ACCOUNTS, key = "{#userId, 'cash'}"),
       @CacheEvict(value = CacheNames.USER_FINANCIAL_SUMMARY, allEntries = true)
   })
-  public AccountDto updateCashBalance(String userId, UpdateCashBalanceRequest updateCashBalanceRequest) {
+  public AccountDetailsResponse updateCashBalance(String userId, UpdateCashBalanceRequest updateCashBalanceRequest) {
     final var cashAccount = getCashAccount(userId);
 
     if (updateCashBalanceRequest.cashBalance() > 0) {
       cashAccount.setBalance(updateCashBalanceRequest.cashBalance());
     }
 
-    return accountMapper.toDto(accountRepo.save(cashAccount));
+    return accountMapper.toDto(accountRepository.save(cashAccount));
   }
 
   @Override
   @Cacheable(value = CacheNames.USER_BANK_ACCOUNTS, key = "{#userId, 'cash'}")
   public AccountDtoOld getUserCashAccountDetails(String userId) {
-    return accountRepo.findByUserIdAndAccountType(UUID.fromString(userId), Account.AccountType.CASH);
+    return accountRepository.findByUserIdAndAccountType(UUID.fromString(userId), Account.AccountType.CASH);
   }
 
   @Override
   @Cacheable(value = CacheNames.USER_BANK_ACCOUNTS, key = "#userId")
-  public List<AccountDto> getUserAccounts(String userId) {
-    return accountRepo.findByAppUserId(UUID.fromString(userId))
+  public List<AccountDetailsResponse> getUserAccounts(String userId) {
+    return accountRepository.findByAppUserId(UUID.fromString(userId))
         .stream()
         .map(accountMapper::toDto)
         .collect(Collectors.toList());
@@ -213,13 +213,13 @@ public class AccountServiceImpl implements AccountService {
   public void debitAccount(String userId, String accountId, Float amount) {
     final var account = this.getAccountEntity(userId, accountId);
     account.debit(amount);
-    accountRepo.save(account);
+    accountRepository.save(account);
   }
 
   @Override
   public void creditAccount(String userId, String accountId, Float amount) {
     final var account = this.getAccountEntity(userId, accountId);
     account.credit(amount);
-    accountRepo.save(account);
+    accountRepository.save(account);
   }
 }

@@ -1,6 +1,6 @@
 package com.example.et.module.account;
 
-import com.example.et.module.account.dto.AccountDto;
+import com.example.et.module.account.dto.AccountDetailsResponse;
 import com.example.et.module.reference.bank.BankMapper;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
@@ -14,18 +14,18 @@ import org.mapstruct.MappingTarget;
 )
 public interface AccountMapper {
   // Entity to DTO
-  AccountDto toDto(Account entity);
+  AccountDetailsResponse toDto(Account entity);
 
   // DTO to Entity
   @Mapping(target = "appUser", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "lastModifiedAt", ignore = true)
-  Account toEntity(AccountDto dto);
+  Account toEntity(AccountDetailsResponse dto);
 
   // Update existing entity from DTO
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "appUser", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "lastModifiedAt", ignore = true)
-  void updateEntityFromDto(AccountDto dto, @MappingTarget Account entity);
+  void updateEntityFromDto(AccountDetailsResponse dto, @MappingTarget Account entity);
 }

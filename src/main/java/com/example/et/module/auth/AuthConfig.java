@@ -40,6 +40,8 @@ public class AuthConfig {
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter, AuthenticationEntryPoint authenticationEntryPoint) {
 
+    final var whitelistEndpoints = new String[]{"/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/error", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"};
+
     http
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(CsrfConfigurer::disable)
@@ -47,7 +49,7 @@ public class AuthConfig {
         .authorizeHttpRequests(h -> h
             .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
             .requestMatchers(EndpointRequest.to("metrics", "prometheus", "health")).permitAll()
-            .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/error")
+            .requestMatchers(whitelistEndpoints)
             .permitAll()
             .anyRequest()
             .authenticated())
@@ -59,7 +61,7 @@ public class AuthConfig {
 
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
+    final var configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(allowedOrigins); // Your Next.js URL
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-API-Version"));

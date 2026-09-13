@@ -2,7 +2,7 @@ package com.example.et.module.chat;
 
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
-import com.example.et.module.account.dto.AccountDto;
+import com.example.et.module.account.dto.AccountDetailsResponse;
 import com.example.et.module.ai.chat.AiChatServiceImpl;
 import com.example.et.module.ai.chat.StoredChatMessage;
 import com.example.et.module.ai.dto.ChatMessageRequest;
@@ -67,7 +67,7 @@ class AiChatServiceImplTest {
     when(redisTemplate.opsForList()).thenReturn(listOperations);
     when(listOperations.range(sessionKey, 0, -1)).thenReturn(Collections.emptyList());
 
-    final AccountDto mockAccount = new AccountDto(
+    final AccountDetailsResponse mockAccount = new AccountDetailsResponse(
         UUID.randomUUID(),
         "4321",
         1500.00f,

@@ -5,7 +5,7 @@ import com.example.et.core.exception.ErrorCode;
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountMapper;
 import com.example.et.module.account.AccountService;
-import com.example.et.module.account.dto.AccountDto;
+import com.example.et.module.account.dto.AccountDetailsResponse;
 import com.example.et.module.card.dto.AddCardsRequest;
 import com.example.et.module.card.dto.CardResponse;
 import com.example.et.module.card.dto.CardsResponse;
@@ -216,7 +216,7 @@ class CardServiceImplTest {
     CardResponse requestCard = new CardResponse(null, Card.CardType.DEBIT_CARD, "8888", existingAccountId, null, null);
     AddCardsRequest request = new AddCardsRequest(List.of(requestCard));
 
-    AccountDto existingAccountDto = new AccountDto(UUID.fromString(existingAccountId), "8888", 1000.0f, Account.AccountType.SAVINGS, true, true, null, true);
+    AccountDetailsResponse existingAccountDetailsResponse = new AccountDetailsResponse(UUID.fromString(existingAccountId), "8888", 1000.0f, Account.AccountType.SAVINGS, true, true, null, true);
     Account existingAccount = Account.builder().id(UUID.fromString(existingAccountId)).balance(1000.0f).build();
 
     Card savedCard = Card.builder()
@@ -229,8 +229,8 @@ class CardServiceImplTest {
 
     CardResponse responseCard = new CardResponse(savedCard.getId(), Card.CardType.DEBIT_CARD, "8888", existingAccountId, null, null);
 
-    when(accountService.getAccount(userId, existingAccountId)).thenReturn(existingAccountDto);
-    when(accountMapper.toEntity(existingAccountDto)).thenReturn(existingAccount);
+    when(accountService.getAccount(userId, existingAccountId)).thenReturn(existingAccountDetailsResponse);
+    when(accountMapper.toEntity(existingAccountDetailsResponse)).thenReturn(existingAccount);
     when(cardRepo.saveAll(any())).thenReturn(List.of(savedCard));
     when(cardMapper.toDto(savedCard)).thenReturn(responseCard);
 

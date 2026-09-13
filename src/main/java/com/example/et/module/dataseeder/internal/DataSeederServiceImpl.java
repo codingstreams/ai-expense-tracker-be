@@ -2,7 +2,7 @@ package com.example.et.module.dataseeder.internal;
 
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
-import com.example.et.module.account.dto.AccountDto;
+import com.example.et.module.account.dto.AccountDetailsResponse;
 import com.example.et.module.auth.AuthService;
 import com.example.et.module.auth.dto.RegisterUserRequest;
 import com.example.et.module.card.Card;
@@ -161,7 +161,7 @@ public class DataSeederServiceImpl implements DataSeederService {
         formatAmount(initialCashBalance)
     );
 
-    final var savingsAccountDto = new AccountDto(
+    final var savingsAccountDto = new AccountDetailsResponse(
         null,
         String.valueOf(faker.number().numberBetween(1000, 9999)),
         initialSavingsBalance,

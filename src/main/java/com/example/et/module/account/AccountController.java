@@ -1,6 +1,6 @@
 package com.example.et.module.account;
 
-import com.example.et.module.account.dto.AccountDto;
+import com.example.et.module.account.dto.AccountDetailsResponse;
 import com.example.et.module.account.dto.AccountDtoOld;
 import com.example.et.module.account.dto.CreateAccountsRequest;
 import com.example.et.module.account.dto.UpdateCashBalanceRequest;
@@ -18,19 +18,19 @@ public class AccountController {
   private final AccountService accountService;
 
   @GetMapping
-  public ResponseEntity<List<AccountDto>> getUserAccounts(@AuthenticationPrincipal String userId) {
+  public ResponseEntity<List<AccountDetailsResponse>> getUserAccounts(@AuthenticationPrincipal String userId) {
     final var accounts = accountService.getUserAccounts(userId);
     return ResponseEntity.ok(accounts);
   }
 
   @PostMapping
-  public ResponseEntity<List<AccountDto>> addAccounts(@AuthenticationPrincipal String userId, @RequestBody CreateAccountsRequest accounts) {
+  public ResponseEntity<List<AccountDetailsResponse>> addAccounts(@AuthenticationPrincipal String userId, @RequestBody CreateAccountsRequest accounts) {
     final var createdAccounts = accountService.addAccounts(userId, accounts);
     return ResponseEntity.ok(createdAccounts);
   }
 
   @GetMapping("/{accountId}")
-  public ResponseEntity<AccountDto> getUserAccountDetails(@AuthenticationPrincipal String userId, @PathVariable String accountId) {
+  public ResponseEntity<AccountDetailsResponse> getUserAccountDetails(@AuthenticationPrincipal String userId, @PathVariable String accountId) {
     final var account = accountService.getUserAccountDetails(userId, accountId);
     return ResponseEntity.ok(account);
   }
@@ -42,14 +42,14 @@ public class AccountController {
   }
 
   @PutMapping("/cash")
-  public ResponseEntity<AccountDto> updateCashBalance(@AuthenticationPrincipal String userId, @RequestBody UpdateCashBalanceRequest requestBody) {
+  public ResponseEntity<AccountDetailsResponse> updateCashBalance(@AuthenticationPrincipal String userId, @RequestBody UpdateCashBalanceRequest requestBody) {
     final var account = accountService.updateCashBalance(userId, requestBody);
     return ResponseEntity.ok(account);
   }
 
   @PutMapping("/{accountId}")
-  public ResponseEntity<AccountDto> updateAccount(@AuthenticationPrincipal String userId, @PathVariable String accountId, @RequestBody AccountDto accountDto) {
-    final var account = accountService.updateAccount(userId, accountId, accountDto);
+  public ResponseEntity<AccountDetailsResponse> updateAccount(@AuthenticationPrincipal String userId, @PathVariable String accountId, @RequestBody AccountDetailsResponse accountDetailsResponse) {
+    final var account = accountService.updateAccount(userId, accountId, accountDetailsResponse);
     return ResponseEntity.ok(account);
   }
 

@@ -5,7 +5,7 @@ import com.example.et.module.reference.bank.dto.BankDetailsResponse;
 
 import java.util.UUID;
 
-public record AccountDto(
+public record AccountDetailsResponse(
     UUID id,
     String lastFourDigits,
     Float balance,

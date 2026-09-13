@@ -4,7 +4,7 @@ import com.example.et.core.exception.ApiException;
 import com.example.et.core.exception.ErrorCode;
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
-import com.example.et.module.account.dto.AccountDto;
+import com.example.et.module.account.dto.AccountDetailsResponse;
 import com.example.et.module.ai.parser.AiParseTaskService;
 import com.example.et.module.card.Card;
 import com.example.et.module.card.CardService;
@@ -85,14 +85,14 @@ class ExpenseStrategyTest {
 
     PaymentModeDetailsResponse paymentMode = new PaymentModeDetailsResponse(UUID.randomUUID(), "UPI");
     TransactionContext context = new TransactionContext(userId, request, paymentMode, null);
-    AccountDto accountDto = new AccountDto(accountUuid, "1234", 1000.0f, Account.AccountType.SAVINGS, true, true, null, true);
+    AccountDetailsResponse accountDetailsResponse = new AccountDetailsResponse(accountUuid, "1234", 1000.0f, Account.AccountType.SAVINGS, true, true, null, true);
     Transaction savedTransaction = Transaction.builder().id(UUID.randomUUID()).amount(150.0f).build();
     TransactionDetailsResponse expectedResponse = new TransactionDetailsResponse(
         savedTransaction.getId(), Transaction.TransactionType.EXPENSE, 150.0f, LocalDate.now(), "Groceries", "Acc", "UPI", null
     );
 
     doNothing().when(accountService).debitAccount(userId, accountId, 150.0f);
-    when(accountService.getAccount(userId, accountId)).thenReturn(accountDto);
+    when(accountService.getAccount(userId, accountId)).thenReturn(accountDetailsResponse);
     when(transactionRepo.save(any(Transaction.class))).thenReturn(savedTransaction);
     when(transactionMapper.toResponseDto(savedTransaction)).thenReturn(expectedResponse);
 

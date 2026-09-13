@@ -2,7 +2,7 @@ package com.example.et.module.dashboard;
 
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
-import com.example.et.module.account.dto.AccountDto;
+import com.example.et.module.account.dto.AccountDetailsResponse;
 import com.example.et.module.dashboard.dto.CategoryBreakdownDto;
 import com.example.et.module.dashboard.dto.MonthlyTrendDto;
 import com.example.et.module.dashboard.dto.OnboardUserDto;
@@ -59,7 +59,7 @@ class DashboardServiceImplTest {
   // ----------------------------------------------------------------------
   @Test
   void onboardUser_ShouldAddAccountsUpdateCashAndUserConfig() {
-    AccountDto accountDto = new AccountDto(UUID.randomUUID(), "1111", 1000.0f, Account.AccountType.SAVINGS, true, true, null, true);
+    AccountDetailsResponse accountDetailsResponse = new AccountDetailsResponse(UUID.randomUUID(), "1111", 1000.0f, Account.AccountType.SAVINGS, true, true, null, true);
     com.example.et.module.user.dto.UpdateUserDetailsDto configDto = new com.example.et.module.user.dto.UpdateUserDetailsDto(
         com.example.et.module.user.AppUserConfig.LanguagePreference.EN,
         50000,
@@ -67,9 +67,9 @@ class DashboardServiceImplTest {
         "UPI",
         true
     );
-    OnboardUserDto request = new OnboardUserDto(configDto, 500.0f, List.of(accountDto));
+    OnboardUserDto request = new OnboardUserDto(configDto, 500.0f, List.of(accountDetailsResponse));
 
-    when(accountService.addAccounts(eq(userId), any())).thenReturn(List.of(accountDto));
+    when(accountService.addAccounts(eq(userId), any())).thenReturn(List.of(accountDetailsResponse));
     when(accountService.updateCashBalance(userId, 500.0f)).thenReturn(500.0f);
     when(appUserService.updateUserConfig(userId, configDto)).thenReturn(configDto);
 
@@ -170,8 +170,8 @@ class DashboardServiceImplTest {
   // ----------------------------------------------------------------------
   @Test
   void getSummary_ShouldCalculateNetWorthIncomeExpenseSavingsAndBurnRate() {
-    AccountDto savings = new AccountDto(UUID.randomUUID(), "1111", 1000.0f, Account.AccountType.SAVINGS, true, true, null, true);
-    AccountDto credit = new AccountDto(UUID.randomUUID(), "2222", 200.0f, Account.AccountType.CREDIT, true, true, null, true);
+    AccountDetailsResponse savings = new AccountDetailsResponse(UUID.randomUUID(), "1111", 1000.0f, Account.AccountType.SAVINGS, true, true, null, true);
+    AccountDetailsResponse credit = new AccountDetailsResponse(UUID.randomUUID(), "2222", 200.0f, Account.AccountType.CREDIT, true, true, null, true);
 
     when(accountService.getUserAccounts(userId)).thenReturn(List.of(savings, credit));
 

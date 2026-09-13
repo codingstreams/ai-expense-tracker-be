@@ -1,6 +1,6 @@
 package com.example.et.module.transaction.dto;
 
-import com.example.et.module.account.dto.AccountDto;
+import com.example.et.module.account.dto.AccountDetailsResponse;
 import com.example.et.module.reference.category.dto.CategoryDetailsResponse;
 import com.example.et.module.reference.paymentmode.dto.PaymentModeDetailsResponse;
 import com.example.et.module.transaction.Transaction;
@@ -16,7 +16,7 @@ public record TransactionDto(
     UUID transferId,
     String description,
     CategoryDetailsResponse transactionCategory,
-    AccountDto account,
+    AccountDetailsResponse account,
     PaymentModeDetailsResponse paymentMode
 ) {
 }
