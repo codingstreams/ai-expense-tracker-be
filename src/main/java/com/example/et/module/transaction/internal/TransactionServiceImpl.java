@@ -9,7 +9,7 @@ import com.example.et.module.reference.paymentmode.PaymentModeService;
 import com.example.et.module.reference.paymentmode.dto.PaymentModeDetailsResponse;
 import com.example.et.module.transaction.*;
 import com.example.et.module.transaction.dto.CreateTransactionRequest;
-import com.example.et.module.transaction.dto.PagedTransactionsDto;
+import com.example.et.module.transaction.dto.PagedTransactionsResponse;
 import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.dto.TransactionFilterParams;
 import com.example.et.module.transaction.internal.strategy.TransactionStrategyFactory;
@@ -40,14 +40,14 @@ public class TransactionServiceImpl implements TransactionService {
       key = "#userId + ':' + (#filterParams != null ? #filterParams.toCacheKey() : 'all') + ':' + (#pageable.isPaged() ? (#pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort) : 'unpaged')",
       unless = "#result == null || #result.content().isEmpty()"
   )
-  public PagedTransactionsDto getAllTransactions(String userId, TransactionFilterParams filterParams, Pageable pageable) {
+  public PagedTransactionsResponse getAllTransactions(String userId, TransactionFilterParams filterParams, Pageable pageable) {
     final var parsedUserId = UUID.fromString(userId);
     final var spec = TransactionSpecification.withFilters(parsedUserId, filterParams);
 
     final Page<TransactionDetailsResponse> page = transactionRepo.findAll(spec, pageable)
         .map(transactionMapper::toResponseDto);
 
-    return PagedTransactionsDto.from(page);
+    return PagedTransactionsResponse.from(page);
   }
 
   @Override

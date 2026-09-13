@@ -5,7 +5,7 @@ import com.example.et.module.reference.category.SystemCategory;
 import com.example.et.module.reference.paymentmode.PaymentModeService;
 import com.example.et.module.reference.paymentmode.dto.PaymentModeDetailsResponse;
 import com.example.et.module.transaction.dto.CreateTransactionRequest;
-import com.example.et.module.transaction.dto.PagedTransactionsDto;
+import com.example.et.module.transaction.dto.PagedTransactionsResponse;
 import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.dto.TransactionFilterParams;
 import com.example.et.module.transaction.internal.TransactionRepo;
@@ -80,7 +80,7 @@ class TransactionServiceImplTest {
     when(transactionMapper.toResponseDto(transaction))
         .thenReturn(responseDto);
 
-    PagedTransactionsDto result = transactionService.getAllTransactions(userId, filterParams, pageable);
+    PagedTransactionsResponse result = transactionService.getAllTransactions(userId, filterParams, pageable);
 
     assertNotNull(result);
     assertEquals(1, result.content().size());
@@ -101,7 +101,7 @@ class TransactionServiceImplTest {
     when(transactionRepo.findAll(any(Specification.class), eq(pageable)))
         .thenReturn(emptyPage);
 
-    PagedTransactionsDto result = transactionService.getAllTransactions(userId, filterParams, pageable);
+    PagedTransactionsResponse result = transactionService.getAllTransactions(userId, filterParams, pageable);
 
     assertNotNull(result);
     assertTrue(result.content().isEmpty());

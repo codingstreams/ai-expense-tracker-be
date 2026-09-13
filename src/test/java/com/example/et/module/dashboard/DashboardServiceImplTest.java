@@ -10,7 +10,7 @@ import com.example.et.module.dashboard.dto.UserSummaryDto;
 import com.example.et.module.dashboard.internal.DashboardServiceImpl;
 import com.example.et.module.transaction.Transaction;
 import com.example.et.module.transaction.TransactionService;
-import com.example.et.module.transaction.dto.PagedTransactionsDto;
+import com.example.et.module.transaction.dto.PagedTransactionsResponse;
 import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.dto.TransactionFilterParams;
 import com.example.et.module.user.AppUserService;
@@ -107,7 +107,7 @@ class DashboardServiceImplTest {
         UUID.randomUUID(), Transaction.TransactionType.INCOME, 5000.0f, now, "Salary", "Acc", "UPI", "Salary"
     );
 
-    PagedTransactionsDto pagedTxns = new PagedTransactionsDto(List.of(food1, food2, transport, income), 0, 10, 4, 1, true);
+    PagedTransactionsResponse pagedTxns = new PagedTransactionsResponse(List.of(food1, food2, transport, income), 0, 10, 4, 1, true);
 
     when(transactionService.getAllTransactions(eq(userId), any(TransactionFilterParams.class), any(Pageable.class)))
         .thenReturn(pagedTxns);
@@ -138,7 +138,7 @@ class DashboardServiceImplTest {
         UUID.randomUUID(), Transaction.TransactionType.EXPENSE, 50.0f, LocalDate.now(), "Unknown", "Acc", "UPI", null
     );
 
-    PagedTransactionsDto pagedTxns = new PagedTransactionsDto(List.of(txn), 0, 10, 1, 1, true);
+    PagedTransactionsResponse pagedTxns = new PagedTransactionsResponse(List.of(txn), 0, 10, 1, 1, true);
 
     when(transactionService.getAllTransactions(eq(userId), any(TransactionFilterParams.class), any(Pageable.class)))
         .thenReturn(pagedTxns);
@@ -154,7 +154,7 @@ class DashboardServiceImplTest {
 
   @Test
   void getCategoryBreakdown_ShouldReturnEmptyList_WhenNoExpenses() {
-    PagedTransactionsDto emptyTxns = new PagedTransactionsDto(Collections.emptyList(), 0, 10, 0, 0, true);
+    PagedTransactionsResponse emptyTxns = new PagedTransactionsResponse(Collections.emptyList(), 0, 10, 0, 0, true);
 
     when(transactionService.getAllTransactions(eq(userId), any(TransactionFilterParams.class), any(Pageable.class)))
         .thenReturn(emptyTxns);
@@ -183,7 +183,7 @@ class DashboardServiceImplTest {
         UUID.randomUUID(), Transaction.TransactionType.INCOME, 5000.0f, now, "Salary", "Acc", "UPI", "Salary"
     );
 
-    PagedTransactionsDto pagedTxns = new PagedTransactionsDto(List.of(expense, income), 0, 10, 2, 1, true);
+    PagedTransactionsResponse pagedTxns = new PagedTransactionsResponse(List.of(expense, income), 0, 10, 2, 1, true);
     when(transactionService.getAllTransactions(eq(userId), any(TransactionFilterParams.class), any(Pageable.class)))
         .thenReturn(pagedTxns);
 
@@ -225,7 +225,7 @@ class DashboardServiceImplTest {
         UUID.randomUUID(), Transaction.TransactionType.INCOME, 2000.0f, now, "Paycheck", "Acc", "UPI", "Salary"
     );
 
-    PagedTransactionsDto pagedTxns = new PagedTransactionsDto(List.of(expense, income), 0, 10, 2, 1, true);
+    PagedTransactionsResponse pagedTxns = new PagedTransactionsResponse(List.of(expense, income), 0, 10, 2, 1, true);
     when(transactionService.getAllTransactions(eq(userId), any(TransactionFilterParams.class), any(Pageable.class)))
         .thenReturn(pagedTxns);
 
@@ -243,7 +243,7 @@ class DashboardServiceImplTest {
 
   @Test
   void getMonthlyTrend_Default_ShouldDefaultToSixMonths() {
-    PagedTransactionsDto emptyTxns = new PagedTransactionsDto(Collections.emptyList(), 0, 10, 0, 0, true);
+    PagedTransactionsResponse emptyTxns = new PagedTransactionsResponse(Collections.emptyList(), 0, 10, 0, 0, true);
     when(transactionService.getAllTransactions(eq(userId), any(TransactionFilterParams.class), any(Pageable.class)))
         .thenReturn(emptyTxns);
 

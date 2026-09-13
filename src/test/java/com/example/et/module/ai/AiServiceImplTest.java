@@ -12,7 +12,7 @@ import com.example.et.module.ai.parser.AiParsingTask;
 import com.example.et.module.reference.category.internal.SysCategoryRepo;
 import com.example.et.module.reference.paymentmode.internal.PaymentModeRepo;
 import com.example.et.module.transaction.TransactionService;
-import com.example.et.module.transaction.dto.PagedTransactionsDto;
+import com.example.et.module.transaction.dto.PagedTransactionsResponse;
 import com.example.et.module.user.AppUser;
 import com.example.et.module.user.internal.AppUserConfigRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -174,7 +174,7 @@ class AiServiceImplTest {
         .thenReturn(0L)
         .thenReturn(0L);
 
-    PagedTransactionsDto emptyTxns = new PagedTransactionsDto(Collections.emptyList(), 0, 10, 0, 0, true);
+    PagedTransactionsResponse emptyTxns = new PagedTransactionsResponse(Collections.emptyList(), 0, 10, 0, 0, true);
     when(transactionService.getAllTransactions(eq(userId), any(), any())).thenReturn(emptyTxns);
 
     AiInsightDto result = aiService.generateInsights(userId);

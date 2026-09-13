@@ -2,7 +2,7 @@ package com.example.et.module.transaction;
 
 
 import com.example.et.module.transaction.dto.CreateTransactionRequest;
-import com.example.et.module.transaction.dto.PagedTransactionsDto;
+import com.example.et.module.transaction.dto.PagedTransactionsResponse;
 import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.dto.TransactionFilterParams;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class TransactionController {
   private final TransactionService transactionService;
 
   @GetMapping
-  public ResponseEntity<PagedTransactionsDto> getAllTransactions(@AuthenticationPrincipal String userId, @ModelAttribute TransactionFilterParams filterParams, Pageable pageable) {
+  public ResponseEntity<PagedTransactionsResponse> getAllTransactions(@AuthenticationPrincipal String userId, @ModelAttribute TransactionFilterParams filterParams, Pageable pageable) {
     return ResponseEntity.ok(transactionService.getAllTransactions(userId, filterParams, pageable));
   }
 

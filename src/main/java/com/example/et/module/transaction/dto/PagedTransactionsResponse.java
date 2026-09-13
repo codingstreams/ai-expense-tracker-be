@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-public record PagedTransactionsDto(
+public record PagedTransactionsResponse(
     List<TransactionDetailsResponse> content,
     int pageNumber,
     int pageSize,
@@ -12,8 +12,8 @@ public record PagedTransactionsDto(
     int totalPages,
     boolean isLast
 ) {
-  public static PagedTransactionsDto from(Page<TransactionDetailsResponse> page) {
-    return new PagedTransactionsDto(
+  public static PagedTransactionsResponse from(Page<TransactionDetailsResponse> page) {
+    return new PagedTransactionsResponse(
         page.getContent(),
         page.getNumber(),
         page.getSize(),
