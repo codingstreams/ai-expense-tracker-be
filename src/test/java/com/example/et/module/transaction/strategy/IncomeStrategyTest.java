@@ -1,9 +1,6 @@
 package com.example.et.module.transaction.strategy;
 
-import com.example.et.module.account.Account;
-import com.example.et.module.account.AccountMapper;
 import com.example.et.module.account.AccountService;
-import com.example.et.module.account.dto.AccountDto;
 import com.example.et.module.ai.parser.AiParseTaskService;
 import com.example.et.module.reference.paymentmode.PaymentModeMapper;
 import com.example.et.module.transaction.Transaction;
@@ -16,6 +13,7 @@ import com.example.et.module.transaction.internal.strategy.IncomeStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,9 +43,6 @@ class IncomeStrategyTest {
 
   @Mock
   private TransactionMapper transactionMapper;
-
-  @Mock
-  private AccountMapper accountMapper;
 
   @InjectMocks
   private IncomeStrategy incomeStrategy;
@@ -80,16 +75,12 @@ class IncomeStrategyTest {
     );
 
     TransactionContext context = new TransactionContext(userId, request, null, null);
-    AccountDto accountDto = new AccountDto(accountUuid, "1234", 1000.0f, Account.AccountType.SAVINGS, true, true, null, true);
-    Account account = Account.builder().id(accountUuid).balance(1000.0f).build();
     Transaction savedTxn = Transaction.builder().id(UUID.randomUUID()).amount(3000.0f).build();
     TransactionDetailsResponse expectedResponse = new TransactionDetailsResponse(
         savedTxn.getId(), Transaction.TransactionType.INCOME, 3000.0f, LocalDate.now(), "Bonus", "Acc", "Bank", null
     );
 
-    when(accountService.getAccount(userId, accountId)).thenReturn(accountDto);
-    when(accountMapper.toEntity(accountDto)).thenReturn(account);
-    when(accountService.saveAccount(account)).thenReturn(account);
+    doNothing().when(accountService).creditAccount(userId, accountId, 3000.0f);
     when(transactionRepo.save(any(Transaction.class))).thenReturn(savedTxn);
     when(transactionMapper.toResponseDto(savedTxn)).thenReturn(expectedResponse);
 
@@ -97,29 +88,53 @@ class IncomeStrategyTest {
 
     assertNotNull(actual);
     assertEquals(expectedResponse, actual);
-    assertEquals(4000.0f, account.getBalance());
-    verify(accountService, times(1)).saveAccount(account);
-    verify(transactionRepo, times(1)).save(any(Transaction.class));
+
+    ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+    verify(transactionRepo, times(1)).save(captor.capture());
+    Transaction captured = captor.getValue();
+    assertEquals(3000.0f, captured.getAmount());
+    assertEquals(Transaction.TransactionType.INCOME, captured.getType());
+    assertEquals(accountUuid, captured.getAccount().getId());
+
+    verify(accountService, times(1)).creditAccount(userId, accountId, 3000.0f);
   }
 
   @Test
   void delete_ShouldDebitAccountUnlinkAiTaskAndDelete() {
     UUID txId = UUID.randomUUID();
-    Account account = Account.builder().id(accountUuid).balance(5000.0f).build();
+    com.example.et.module.account.Account account = com.example.et.module.account.Account.builder().id(accountUuid).build();
     Transaction transaction = Transaction.builder()
         .id(txId)
         .account(account)
         .amount(2000.0f)
         .build();
 
-    when(accountService.saveAccount(account)).thenReturn(account);
+    doNothing().when(accountService).debitAccount(userId, accountUuid.toString(), 2000.0f);
     doNothing().when(aiParseTaskService).unlinkTransaction(txId);
     doNothing().when(transactionRepo).delete(transaction);
 
     incomeStrategy.delete(userId, transaction);
 
-    assertEquals(3000.0f, account.getBalance());
-    verify(accountService, times(1)).saveAccount(account);
+    verify(accountService, times(1)).debitAccount(userId, accountUuid.toString(), 2000.0f);
+    verify(aiParseTaskService, times(1)).unlinkTransaction(txId);
+    verify(transactionRepo, times(1)).delete(transaction);
+  }
+
+  @Test
+  void delete_ShouldNotDebitAccount_WhenAccountIsNull() {
+    UUID txId = UUID.randomUUID();
+    Transaction transaction = Transaction.builder()
+        .id(txId)
+        .account(null)
+        .amount(2000.0f)
+        .build();
+
+    doNothing().when(aiParseTaskService).unlinkTransaction(txId);
+    doNothing().when(transactionRepo).delete(transaction);
+
+    incomeStrategy.delete(userId, transaction);
+
+    verify(accountService, never()).debitAccount(any(), any(), anyFloat());
     verify(aiParseTaskService, times(1)).unlinkTransaction(txId);
     verify(transactionRepo, times(1)).delete(transaction);
   }

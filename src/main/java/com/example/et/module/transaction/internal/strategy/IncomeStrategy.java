@@ -1,6 +1,6 @@
 package com.example.et.module.transaction.internal.strategy;
 
-import com.example.et.module.account.AccountMapper;
+import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.ai.parser.AiParseTaskService;
 import com.example.et.module.reference.paymentmode.PaymentModeMapper;
@@ -21,22 +21,24 @@ public class IncomeStrategy implements TransactionStrategy {
   private final AiParseTaskService aiParseTaskService;
   private final PaymentModeMapper paymentModeMapper;
   private final TransactionMapper transactionMapper;
-  private final AccountMapper accountMapper;
 
   @Override
   public TransactionDetailsResponse execute(TransactionContext transactionContext) {
     final var userId = transactionContext.userId();
     final var user = AppUser.ofId(userId);
-    final var account = accountMapper.toEntity(accountService.getAccount(userId, transactionContext.requestDto().accountId()));
+    final var accountId = transactionContext.requestDto().accountId();
+    final var amount = transactionContext.requestDto().amount();
 
-    account.credit(transactionContext.requestDto().amount());
-    accountService.saveAccount(account);
+    // Credit Account
+    accountService.creditAccount(userId, accountId, amount);
+
+    final var account = Account.ofId(accountId);
 
     final var transaction = Transaction.builder()
         .appUser(user)
         .account(account)
         .type(transactionContext.requestDto().type())
-        .amount(transactionContext.requestDto().amount())
+        .amount(amount)
         .transactionDate(transactionContext.requestDto().transactionDate())
         .description(transactionContext.requestDto().description())
         .paymentMode(paymentModeMapper.toEntity(transactionContext.paymentMode()))
@@ -50,8 +52,8 @@ public class IncomeStrategy implements TransactionStrategy {
   public void delete(String userId, Transaction transaction) {
     if (transaction.getAccount() != null) {
       final var account = transaction.getAccount();
-      account.debit(transaction.getAmount());
-      accountService.saveAccount(account);
+      // Debit Account
+      accountService.debitAccount(userId, account.getId().toString(), transaction.getAmount());
     }
 
     aiParseTaskService.unlinkTransaction(transaction.getId());

@@ -3,7 +3,6 @@ package com.example.et.module.transaction.strategy;
 import com.example.et.core.exception.ApiException;
 import com.example.et.core.exception.ErrorCode;
 import com.example.et.module.account.Account;
-import com.example.et.module.account.AccountMapper;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.account.dto.AccountDto;
 import com.example.et.module.ai.parser.AiParseTaskService;
@@ -53,8 +52,6 @@ class ExpenseStrategyTest {
   @Mock
   private TransactionMapper transactionMapper;
 
-  @Mock
-  private AccountMapper accountMapper;
 
   @InjectMocks
   private ExpenseStrategy expenseStrategy;

@@ -81,7 +81,7 @@ public class TransactionServiceImpl implements TransactionService {
       @CacheEvict(value = CacheNames.USER_TRANSACTIONS, allEntries = true)
   })
   public void deleteTransaction(String userId, String transactionId) {
-    final var transaction = transactionRepo.findByIdAndAppUserId(userId, transactionId)
+    final var transaction = transactionRepo.findByIdAndAppUserId(transactionId, userId)
         .orElseThrow(() -> new ApiException(ErrorCode.TRANSACTION_NOT_FOUND));
 
     strategyFactory.getTransactionStrategy(transaction.getType())

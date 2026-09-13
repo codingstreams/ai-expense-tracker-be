@@ -193,18 +193,17 @@ class TransactionServiceImplTest {
   @Test
   void deleteTransaction_ShouldFindAndDelegateToDelete() {
     String userId = UUID.randomUUID().toString();
-    UUID userUuid = UUID.fromString(userId);
-    UUID transactionId = UUID.randomUUID();
+    final var transactionId = UUID.randomUUID().toString();
 
     Transaction transaction = Transaction.builder()
-        .id(transactionId)
+        .id(UUID.fromString(transactionId))
         .type(Transaction.TransactionType.EXPENSE)
         .amount(100.0f)
         .build();
 
     TransactionStrategy mockStrategy = mock(TransactionStrategy.class);
 
-    when(transactionRepo.findByIdAndAppUserId(transactionId, userUuid)).thenReturn(Optional.of(transaction));
+    when(transactionRepo.findByIdAndAppUserId(transactionId, userId)).thenReturn(Optional.of(transaction));
     when(strategyFactory.getTransactionStrategy(Transaction.TransactionType.EXPENSE)).thenReturn(mockStrategy);
 
     transactionService.deleteTransaction(userId, transactionId);
@@ -215,10 +214,9 @@ class TransactionServiceImplTest {
   @Test
   void deleteTransaction_ShouldThrowException_WhenTransactionNotFound() {
     String userId = UUID.randomUUID().toString();
-    UUID userUuid = UUID.fromString(userId);
-    UUID transactionId = UUID.randomUUID();
+    String transactionId = UUID.randomUUID().toString();
 
-    when(transactionRepo.findByIdAndAppUserId(transactionId, userUuid)).thenReturn(Optional.empty());
+    when(transactionRepo.findByIdAndAppUserId(transactionId, userId)).thenReturn(Optional.empty());
 
     assertThrows(RuntimeException.class, () -> transactionService.deleteTransaction(userId, transactionId));
     verifyNoInteractions(strategyFactory);

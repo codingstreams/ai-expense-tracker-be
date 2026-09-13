@@ -59,6 +59,10 @@ public class Account extends BaseAudit implements ActivableEntity, Serializable 
     return Account.builder().id(id).build();
   }
 
+  public static Account ofId(String id) {
+    return ofId(UUID.fromString(id));
+  }
+
   @Override
   public Boolean isActive() {
     return isActive;

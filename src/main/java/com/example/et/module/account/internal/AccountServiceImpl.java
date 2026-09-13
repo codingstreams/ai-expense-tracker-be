@@ -211,14 +211,14 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
   public void debitAccount(String userId, String accountId, Float amount) {
-    final var account = getAccountEntity(userId, accountId);
+    final var account = this.getAccountEntity(userId, accountId);
     account.debit(amount);
     accountRepo.save(account);
   }
 
   @Override
   public void creditAccount(String userId, String accountId, Float amount) {
-    final var account = getAccountEntity(userId, accountId);
+    final var account = this.getAccountEntity(userId, accountId);
     account.credit(amount);
     accountRepo.save(account);
   }

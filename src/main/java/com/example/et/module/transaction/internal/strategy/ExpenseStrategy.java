@@ -3,7 +3,6 @@ package com.example.et.module.transaction.internal.strategy;
 import com.example.et.core.exception.ApiException;
 import com.example.et.core.exception.ErrorCode;
 import com.example.et.module.account.Account;
-import com.example.et.module.account.AccountMapper;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.ai.parser.AiParseTaskService;
 import com.example.et.module.card.CardService;
@@ -28,7 +27,6 @@ public class ExpenseStrategy implements TransactionStrategy {
   private final AiParseTaskService aiParseTaskService;
   private final PaymentModeMapper paymentModeMapper;
   private final TransactionMapper transactionMapper;
-  private final AccountMapper accountMapper;
 
   private Account resolveAccount(String userId, String accountId, String cardId) {
     if (cardId != null) {
@@ -74,6 +72,7 @@ public class ExpenseStrategy implements TransactionStrategy {
   @Override
   public void delete(String userId, Transaction transaction) {
     if (transaction.getAccount() != null) {
+      // Credit Account
       accountService.creditAccount(userId, transaction.getAccount().getId().toString(), transaction.getAmount());
     }
 

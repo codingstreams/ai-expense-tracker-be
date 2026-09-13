@@ -1,5 +1,6 @@
 package com.example.et.module.transaction.internal.strategy;
 
+import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.ai.parser.AiParseTaskService;
 import com.example.et.module.reference.paymentmode.PaymentModeMapper;
@@ -28,22 +29,21 @@ public class TransferStrategy implements TransactionStrategy {
     final var userId = transactionContext.userId();
     final var user = AppUser.ofId(userId);
 
-    final var sourceAccount = accountService.getAccountEntity(userId, transactionContext.requestDto().accountId());
-    final var destAccount = accountService.getAccountEntity(userId, transactionContext.requestDto().toAccountId());
-
+    final var sourceAccountId = transactionContext.requestDto().accountId();
+    final var sourceAccount = Account.ofId(sourceAccountId);
+    final var destAccountId = transactionContext.requestDto().toAccountId();
+    final var destAccount = Account.ofId(destAccountId);
     final var transferId = UUID.randomUUID();
+    final var amount = transactionContext.requestDto().amount();
 
-    sourceAccount.debit(transactionContext.requestDto().amount());
-    destAccount.credit(transactionContext.requestDto().amount());
-
-    accountService.saveAccount(sourceAccount);
-    accountService.saveAccount(destAccount);
+    accountService.debitAccount(userId, sourceAccountId, amount);
+    accountService.creditAccount(userId, destAccountId, amount);
 
     final var debitTxn = Transaction.builder()
         .appUser(user)
         .account(sourceAccount)
         .type(Transaction.TransactionType.TRANSFER)
-        .amount(-transactionContext.requestDto().amount())
+        .amount(-amount)
         .transactionDate(transactionContext.requestDto().transactionDate())
         .description(transactionContext.requestDto().description())
         .paymentMode(paymentModeMapper.toEntity(transactionContext.paymentMode()))
@@ -54,7 +54,7 @@ public class TransferStrategy implements TransactionStrategy {
         .appUser(user)
         .account(destAccount)
         .type(Transaction.TransactionType.TRANSFER)
-        .amount(transactionContext.requestDto().amount())
+        .amount(amount)
         .transactionDate(transactionContext.requestDto().transactionDate())
         .description(transactionContext.requestDto().description())
         .paymentMode(paymentModeMapper.toEntity(transactionContext.paymentMode()))
