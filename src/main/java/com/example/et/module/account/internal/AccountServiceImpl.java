@@ -10,9 +10,8 @@ import com.example.et.module.account.dto.AccountDto;
 import com.example.et.module.account.dto.AccountDtoOld;
 import com.example.et.module.account.dto.CreateAccountsReq;
 import com.example.et.module.account.dto.UpdateCashDto;
-import com.example.et.module.reference.bank.BankMapper;
+import com.example.et.module.reference.bank.BankService;
 import com.example.et.module.reference.bank.dto.BankDto;
-import com.example.et.module.reference.bank.internal.BankRepo;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.cache.annotation.CacheEvict;
@@ -29,9 +28,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
   private final AccountRepo accountRepo;
-  private final BankRepo bankRepo;
   private final AccountMapper accountMapper;
-  private final BankMapper bankMapper;
+  private final BankService bankService;
 
   @Override
   public List<Account> getUserAccountList(String userId) {
@@ -52,9 +50,7 @@ public class AccountServiceImpl implements AccountService {
         .map(BankDto::id)
         .collect(Collectors.toSet());
 
-    if (bankRepo.countByIdIn(bankIds) != bankIds.size()) {
-      throw new RuntimeException("Invalid bank ids.");
-    }
+    bankService.validateBankIds(bankIds);
 
     final var accountToBeCreated = requestBody.accounts()
         .stream()

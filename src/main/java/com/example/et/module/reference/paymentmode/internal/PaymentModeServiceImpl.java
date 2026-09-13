@@ -1,6 +1,8 @@
 package com.example.et.module.reference.paymentmode.internal;
 
 import com.example.et.core.config.CacheNames;
+import com.example.et.core.exception.ApiException;
+import com.example.et.core.exception.ErrorCode;
 import com.example.et.module.reference.paymentmode.PaymentModeMapper;
 import com.example.et.module.reference.paymentmode.PaymentModeService;
 import com.example.et.module.reference.paymentmode.dto.PaymentModeDto;
@@ -32,6 +34,6 @@ public class PaymentModeServiceImpl implements PaymentModeService {
   public PaymentModeDto getPaymentModeById(UUID id) {
     return paymentModeRepo.findById(id)
         .map(paymentModeMapper::toDto)
-        .orElseThrow(() -> new RuntimeException("PaymentMode ID: %s not found".formatted(id)));
+        .orElseThrow(() -> new ApiException(ErrorCode.PAYMENT_MODE_NOT_FOUND, "PaymentMode ID: %s not found".formatted(id)));
   }
 }

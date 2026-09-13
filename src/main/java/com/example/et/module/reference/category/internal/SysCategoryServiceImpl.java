@@ -1,6 +1,8 @@
 package com.example.et.module.reference.category.internal;
 
 import com.example.et.core.config.CacheNames;
+import com.example.et.core.exception.ApiException;
+import com.example.et.core.exception.ErrorCode;
 import com.example.et.module.reference.category.SysCategoryService;
 import com.example.et.module.reference.category.SystemCategory;
 import jakarta.transaction.Transactional;
@@ -27,6 +29,6 @@ public class SysCategoryServiceImpl implements SysCategoryService {
   @Cacheable(value = CacheNames.SYSTEM_CATEGORIES, key = "#id")
   public SystemCategory getSystemCategoryById(UUID id) {
     return sysCategoryRepo.findById(id)
-        .orElseThrow(() -> new RuntimeException("SystemCategory ID: %s not found".formatted(id)));
+        .orElseThrow(() -> new ApiException(ErrorCode.CATEGORY_NOT_FOUND, "SystemCategory ID: %s not found".formatted(id)));
   }
 }
