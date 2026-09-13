@@ -1,6 +1,6 @@
 package com.example.et.module.reference.paymentmode;
 
-import com.example.et.module.reference.paymentmode.dto.PaymentModeDto;
+import com.example.et.module.reference.paymentmode.dto.PaymentModeDetailsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +16,7 @@ public class PaymentModeController {
   private final PaymentModeService paymentModeService;
 
   @GetMapping
-  public ResponseEntity<List<PaymentModeDto>> getPaymentModes() {
+  public ResponseEntity<List<PaymentModeDetailsResponse>> getPaymentModes() {
     return ResponseEntity.ok().body(paymentModeService.getAllPaymentModes());
   }
 }

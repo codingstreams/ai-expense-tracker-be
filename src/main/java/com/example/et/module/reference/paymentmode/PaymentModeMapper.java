@@ -1,6 +1,6 @@
 package com.example.et.module.reference.paymentmode;
 
-import com.example.et.module.reference.paymentmode.dto.PaymentModeDto;
+import com.example.et.module.reference.paymentmode.dto.PaymentModeDetailsResponse;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,14 +12,14 @@ import org.mapstruct.MappingTarget;
 )
 public interface PaymentModeMapper {
 
-  PaymentModeDto toDto(PaymentMode entity);
+  PaymentModeDetailsResponse toDto(PaymentMode entity);
 
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "lastModifiedAt", ignore = true)
-  PaymentMode toEntity(PaymentModeDto dto);
+  PaymentMode toEntity(PaymentModeDetailsResponse dto);
 
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "lastModifiedAt", ignore = true)
-  void updateEntityFromDto(PaymentModeDto dto, @MappingTarget PaymentMode entity);
+  void updateEntityFromDto(PaymentModeDetailsResponse dto, @MappingTarget PaymentMode entity);
 }

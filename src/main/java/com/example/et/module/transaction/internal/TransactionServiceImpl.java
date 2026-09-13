@@ -4,7 +4,7 @@ import com.example.et.core.config.CacheNames;
 import com.example.et.module.reference.category.SysCategoryService;
 import com.example.et.module.reference.category.SystemCategory;
 import com.example.et.module.reference.paymentmode.PaymentModeService;
-import com.example.et.module.reference.paymentmode.dto.PaymentModeDto;
+import com.example.et.module.reference.paymentmode.dto.PaymentModeDetailsResponse;
 import com.example.et.module.transaction.*;
 import com.example.et.module.transaction.dto.PagedTransactionsDto;
 import com.example.et.module.transaction.dto.TransactionFilterParams;
@@ -57,7 +57,7 @@ public class TransactionServiceImpl implements TransactionService {
       @CacheEvict(value = CacheNames.USER_TRANSACTIONS, allEntries = true)
   })
   public TransactionResponseDto createTransaction(String userId, TransactionRequestDto requestBody) {
-    PaymentModeDto paymentMode = null;
+    PaymentModeDetailsResponse paymentMode = null;
     SystemCategory category = null;
 
     if (requestBody.type() == Transaction.TransactionType.EXPENSE) {

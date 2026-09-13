@@ -5,9 +5,9 @@ import com.example.et.module.account.AccountService;
 import com.example.et.module.account.dto.AccountDto;
 import com.example.et.module.ai.chat.AiChatServiceImpl;
 import com.example.et.module.ai.chat.StoredChatMessage;
-import com.example.et.module.ai.dto.AiChatRequestDto;
-import com.example.et.module.ai.dto.AiChatResponseDto;
-import com.example.et.module.reference.bank.dto.BankDto;
+import com.example.et.module.ai.dto.ChatMessageRequest;
+import com.example.et.module.ai.dto.ChatReplyResponse;
+import com.example.et.module.reference.bank.dto.BankDetailsResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,7 +74,7 @@ class AiChatServiceImplTest {
         Account.AccountType.SAVINGS,
         true,
         true,
-        new BankDto(UUID.randomUUID(), "Chase"),
+        new BankDetailsResponse(UUID.randomUUID(), "Chase"),
         true
     );
     when(accountService.getUserAccounts(userId)).thenReturn(List.of(mockAccount));
@@ -86,7 +86,7 @@ class AiChatServiceImplTest {
     when(requestSpec.call()).thenReturn(callResponseSpec);
     when(callResponseSpec.content()).thenReturn("Here is your finance advice");
 
-    AiChatResponseDto response = aiChatService.chat(userId, new AiChatRequestDto("How much do I have?", null));
+    ChatReplyResponse response = aiChatService.chat(userId, new ChatMessageRequest("How much do I have?", null));
 
     assertNotNull(response);
     assertEquals("Here is your finance advice", response.reply());
@@ -100,7 +100,7 @@ class AiChatServiceImplTest {
   @Test
   void chat_blankMessage_throwsIllegalArgumentException() {
     assertThrows(IllegalArgumentException.class, () ->
-        aiChatService.chat("user-123", new AiChatRequestDto("   ", null))
+        aiChatService.chat("user-123", new ChatMessageRequest("   ", null))
     );
 
     verify(redisTemplate, never()).opsForList();

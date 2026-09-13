@@ -1,7 +1,7 @@
 package com.example.et.module.ai.dto;
 
-public record AiChatRequestDto(
-    String message,
+public record ChatReplyResponse(
+    String reply,
     String sessionId
 ) {
 }

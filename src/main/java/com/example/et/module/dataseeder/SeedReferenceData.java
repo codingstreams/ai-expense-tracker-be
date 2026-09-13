@@ -1,6 +1,6 @@
 package com.example.et.module.dataseeder;
 
-import com.example.et.module.reference.bank.dto.BankDto;
+import com.example.et.module.reference.bank.dto.BankDetailsResponse;
 import com.example.et.module.reference.category.SystemCategory;
 import com.example.et.module.reference.paymentmode.PaymentMode;
 import net.datafaker.Faker;
@@ -8,7 +8,7 @@ import net.datafaker.Faker;
 import java.util.List;
 
 public record SeedReferenceData(
-    List<BankDto> banks,
+    List<BankDetailsResponse> banks,
     PaymentMode upiPaymentMode,
     PaymentMode cashPaymentMode,
     PaymentMode debitCardPaymentMode,
@@ -16,12 +16,12 @@ public record SeedReferenceData(
     List<SystemCategory> categories
 ) {
 
-  public BankDto getRandomBank(Faker faker) {
+  public BankDetailsResponse getRandomBank(Faker faker) {
     if (banks.isEmpty()) return null;
     return banks.get(faker.random().nextInt(banks.size()));
   }
 
-  public BankDto getSecondaryBank(BankDto primaryBank) {
+  public BankDetailsResponse getSecondaryBank(BankDetailsResponse primaryBank) {
     if (banks.size() <= 1 || primaryBank == null) return primaryBank;
     int primaryIndex = banks.indexOf(primaryBank);
     return banks.get((primaryIndex + 1) % banks.size());

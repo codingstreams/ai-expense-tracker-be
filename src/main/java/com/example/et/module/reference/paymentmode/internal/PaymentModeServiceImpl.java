@@ -5,7 +5,7 @@ import com.example.et.core.exception.ApiException;
 import com.example.et.core.exception.ErrorCode;
 import com.example.et.module.reference.paymentmode.PaymentModeMapper;
 import com.example.et.module.reference.paymentmode.PaymentModeService;
-import com.example.et.module.reference.paymentmode.dto.PaymentModeDto;
+import com.example.et.module.reference.paymentmode.dto.PaymentModeDetailsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class PaymentModeServiceImpl implements PaymentModeService {
 
   @Override
   @Cacheable(value = CacheNames.PAYMENT_MODES)
-  public List<PaymentModeDto> getAllPaymentModes() {
+  public List<PaymentModeDetailsResponse> getAllPaymentModes() {
     return paymentModeRepo.findAll()
         .stream()
         .map(paymentModeMapper::toDto)
@@ -31,7 +31,7 @@ public class PaymentModeServiceImpl implements PaymentModeService {
 
   @Override
   @Cacheable(value = CacheNames.PAYMENT_MODES, key = "#id", condition = "#id != null")
-  public PaymentModeDto getPaymentModeById(UUID id) {
+  public PaymentModeDetailsResponse getPaymentModeById(UUID id) {
     return paymentModeRepo.findById(id)
         .map(paymentModeMapper::toDto)
         .orElseThrow(() -> new ApiException(ErrorCode.PAYMENT_MODE_NOT_FOUND, "PaymentMode ID: %s not found".formatted(id)));

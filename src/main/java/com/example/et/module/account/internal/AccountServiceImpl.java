@@ -8,10 +8,10 @@ import com.example.et.module.account.AccountMapper;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.account.dto.AccountDto;
 import com.example.et.module.account.dto.AccountDtoOld;
-import com.example.et.module.account.dto.CreateAccountsReq;
-import com.example.et.module.account.dto.UpdateCashDto;
+import com.example.et.module.account.dto.CreateAccountsRequest;
+import com.example.et.module.account.dto.UpdateCashBalanceRequest;
 import com.example.et.module.reference.bank.BankService;
-import com.example.et.module.reference.bank.dto.BankDto;
+import com.example.et.module.reference.bank.dto.BankDetailsResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.cache.annotation.CacheEvict;
@@ -43,11 +43,11 @@ public class AccountServiceImpl implements AccountService {
           @CacheEvict(value = CacheNames.USER_FINANCIAL_SUMMARY, allEntries = true)
       }
   )
-  public List<AccountDto> addAccounts(String userId, CreateAccountsReq requestBody) {
+  public List<AccountDto> addAccounts(String userId, CreateAccountsRequest requestBody) {
     final var bankIds = requestBody.accounts()
         .stream()
         .map(AccountDto::bank)
-        .map(BankDto::id)
+        .map(BankDetailsResponse::id)
         .collect(Collectors.toSet());
 
     bankService.validateBankIds(bankIds);
@@ -79,7 +79,7 @@ public class AccountServiceImpl implements AccountService {
   public AccountDto getUserAccountDetails(String userId, String accountId) {
     return accountRepo.findByUserIdAndAccountId(UUID.fromString(userId), UUID.fromString(accountId))
         .map(accountMapper::toDto)
-        .orElseThrow();
+        .orElseThrow(() -> new ApiException(ErrorCode.ACCOUNT_NOT_FOUND));
   }
 
   @Override
@@ -137,7 +137,7 @@ public class AccountServiceImpl implements AccountService {
     final var existingAccount = getAccountEntity(userId, accountId);
 
     if (existingAccount.getAccountType().compareTo(Account.AccountType.CASH) == 0) {
-      throw new RuntimeException("Cannot delete cash account");
+      throw new ApiException(ErrorCode.CASH_ACCOUNT_IMMUTABLE, "Cannot delete cash account");
     }
 
     existingAccount.setIsActive(false);
@@ -184,11 +184,11 @@ public class AccountServiceImpl implements AccountService {
       @CacheEvict(value = CacheNames.USER_BANK_ACCOUNTS, key = "{#userId, 'cash'}"),
       @CacheEvict(value = CacheNames.USER_FINANCIAL_SUMMARY, allEntries = true)
   })
-  public AccountDto updateCashBalance(String userId, UpdateCashDto updateCashDto) {
+  public AccountDto updateCashBalance(String userId, UpdateCashBalanceRequest updateCashBalanceRequest) {
     final var cashAccount = getCashAccount(userId);
 
-    if (updateCashDto.cashBalance() > 0) {
-      cashAccount.setBalance(updateCashDto.cashBalance());
+    if (updateCashBalanceRequest.cashBalance() > 0) {
+      cashAccount.setBalance(updateCashBalanceRequest.cashBalance());
     }
 
     return accountMapper.toDto(accountRepo.save(cashAccount));

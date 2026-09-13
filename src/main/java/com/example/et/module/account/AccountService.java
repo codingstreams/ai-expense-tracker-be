@@ -2,15 +2,15 @@ package com.example.et.module.account;
 
 import com.example.et.module.account.dto.AccountDto;
 import com.example.et.module.account.dto.AccountDtoOld;
-import com.example.et.module.account.dto.CreateAccountsReq;
-import com.example.et.module.account.dto.UpdateCashDto;
+import com.example.et.module.account.dto.CreateAccountsRequest;
+import com.example.et.module.account.dto.UpdateCashBalanceRequest;
 
 import java.util.List;
 
 public interface AccountService {
   List<Account> getUserAccountList(String userId);
 
-  List<AccountDto> addAccounts(String userId, CreateAccountsReq requestBody);
+  List<AccountDto> addAccounts(String userId, CreateAccountsRequest requestBody);
 
   Account saveAccount(Account account);
 
@@ -26,7 +26,7 @@ public interface AccountService {
 
   Float updateCashBalance(String userId, Float cashBalance);
 
-  AccountDto updateCashBalance(String userId, UpdateCashDto updateCashDto);
+  AccountDto updateCashBalance(String userId, UpdateCashBalanceRequest updateCashBalanceRequest);
 
   AccountDtoOld getUserCashAccountDetails(String userId);
 

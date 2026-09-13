@@ -2,8 +2,8 @@ package com.example.et.module.account;
 
 import com.example.et.module.account.dto.AccountDto;
 import com.example.et.module.account.dto.AccountDtoOld;
-import com.example.et.module.account.dto.CreateAccountsReq;
-import com.example.et.module.account.dto.UpdateCashDto;
+import com.example.et.module.account.dto.CreateAccountsRequest;
+import com.example.et.module.account.dto.UpdateCashBalanceRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,7 +24,7 @@ public class AccountController {
   }
 
   @PostMapping
-  public ResponseEntity<List<AccountDto>> addAccounts(@AuthenticationPrincipal String userId, @RequestBody CreateAccountsReq accounts) {
+  public ResponseEntity<List<AccountDto>> addAccounts(@AuthenticationPrincipal String userId, @RequestBody CreateAccountsRequest accounts) {
     final var createdAccounts = accountService.addAccounts(userId, accounts);
     return ResponseEntity.ok(createdAccounts);
   }
@@ -42,7 +42,7 @@ public class AccountController {
   }
 
   @PutMapping("/cash")
-  public ResponseEntity<AccountDto> updateCashBalance(@AuthenticationPrincipal String userId, @RequestBody UpdateCashDto requestBody) {
+  public ResponseEntity<AccountDto> updateCashBalance(@AuthenticationPrincipal String userId, @RequestBody UpdateCashBalanceRequest requestBody) {
     final var account = accountService.updateCashBalance(userId, requestBody);
     return ResponseEntity.ok(account);
   }

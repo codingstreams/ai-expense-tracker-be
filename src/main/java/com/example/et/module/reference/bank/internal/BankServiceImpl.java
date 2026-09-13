@@ -5,7 +5,7 @@ import com.example.et.core.exception.ApiException;
 import com.example.et.core.exception.ErrorCode;
 import com.example.et.module.reference.bank.BankMapper;
 import com.example.et.module.reference.bank.BankService;
-import com.example.et.module.reference.bank.dto.BankDto;
+import com.example.et.module.reference.bank.dto.BankDetailsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class BankServiceImpl implements BankService {
 
   @Override
   @Cacheable(value = CacheNames.BANKS)
-  public List<BankDto> getSupportedBanks() {
+  public List<BankDetailsResponse> getSupportedBanks() {
     return bankRepo.findAll()
         .stream().map(bankMapper::toDto)
         .collect(Collectors.toList());

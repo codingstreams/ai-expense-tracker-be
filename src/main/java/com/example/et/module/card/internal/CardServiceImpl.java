@@ -89,7 +89,7 @@ public class CardServiceImpl implements CardService {
   @Cacheable(value = CacheNames.USER_CARDS, key = "#userId + ':card:' + #cardId")
   public Card getUserCard(String userId, UUID cardId) {
     return cardRepo.findByIdAndAppUserId(cardId, UUID.fromString(userId))
-        .orElseThrow(() -> new RuntimeException("Card not found."));
+        .orElseThrow(() -> new com.example.et.core.exception.ApiException(com.example.et.core.exception.ErrorCode.CARD_NOT_FOUND));
   }
 
 }

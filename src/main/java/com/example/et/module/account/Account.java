@@ -66,11 +66,11 @@ public class Account extends BaseAudit implements ActivableEntity, Serializable 
 
   public void debit(Float amount) {
     if (Objects.isNull(amount) || amount <= 0) {
-      throw new RuntimeException("Invalid amount");
+      throw new com.example.et.core.exception.ApiException(com.example.et.core.exception.ErrorCode.INVALID_AMOUNT, "Invalid amount");
     }
 
-    if (this.balance - amount < 0) {
-      throw new RuntimeException("Insufficient amount to debit the expense transaction.");
+    if (this.balance == null || this.balance - amount < 0) {
+      throw new com.example.et.core.exception.InsufficientAccountBalanceException(this.id);
     }
 
     this.balance -= amount;
@@ -78,9 +78,12 @@ public class Account extends BaseAudit implements ActivableEntity, Serializable 
 
   public void credit(Float amount) {
     if (Objects.isNull(amount) || amount <= 0) {
-      throw new RuntimeException("Invalid amount");
+      throw new com.example.et.core.exception.ApiException(com.example.et.core.exception.ErrorCode.INVALID_AMOUNT, "Invalid amount");
     }
 
+    if (this.balance == null) {
+      this.balance = 0f;
+    }
     this.balance += amount;
   }
 

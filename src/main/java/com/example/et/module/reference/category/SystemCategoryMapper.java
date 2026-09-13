@@ -1,6 +1,6 @@
 package com.example.et.module.reference.category;
 
-import com.example.et.module.reference.category.dto.SystemCategoryDto;
+import com.example.et.module.reference.category.dto.CategoryDetailsResponse;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,16 +13,16 @@ import org.mapstruct.MappingTarget;
 public interface SystemCategoryMapper {
 
   // Entity to DTO
-  SystemCategoryDto toDto(SystemCategory entity);
+  CategoryDetailsResponse toDto(SystemCategory entity);
 
   // DTO to Entity
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "lastModifiedAt", ignore = true)
-  SystemCategory toEntity(SystemCategoryDto dto);
+  SystemCategory toEntity(CategoryDetailsResponse dto);
 
   // Update existing entity from DTO
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "lastModifiedAt", ignore = true)
-  void updateEntityFromDto(SystemCategoryDto dto, @MappingTarget SystemCategory entity);
+  void updateEntityFromDto(CategoryDetailsResponse dto, @MappingTarget SystemCategory entity);
 }

@@ -1,6 +1,6 @@
 package com.example.et.module.reference.bank;
 
-import com.example.et.module.reference.bank.dto.BankDto;
+import com.example.et.module.reference.bank.dto.BankDetailsResponse;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,16 +13,16 @@ import org.mapstruct.MappingTarget;
 public interface BankMapper {
 
   // Entity to DTO
-  BankDto toDto(Bank entity);
+  BankDetailsResponse toDto(Bank entity);
 
   // DTO to Entity (ignores BaseAudit timestamp fields)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "lastModifiedAt", ignore = true)
-  Bank toEntity(BankDto dto);
+  Bank toEntity(BankDetailsResponse dto);
 
   // Update existing entity from DTO
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "lastModifiedAt", ignore = true)
-  void updateEntityFromDto(BankDto dto, @MappingTarget Bank entity);
+  void updateEntityFromDto(BankDetailsResponse dto, @MappingTarget Bank entity);
 }

@@ -1,8 +1,8 @@
 package com.example.et.module.transaction.dto;
 
 import com.example.et.module.account.dto.AccountDto;
-import com.example.et.module.reference.category.dto.SystemCategoryDto;
-import com.example.et.module.reference.paymentmode.dto.PaymentModeDto;
+import com.example.et.module.reference.category.dto.CategoryDetailsResponse;
+import com.example.et.module.reference.paymentmode.dto.PaymentModeDetailsResponse;
 import com.example.et.module.transaction.Transaction;
 
 import java.time.LocalDate;
@@ -15,8 +15,8 @@ public record TransactionDto(
     LocalDate transactionDate,
     UUID transferId,
     String description,
-    SystemCategoryDto transactionCategory,
+    CategoryDetailsResponse transactionCategory,
     AccountDto account,
-    PaymentModeDto paymentMode
+    PaymentModeDetailsResponse paymentMode
 ) {
 }

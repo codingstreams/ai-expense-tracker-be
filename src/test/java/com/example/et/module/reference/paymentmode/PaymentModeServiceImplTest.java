@@ -2,7 +2,7 @@ package com.example.et.module.reference.paymentmode;
 
 import com.example.et.core.exception.ApiException;
 import com.example.et.core.exception.ErrorCode;
-import com.example.et.module.reference.paymentmode.dto.PaymentModeDto;
+import com.example.et.module.reference.paymentmode.dto.PaymentModeDetailsResponse;
 import com.example.et.module.reference.paymentmode.internal.PaymentModeRepo;
 import com.example.et.module.reference.paymentmode.internal.PaymentModeServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -35,12 +35,12 @@ class PaymentModeServiceImplTest {
   void getAllPaymentModes_ShouldReturnListOfDtos_WhenPaymentModesExist() {
     UUID id = UUID.randomUUID();
     PaymentMode paymentMode = PaymentMode.builder().id(id).name("UPI").build();
-    PaymentModeDto dto = new PaymentModeDto(id, "UPI");
+    PaymentModeDetailsResponse dto = new PaymentModeDetailsResponse(id, "UPI");
 
     when(paymentModeRepo.findAll()).thenReturn(List.of(paymentMode));
     when(paymentModeMapper.toDto(paymentMode)).thenReturn(dto);
 
-    List<PaymentModeDto> result = paymentModeService.getAllPaymentModes();
+    List<PaymentModeDetailsResponse> result = paymentModeService.getAllPaymentModes();
 
     assertNotNull(result);
     assertEquals(1, result.size());
@@ -55,7 +55,7 @@ class PaymentModeServiceImplTest {
   void getAllPaymentModes_ShouldReturnEmptyList_WhenNoneExist() {
     when(paymentModeRepo.findAll()).thenReturn(Collections.emptyList());
 
-    List<PaymentModeDto> result = paymentModeService.getAllPaymentModes();
+    List<PaymentModeDetailsResponse> result = paymentModeService.getAllPaymentModes();
 
     assertNotNull(result);
     assertTrue(result.isEmpty());
@@ -68,12 +68,12 @@ class PaymentModeServiceImplTest {
   void getPaymentModeById_ShouldReturnDto_WhenFound() {
     UUID id = UUID.randomUUID();
     PaymentMode paymentMode = PaymentMode.builder().id(id).name("CREDIT_CARD").build();
-    PaymentModeDto dto = new PaymentModeDto(id, "CREDIT_CARD");
+    PaymentModeDetailsResponse dto = new PaymentModeDetailsResponse(id, "CREDIT_CARD");
 
     when(paymentModeRepo.findById(id)).thenReturn(Optional.of(paymentMode));
     when(paymentModeMapper.toDto(paymentMode)).thenReturn(dto);
 
-    PaymentModeDto result = paymentModeService.getPaymentModeById(id);
+    PaymentModeDetailsResponse result = paymentModeService.getPaymentModeById(id);
 
     assertNotNull(result);
     assertEquals(id, result.id());

@@ -3,7 +3,7 @@ package com.example.et.module.dashboard.internal;
 import com.example.et.core.config.CacheNames;
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
-import com.example.et.module.account.dto.CreateAccountsReq;
+import com.example.et.module.account.dto.CreateAccountsRequest;
 import com.example.et.module.dashboard.DashboardService;
 import com.example.et.module.dashboard.dto.CategoryBreakdownDto;
 import com.example.et.module.dashboard.dto.MonthlyTrendDto;
@@ -37,7 +37,7 @@ public class DashboardServiceImpl implements DashboardService {
 
   @Override
   public OnboardUserDto onboardUser(String userId, OnboardUserDto requestBody) {
-    final var accounts = accountService.addAccounts(userId, new CreateAccountsReq(requestBody.accounts()));
+    final var accounts = accountService.addAccounts(userId, new CreateAccountsRequest(requestBody.accounts()));
     final var cashBalance = accountService.updateCashBalance(userId, requestBody.cashBalance());
     final var userConfig = appUserService.updateUserConfig(userId, requestBody.userConfig());
 

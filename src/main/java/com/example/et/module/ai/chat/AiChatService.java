@@ -1,10 +1,10 @@
 package com.example.et.module.ai.chat;
 
-import com.example.et.module.ai.dto.AiChatRequestDto;
-import com.example.et.module.ai.dto.AiChatResponseDto;
+import com.example.et.module.ai.dto.ChatMessageRequest;
+import com.example.et.module.ai.dto.ChatReplyResponse;
 
 public interface AiChatService {
-  AiChatResponseDto chat(String userId, AiChatRequestDto request);
+  ChatReplyResponse chat(String userId, ChatMessageRequest request);
 
   void clearSession(String userId);
 }

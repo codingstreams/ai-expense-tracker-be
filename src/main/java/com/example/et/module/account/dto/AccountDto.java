@@ -1,7 +1,7 @@
 package com.example.et.module.account.dto;
 
 import com.example.et.module.account.Account;
-import com.example.et.module.reference.bank.dto.BankDto;
+import com.example.et.module.reference.bank.dto.BankDetailsResponse;
 
 import java.util.UUID;
 
@@ -12,7 +12,7 @@ public record AccountDto(
     Account.AccountType accountType,
     Boolean upiEnabled,
     Boolean netBankingEnabled,
-    BankDto bank,
+    BankDetailsResponse bank,
     Boolean isActive
 ) {
 }

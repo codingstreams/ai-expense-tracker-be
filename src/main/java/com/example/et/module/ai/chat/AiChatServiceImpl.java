@@ -1,8 +1,8 @@
 package com.example.et.module.ai.chat;
 
 import com.example.et.module.account.AccountService;
-import com.example.et.module.ai.dto.AiChatRequestDto;
-import com.example.et.module.ai.dto.AiChatResponseDto;
+import com.example.et.module.ai.dto.ChatMessageRequest;
+import com.example.et.module.ai.dto.ChatReplyResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -30,7 +30,7 @@ public class AiChatServiceImpl implements AiChatService {
   private final RedisTemplate<String, StoredChatMessage> redisTemplate;
 
   @Override
-  public AiChatResponseDto chat(String userId, AiChatRequestDto request) {
+  public ChatReplyResponse chat(String userId, ChatMessageRequest request) {
     if (request == null || request.message() == null || request.message().isBlank()) {
       throw new IllegalArgumentException("Chat message must not be blank");
     }
@@ -75,7 +75,7 @@ public class AiChatServiceImpl implements AiChatService {
         new StoredChatMessage(MessageType.ASSISTANT, safeReply)
     ));
 
-    return new AiChatResponseDto(safeReply, userId);
+    return new ChatReplyResponse(safeReply, userId);
   }
 
   @Override

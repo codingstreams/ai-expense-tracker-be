@@ -2,7 +2,7 @@ package com.example.et.module.reference.bank;
 
 import com.example.et.core.exception.ApiException;
 import com.example.et.core.exception.ErrorCode;
-import com.example.et.module.reference.bank.dto.BankDto;
+import com.example.et.module.reference.bank.dto.BankDetailsResponse;
 import com.example.et.module.reference.bank.internal.BankRepo;
 import com.example.et.module.reference.bank.internal.BankServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -35,12 +35,12 @@ class BankServiceImplTest {
   void getSupportedBanks_ShouldReturnListOfBankDtos_WhenBanksExist() {
     UUID bankId = UUID.randomUUID();
     Bank bank = Bank.builder().id(bankId).name("HDFC Bank").build();
-    BankDto bankDto = new BankDto(bankId, "HDFC Bank");
+    BankDetailsResponse bankDetailsResponse = new BankDetailsResponse(bankId, "HDFC Bank");
 
     when(bankRepo.findAll()).thenReturn(List.of(bank));
-    when(bankMapper.toDto(bank)).thenReturn(bankDto);
+    when(bankMapper.toDto(bank)).thenReturn(bankDetailsResponse);
 
-    List<BankDto> result = bankService.getSupportedBanks();
+    List<BankDetailsResponse> result = bankService.getSupportedBanks();
 
     assertNotNull(result);
     assertEquals(1, result.size());
@@ -55,7 +55,7 @@ class BankServiceImplTest {
   void getSupportedBanks_ShouldReturnEmptyList_WhenNoBanksExist() {
     when(bankRepo.findAll()).thenReturn(Collections.emptyList());
 
-    List<BankDto> result = bankService.getSupportedBanks();
+    List<BankDetailsResponse> result = bankService.getSupportedBanks();
 
     assertNotNull(result);
     assertTrue(result.isEmpty());
