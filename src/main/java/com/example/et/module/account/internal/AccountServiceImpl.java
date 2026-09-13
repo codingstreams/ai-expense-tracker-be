@@ -212,4 +212,18 @@ public class AccountServiceImpl implements AccountService {
         .map(accountMapper::toDto)
         .collect(Collectors.toList());
   }
+
+  @Override
+  public void debitAccount(String userId, String accountId, Float amount) {
+    final var account = getAccountEntity(userId, accountId);
+    account.debit(amount);
+    accountRepo.save(account);
+  }
+
+  @Override
+  public void creditAccount(String userId, String accountId, Float amount) {
+    final var account = getAccountEntity(userId, accountId);
+    account.credit(amount);
+    accountRepo.save(account);
+  }
 }

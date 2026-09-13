@@ -31,5 +31,9 @@ public interface AccountService {
   AccountDtoOld getUserCashAccountDetails(String userId);
 
   List<AccountDto> getUserAccounts(String userId);
+
+  void debitAccount(String userId, String accountId, Float amount);
+
+  void creditAccount(String userId, String accountId, Float amount);
 }
 

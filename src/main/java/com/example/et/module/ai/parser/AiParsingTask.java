@@ -17,29 +17,29 @@ import java.util.UUID;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class AiParsingTask extends BaseAudit {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    private String rawInput;
-    private String content;
-    private String errorMessage;
+  private String rawInput;
+  private String content;
+  private String errorMessage;
 
-    private UUID correlationId;
+  private UUID correlationId;
 
-    @Enumerated(EnumType.STRING)
-    private Status status;
+  @Enumerated(EnumType.STRING)
+  private Status status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "app_user_id")
-    private AppUser appUser;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "app_user_id")
+  private AppUser appUser;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "transaction_id")
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    private Transaction transaction;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "transaction_id")
+  @OnDelete(action = OnDeleteAction.SET_NULL)
+  private Transaction transaction;
 
-    public enum Status {
-        PENDING, PROCESSING, COMPLETED, FAILED
-    }
+  public enum Status {
+    PENDING, PROCESSING, COMPLETED, FAILED
+  }
 }

@@ -14,19 +14,19 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class SysCategoryServiceImpl implements SysCategoryService {
-    private final SysCategoryRepo sysCategoryRepo;
+  private final SysCategoryRepo sysCategoryRepo;
 
-    @Override
-    @Transactional
-    @Cacheable(value = CacheNames.SYSTEM_CATEGORIES)
-    public List<SystemCategory> getAllSystemCategories() {
-        return sysCategoryRepo.findAll();
-    }
+  @Override
+  @Transactional
+  @Cacheable(value = CacheNames.SYSTEM_CATEGORIES)
+  public List<SystemCategory> getAllSystemCategories() {
+    return sysCategoryRepo.findAll();
+  }
 
-    @Override
-    @Cacheable(value = CacheNames.SYSTEM_CATEGORIES, key = "#id")
-    public SystemCategory getSystemCategoryById(UUID id) {
-        return sysCategoryRepo.findById(id)
-            .orElseThrow(() -> new RuntimeException("SystemCategory ID: %s not found".formatted(id)));
-    }
+  @Override
+  @Cacheable(value = CacheNames.SYSTEM_CATEGORIES, key = "#id")
+  public SystemCategory getSystemCategoryById(UUID id) {
+    return sysCategoryRepo.findById(id)
+        .orElseThrow(() -> new RuntimeException("SystemCategory ID: %s not found".formatted(id)));
+  }
 }

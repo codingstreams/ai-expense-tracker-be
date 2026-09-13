@@ -308,11 +308,11 @@ public class DataSeederServiceImpl implements DataSeederService {
           salaryAmount,
           salaryDate,
           "Monthly Salary Credit",
-          state.getSavingsAccountId(),
+          state.getSavingsAccountId().toString(),
           null,
           null,
-          refData.upiPaymentMode() != null ? refData.upiPaymentMode().getId() : null,
-          salaryCategory != null ? salaryCategory.getId() : null,
+          refData.upiPaymentMode() != null ? String.valueOf(refData.upiPaymentMode().getId()) : null,
+          salaryCategory != null ? String.valueOf(salaryCategory.getId()) : null,
           null
       ));
       state.creditSavings(salaryAmount);
@@ -335,10 +335,10 @@ public class DataSeederServiceImpl implements DataSeederService {
             withdrawalAmount,
             transferDate,
             "ATM Cash Withdrawal",
-            state.getSavingsAccountId(),
+            state.getSavingsAccountId().toString(),
             null,
-            state.getCashAccountId(),
-            refData.cashPaymentMode() != null ? refData.cashPaymentMode().getId() : null,
+            state.getCashAccountId().toString(),
+            refData.cashPaymentMode() != null ? String.valueOf(refData.cashPaymentMode().getId()) : null,
             null,
             null
         ));
@@ -393,11 +393,11 @@ public class DataSeederServiceImpl implements DataSeederService {
             bonusAmount,
             bonusDate,
             "Freelance Project Payout",
-            state.getSavingsAccountId(),
+            state.getSavingsAccountId().toString(),
             null,
             null,
-            refData.upiPaymentMode() != null ? refData.upiPaymentMode().getId() : null,
-            salaryCategory != null ? salaryCategory.getId() : null,
+            refData.upiPaymentMode() != null ? String.valueOf(refData.upiPaymentMode().getId()) : null,
+            salaryCategory != null ? String.valueOf(salaryCategory.getId()) : null,
             null
         ));
         state.creditSavings(bonusAmount);
@@ -477,10 +477,10 @@ public class DataSeederServiceImpl implements DataSeederService {
             withdrawal,
             txnDate,
             "ATM Cash Withdrawal",
-            state.getSavingsAccountId(),
+            state.getSavingsAccountId().toString(),
             null,
-            state.getCashAccountId(),
-            refData.cashPaymentMode() != null ? refData.cashPaymentMode().getId() : null,
+            state.getCashAccountId().toString(),
+            refData.cashPaymentMode() != null ? String.valueOf(refData.cashPaymentMode().getId()) : null,
             null,
             null
         ));
@@ -525,10 +525,10 @@ public class DataSeederServiceImpl implements DataSeederService {
           topUp,
           txnDate,
           "Consulting Payout / Returns",
-          state.getSavingsAccountId(),
+          state.getSavingsAccountId().toString(),
           null,
           null,
-          refData.upiPaymentMode() != null ? refData.upiPaymentMode().getId() : null,
+          refData.upiPaymentMode() != null ? String.valueOf(refData.upiPaymentMode().getId()) : null,
           null,
           null
       ));
@@ -540,17 +540,20 @@ public class DataSeederServiceImpl implements DataSeederService {
     }
 
     // 4. Create the Expense Transaction
+    assert accountId != null;
+    assert paymentModeId != null;
+
     transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
         null,
         Transaction.TransactionType.EXPENSE,
         amount,
         txnDate,
         expenseInfo.description(),
-        accountId,
-        cardId,
+        accountId.toString(),
+        cardId.toString(),
         null,
-        paymentModeId,
-        category != null ? category.getId() : null,
+        paymentModeId.toString(),
+        category != null ? String.valueOf(category.getId()) : null,
         null
     ));
 

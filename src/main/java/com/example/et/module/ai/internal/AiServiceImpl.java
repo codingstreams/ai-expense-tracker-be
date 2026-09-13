@@ -100,14 +100,17 @@ public class AiServiceImpl implements AiService {
 
       final var accountId = Optional.ofNullable(account)
           .map(Account::getId)
+          .map(String::valueOf)
           .orElse(null);
 
       final var paymentModeId = Optional.ofNullable(paymentMode)
           .map(PaymentMode::getId)
+          .map(String::valueOf)
           .orElse(null);
 
       final var categoryId = Optional.ofNullable(category)
           .map(SystemCategory::getId)
+          .map(String::valueOf)
           .orElse(null);
 
       final var txnType = Optional.of(parsed)

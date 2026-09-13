@@ -27,7 +27,7 @@ public class IncomeStrategy implements TransactionStrategy {
   public TransactionResponseDto execute(TransactionContext transactionContext) {
     final var userId = transactionContext.userId();
     final var user = AppUser.ofId(userId);
-    final var account = accountMapper.toEntity(accountService.getAccount(userId, transactionContext.requestDto().accountId().toString()));
+    final var account = accountMapper.toEntity(accountService.getAccount(userId, transactionContext.requestDto().accountId()));
 
     account.credit(transactionContext.requestDto().amount());
     accountService.saveAccount(account);

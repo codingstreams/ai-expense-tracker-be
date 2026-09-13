@@ -1,5 +1,7 @@
 package com.example.et.module.transaction.internal.strategy;
 
+import com.example.et.core.exception.ApiException;
+import com.example.et.core.exception.ErrorCode;
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountMapper;
 import com.example.et.module.account.AccountService;
@@ -32,30 +34,34 @@ public class ExpenseStrategy implements TransactionStrategy {
     if (cardId != null) {
       final var card = cardService.getUserCard(userId, UUID.fromString(cardId));
       if (card.getAccount() == null) {
-        throw new RuntimeException("Card is not linked to any account");
+        throw new ApiException(ErrorCode.CARD_NOT_LINKED);
       }
-      return card.getAccount();
+      return Account.ofId(card.getAccount().getId());
     }
     if (accountId != null) {
-      return accountMapper.toEntity(accountService.getAccount(userId, accountId));
+      return Account.ofId(accountService.getAccount(userId, accountId).id());
     }
-    throw new RuntimeException("Either accountId or cardId must be provided");
+    throw new ApiException(ErrorCode.INVALID_TRANSACTION_PAYLOAD);
   }
 
   @Override
   public TransactionResponseDto execute(TransactionContext transactionContext) {
     final var userId = transactionContext.userId();
     final var user = AppUser.ofId(userId);
-    final var account = resolveAccount(userId, transactionContext.requestDto().accountId().toString(), transactionContext.requestDto().cardId().toString());
+    final var accountId = transactionContext.requestDto().accountId();
+    final var amount = transactionContext.requestDto().amount();
+    final var cardId = transactionContext.requestDto().cardId();
 
-    account.debit(transactionContext.requestDto().amount());
-    accountService.saveAccount(account);
+    // Debit Account
+    accountService.debitAccount(userId, accountId, amount);
+
+    final var account = resolveAccount(userId, accountId, cardId);
 
     final var transaction = Transaction.builder()
         .appUser(user)
         .account(account)
         .type(transactionContext.requestDto().type())
-        .amount(transactionContext.requestDto().amount())
+        .amount(amount)
         .transactionDate(transactionContext.requestDto().transactionDate())
         .description(transactionContext.requestDto().description())
         .paymentMode(paymentModeMapper.toEntity(transactionContext.paymentMode()))
@@ -68,9 +74,7 @@ public class ExpenseStrategy implements TransactionStrategy {
   @Override
   public void delete(String userId, Transaction transaction) {
     if (transaction.getAccount() != null) {
-      final var account = transaction.getAccount();
-      account.credit(transaction.getAmount());
-      accountService.saveAccount(account);
+      accountService.creditAccount(userId, transaction.getAccount().getId().toString(), transaction.getAmount());
     }
 
     aiParseTaskService.unlinkTransaction(transaction.getId());

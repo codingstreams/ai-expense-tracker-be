@@ -55,6 +55,10 @@ public class Account extends BaseAudit implements ActivableEntity, Serializable 
   @ColumnDefault("true")
   private Boolean isActive;
 
+  public static Account ofId(UUID id) {
+    return Account.builder().id(id).build();
+  }
+
   @Override
   public Boolean isActive() {
     return isActive;

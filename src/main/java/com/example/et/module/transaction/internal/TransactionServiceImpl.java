@@ -61,8 +61,8 @@ public class TransactionServiceImpl implements TransactionService {
     SystemCategory category = null;
 
     if (requestBody.type() == Transaction.TransactionType.EXPENSE) {
-      paymentMode = paymentModeService.getPaymentModeById(requestBody.paymentModeId());
-      category = sysCategoryService.getSystemCategoryById(requestBody.categoryId());
+      paymentMode = paymentModeService.getPaymentModeById(UUID.fromString(requestBody.paymentModeId()));
+      category = sysCategoryService.getSystemCategoryById(UUID.fromString(requestBody.categoryId()));
     }
 
     final var transactionContext = new TransactionContext(userId, requestBody, paymentMode, category);

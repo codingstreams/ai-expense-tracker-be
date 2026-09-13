@@ -21,55 +21,86 @@ public class AiTaskScheduler {
 
   @Scheduled(fixedRate = 5000)
   public void processAiParsingTask() {
-    log.info("AiTaskScheduler start");
+    log.trace("AiTaskScheduler run initiated.");
 
     final var pendingTasks = aiParseTaskService.getPendingTasksWithAppUser(AiParsingTask.Status.PENDING);
+    if (pendingTasks.isEmpty()) {
+      log.trace("No pending AI parsing tasks found.");
+      return;
+    }
+
+    log.info("Found {} pending AI parsing task(s) to process.", pendingTasks.size());
 
     for (AiParsingTask task : pendingTasks) {
-      final var userId = task.getAppUser() != null ? task.getAppUser().getId().toString() : null;
       final var taskId = task.getId().toString();
+      final var userId = task.getAppUser() != null ? task.getAppUser().getId().toString() : null;
 
-      task.setStatus(AiParsingTask.Status.PROCESSING);
-      aiParseTaskService.save(task);
+      log.info("Starting processing for taskId: {}, userId: {}", taskId, userId);
 
-      // Send Notification
-      if (userId != null) {
-        notificationService.send(
-            userId,
-            taskId,
-            NotificationService.NotificationEvent.AI_TASK_PROCESSING,
-            Map.of("taskId", taskId, "status", "PROCESSING")
-        );
-      }
+      try {
+        task.setStatus(AiParsingTask.Status.PROCESSING);
+        aiParseTaskService.save(task);
 
-      aiService.parse(task);
-
-      if (userId != null) {
-        if (task.getStatus() == AiParsingTask.Status.COMPLETED) {
+        if (userId != null) {
+          log.debug("Sending PROCESSING notification for taskId: {} to userId: {}", taskId, userId);
           notificationService.send(
               userId,
               taskId,
-              NotificationService.NotificationEvent.AI_TASK_COMPLETED,
-              Map.of(
-                  "taskId", taskId,
-                  "status", "COMPLETED",
-                  "transactionId", task.getTransaction() != null ? task.getTransaction().getId().toString() : ""
-              )
+              NotificationService.NotificationEvent.AI_TASK_PROCESSING,
+              Map.of("taskId", taskId, "status", "PROCESSING")
           );
         } else {
-          notificationService.send(
-              userId,
-              taskId,
-              NotificationService.NotificationEvent.AI_TASK_FAILED,
-              Map.of(
-                  "taskId", taskId,
-                  "status", "FAILED",
-                  "error", task.getErrorMessage() != null ? task.getErrorMessage() : "Parsing failed"
-              )
-          );
+          log.warn("No userId associated with taskId: {}. Skipping step-start notification.", taskId);
         }
-        notificationService.closeConnection(userId, taskId);
+
+        // Execute parsing logic
+        aiService.parse(task);
+
+        // Handle result status post-parsing
+        if (task.getStatus() == AiParsingTask.Status.COMPLETED) {
+          final String transactionId = task.getTransaction() != null ? task.getTransaction().getId().toString() : "";
+          log.info("Task completed successfully. taskId: {}, transactionId: {}", taskId, transactionId);
+
+          if (userId != null) {
+            notificationService.send(
+                userId,
+                taskId,
+                NotificationService.NotificationEvent.AI_TASK_COMPLETED,
+                Map.of(
+                    "taskId", taskId,
+                    "status", "COMPLETED",
+                    "transactionId", transactionId
+                )
+            );
+          }
+        } else {
+          final String errorMsg = task.getErrorMessage() != null ? task.getErrorMessage() : "Parsing failed";
+          log.warn("Task finished with non-completed status. taskId: {}, status: {}, failure: {}",
+              taskId, task.getStatus(), errorMsg);
+
+          if (userId != null) {
+            notificationService.send(
+                userId,
+                taskId,
+                NotificationService.NotificationEvent.AI_TASK_FAILED,
+                Map.of(
+                    "taskId", taskId,
+                    "status", "FAILED",
+                    "error", errorMsg
+                )
+            );
+          }
+        }
+      } catch (Exception e) {
+        log.error("Unhandled exception processing taskId: {}", taskId, e);
+      } finally {
+        if (userId != null) {
+          log.debug("Closing notification connection for taskId: {}, userId: {}", taskId, userId);
+          notificationService.closeConnection(userId, taskId);
+        }
       }
     }
+
+    log.info("Finished processing batch of {} AI task(s).", pendingTasks.size());
   }
 }
