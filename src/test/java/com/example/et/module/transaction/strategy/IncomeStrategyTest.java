@@ -9,8 +9,8 @@ import com.example.et.module.reference.paymentmode.PaymentModeMapper;
 import com.example.et.module.transaction.Transaction;
 import com.example.et.module.transaction.TransactionContext;
 import com.example.et.module.transaction.TransactionMapper;
-import com.example.et.module.transaction.dto.TransactionRequestDto;
-import com.example.et.module.transaction.dto.TransactionResponseDto;
+import com.example.et.module.transaction.dto.CreateTransactionRequest;
+import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.internal.TransactionRepo;
 import com.example.et.module.transaction.internal.strategy.IncomeStrategy;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +65,7 @@ class IncomeStrategyTest {
 
   @Test
   void execute_ShouldCreditAccountAndSaveTransaction() {
-    TransactionRequestDto request = new TransactionRequestDto(
+    CreateTransactionRequest request = new CreateTransactionRequest(
         null,
         Transaction.TransactionType.INCOME,
         3000.0f,
@@ -83,7 +83,7 @@ class IncomeStrategyTest {
     AccountDto accountDto = new AccountDto(accountUuid, "1234", 1000.0f, Account.AccountType.SAVINGS, true, true, null, true);
     Account account = Account.builder().id(accountUuid).balance(1000.0f).build();
     Transaction savedTxn = Transaction.builder().id(UUID.randomUUID()).amount(3000.0f).build();
-    TransactionResponseDto expectedResponse = new TransactionResponseDto(
+    TransactionDetailsResponse expectedResponse = new TransactionDetailsResponse(
         savedTxn.getId(), Transaction.TransactionType.INCOME, 3000.0f, LocalDate.now(), "Bonus", "Acc", "Bank", null
     );
 
@@ -93,7 +93,7 @@ class IncomeStrategyTest {
     when(transactionRepo.save(any(Transaction.class))).thenReturn(savedTxn);
     when(transactionMapper.toResponseDto(savedTxn)).thenReturn(expectedResponse);
 
-    TransactionResponseDto actual = incomeStrategy.execute(context);
+    TransactionDetailsResponse actual = incomeStrategy.execute(context);
 
     assertNotNull(actual);
     assertEquals(expectedResponse, actual);

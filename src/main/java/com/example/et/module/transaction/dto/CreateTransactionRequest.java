@@ -4,7 +4,7 @@ import com.example.et.module.transaction.Transaction;
 
 import java.time.LocalDate;
 
-public record TransactionRequestDto(
+public record CreateTransactionRequest(
     String id,
     Transaction.TransactionType type,
     Float amount,

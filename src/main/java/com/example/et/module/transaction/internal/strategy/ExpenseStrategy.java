@@ -11,7 +11,7 @@ import com.example.et.module.reference.paymentmode.PaymentModeMapper;
 import com.example.et.module.transaction.Transaction;
 import com.example.et.module.transaction.TransactionContext;
 import com.example.et.module.transaction.TransactionMapper;
-import com.example.et.module.transaction.dto.TransactionResponseDto;
+import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.internal.TransactionRepo;
 import com.example.et.module.user.AppUser;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class ExpenseStrategy implements TransactionStrategy {
   }
 
   @Override
-  public TransactionResponseDto execute(TransactionContext transactionContext) {
+  public TransactionDetailsResponse execute(TransactionContext transactionContext) {
     final var userId = transactionContext.userId();
     final var user = AppUser.ofId(userId);
     final var accountId = transactionContext.requestDto().accountId();

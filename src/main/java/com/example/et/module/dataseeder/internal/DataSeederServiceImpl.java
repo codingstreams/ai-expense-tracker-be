@@ -23,7 +23,7 @@ import com.example.et.module.reference.paymentmode.PaymentMode;
 import com.example.et.module.reference.paymentmode.internal.PaymentModeRepo;
 import com.example.et.module.transaction.Transaction;
 import com.example.et.module.transaction.TransactionService;
-import com.example.et.module.transaction.dto.TransactionRequestDto;
+import com.example.et.module.transaction.dto.CreateTransactionRequest;
 import com.example.et.module.user.AppUserConfig;
 import com.example.et.module.user.AppUserService;
 import com.example.et.module.user.dto.UpdateUserDetailsDto;
@@ -302,7 +302,7 @@ public class DataSeederServiceImpl implements DataSeederService {
       log.info("{} [Month {}/{}] [Income] Crediting Monthly Salary of ₹{} on {}...",
           userTag, m + 1, months + 1, formatAmount(salaryAmount), salaryDate);
 
-      transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
+      transactionsService.createTransaction(state.getUserId(), new CreateTransactionRequest(
           null,
           Transaction.TransactionType.INCOME,
           salaryAmount,
@@ -329,7 +329,7 @@ public class DataSeederServiceImpl implements DataSeederService {
         log.info("{} [Month {}/{}] [Transfer] Executing ATM Cash Withdrawal of ₹{} on {}...",
             userTag, m + 1, months + 1, formatAmount(withdrawalAmount), transferDate);
 
-        transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
+        transactionsService.createTransaction(state.getUserId(), new CreateTransactionRequest(
             null,
             Transaction.TransactionType.TRANSFER,
             withdrawalAmount,
@@ -387,7 +387,7 @@ public class DataSeederServiceImpl implements DataSeederService {
         log.info("{} [Month {}/{}] [Income] Crediting Freelance / Bonus payout of ₹{} on {}...",
             userTag, m + 1, months + 1, formatAmount(bonusAmount), bonusDate);
 
-        transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
+        transactionsService.createTransaction(state.getUserId(), new CreateTransactionRequest(
             null,
             Transaction.TransactionType.INCOME,
             bonusAmount,
@@ -471,7 +471,7 @@ public class DataSeederServiceImpl implements DataSeederService {
         log.info("{} [Balance Guard] Cash low (₹{}). Triggering ATM cash withdrawal of ₹{} before expense...",
             userTag, formatAmount(state.getCashBalance()), formatAmount(withdrawal));
 
-        transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
+        transactionsService.createTransaction(state.getUserId(), new CreateTransactionRequest(
             null,
             Transaction.TransactionType.TRANSFER,
             withdrawal,
@@ -519,7 +519,7 @@ public class DataSeederServiceImpl implements DataSeederService {
       log.info("{} [Balance Guard] Savings low (₹{}). Injecting emergency Consulting Income top-up of ₹{}...",
           userTag, formatAmount(state.getSavingsBalance()), formatAmount(topUp));
 
-      transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
+      transactionsService.createTransaction(state.getUserId(), new CreateTransactionRequest(
           null,
           Transaction.TransactionType.INCOME,
           topUp,
@@ -543,7 +543,7 @@ public class DataSeederServiceImpl implements DataSeederService {
     assert accountId != null;
     assert paymentModeId != null;
 
-    transactionsService.createTransaction(state.getUserId(), new TransactionRequestDto(
+    transactionsService.createTransaction(state.getUserId(), new CreateTransactionRequest(
         null,
         Transaction.TransactionType.EXPENSE,
         amount,

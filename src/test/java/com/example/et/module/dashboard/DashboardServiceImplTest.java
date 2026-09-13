@@ -11,8 +11,8 @@ import com.example.et.module.dashboard.internal.DashboardServiceImpl;
 import com.example.et.module.transaction.Transaction;
 import com.example.et.module.transaction.TransactionService;
 import com.example.et.module.transaction.dto.PagedTransactionsDto;
+import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.dto.TransactionFilterParams;
-import com.example.et.module.transaction.dto.TransactionResponseDto;
 import com.example.et.module.user.AppUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -94,16 +94,16 @@ class DashboardServiceImplTest {
     int year = now.getYear();
     int month = now.getMonthValue();
 
-    TransactionResponseDto food1 = new TransactionResponseDto(
+    TransactionDetailsResponse food1 = new TransactionDetailsResponse(
         UUID.randomUUID(), Transaction.TransactionType.EXPENSE, 100.0f, now, "Lunch", "Acc", "UPI", "Food"
     );
-    TransactionResponseDto food2 = new TransactionResponseDto(
+    TransactionDetailsResponse food2 = new TransactionDetailsResponse(
         UUID.randomUUID(), Transaction.TransactionType.EXPENSE, 200.0f, now, "Dinner", "Acc", "UPI", "Food"
     );
-    TransactionResponseDto transport = new TransactionResponseDto(
+    TransactionDetailsResponse transport = new TransactionDetailsResponse(
         UUID.randomUUID(), Transaction.TransactionType.EXPENSE, 100.0f, now, "Cab", "Acc", "UPI", "Transport"
     );
-    TransactionResponseDto income = new TransactionResponseDto(
+    TransactionDetailsResponse income = new TransactionDetailsResponse(
         UUID.randomUUID(), Transaction.TransactionType.INCOME, 5000.0f, now, "Salary", "Acc", "UPI", "Salary"
     );
 
@@ -134,7 +134,7 @@ class DashboardServiceImplTest {
 
   @Test
   void getCategoryBreakdown_ShouldHandleUncategorizedAndNullYearMonth() {
-    TransactionResponseDto txn = new TransactionResponseDto(
+    TransactionDetailsResponse txn = new TransactionDetailsResponse(
         UUID.randomUUID(), Transaction.TransactionType.EXPENSE, 50.0f, LocalDate.now(), "Unknown", "Acc", "UPI", null
     );
 
@@ -176,10 +176,10 @@ class DashboardServiceImplTest {
     when(accountService.getUserAccounts(userId)).thenReturn(List.of(savings, credit));
 
     LocalDate now = LocalDate.now();
-    TransactionResponseDto expense = new TransactionResponseDto(
+    TransactionDetailsResponse expense = new TransactionDetailsResponse(
         UUID.randomUUID(), Transaction.TransactionType.EXPENSE, 1500.0f, now, "Rent", "Acc", "UPI", "Housing"
     );
-    TransactionResponseDto income = new TransactionResponseDto(
+    TransactionDetailsResponse income = new TransactionDetailsResponse(
         UUID.randomUUID(), Transaction.TransactionType.INCOME, 5000.0f, now, "Salary", "Acc", "UPI", "Salary"
     );
 
@@ -218,10 +218,10 @@ class DashboardServiceImplTest {
   @Test
   void getMonthlyTrend_ShouldCalculateTrendsAcrossMonths() {
     LocalDate now = LocalDate.now();
-    TransactionResponseDto expense = new TransactionResponseDto(
+    TransactionDetailsResponse expense = new TransactionDetailsResponse(
         UUID.randomUUID(), Transaction.TransactionType.EXPENSE, 500.0f, now, "Groceries", "Acc", "UPI", "Food"
     );
-    TransactionResponseDto income = new TransactionResponseDto(
+    TransactionDetailsResponse income = new TransactionDetailsResponse(
         UUID.randomUUID(), Transaction.TransactionType.INCOME, 2000.0f, now, "Paycheck", "Acc", "UPI", "Salary"
     );
 

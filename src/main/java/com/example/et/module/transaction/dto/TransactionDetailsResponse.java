@@ -5,7 +5,7 @@ import com.example.et.module.transaction.Transaction;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record TransactionResponseDto(
+public record TransactionDetailsResponse(
     UUID id,
     Transaction.TransactionType type,
     Float amount,

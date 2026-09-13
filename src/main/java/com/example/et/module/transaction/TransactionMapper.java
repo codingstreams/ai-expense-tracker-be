@@ -3,8 +3,8 @@ package com.example.et.module.transaction;
 import com.example.et.module.account.AccountMapper;
 import com.example.et.module.reference.category.SystemCategoryMapper;
 import com.example.et.module.reference.paymentmode.PaymentModeMapper;
+import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.dto.TransactionDto;
-import com.example.et.module.transaction.dto.TransactionResponseDto;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -37,5 +37,5 @@ public interface TransactionMapper {
   @Mapping(target = "account", expression = "java(entity.getAccount() != null && entity.getAccount().getBank() != null ? entity.getAccount().getBank().getName() : \"CASH\")")
   @Mapping(target = "paymentMode", expression = "java(entity.getPaymentMode() != null ? entity.getPaymentMode().getName() : \"\")")
   @Mapping(target = "category", expression = "java(entity.getTransactionCategory() != null ? entity.getTransactionCategory().getName() : \"\")")
-  TransactionResponseDto toResponseDto(Transaction entity);
+  TransactionDetailsResponse toResponseDto(Transaction entity);
 }

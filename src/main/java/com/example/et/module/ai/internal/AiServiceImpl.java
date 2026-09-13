@@ -16,8 +16,8 @@ import com.example.et.module.reference.paymentmode.PaymentMode;
 import com.example.et.module.reference.paymentmode.internal.PaymentModeRepo;
 import com.example.et.module.transaction.Transaction;
 import com.example.et.module.transaction.TransactionService;
+import com.example.et.module.transaction.dto.CreateTransactionRequest;
 import com.example.et.module.transaction.dto.TransactionFilterParams;
-import com.example.et.module.transaction.dto.TransactionRequestDto;
 import com.example.et.module.user.AppUser;
 import com.example.et.module.user.internal.AppUserConfigRepo;
 import lombok.RequiredArgsConstructor;
@@ -129,7 +129,7 @@ public class AiServiceImpl implements AiService {
         throw new IllegalArgumentException("Required transaction details (user, account, payment mode, or category) cannot be null.");
       }
 
-      final var requestDto = new TransactionRequestDto(
+      final var requestDto = new CreateTransactionRequest(
           null,
           txnType,
           amount,

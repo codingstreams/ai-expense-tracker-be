@@ -11,8 +11,8 @@ import com.example.et.module.dashboard.dto.OnboardUserDto;
 import com.example.et.module.dashboard.dto.UserSummaryDto;
 import com.example.et.module.transaction.Transaction;
 import com.example.et.module.transaction.TransactionService;
+import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.dto.TransactionFilterParams;
-import com.example.et.module.transaction.dto.TransactionResponseDto;
 import com.example.et.module.user.AppUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -69,7 +69,7 @@ public class DashboardServiceImpl implements DashboardService {
         .mapToDouble(t -> Math.abs(t.amount()))
         .sum();
 
-    final Map<String, List<TransactionResponseDto>> grouped = expenseTransactions.stream()
+    final Map<String, List<TransactionDetailsResponse>> grouped = expenseTransactions.stream()
         .collect(Collectors.groupingBy(t -> t.category() != null ? t.category() : "Uncategorized"));
 
     return grouped.entrySet().stream()

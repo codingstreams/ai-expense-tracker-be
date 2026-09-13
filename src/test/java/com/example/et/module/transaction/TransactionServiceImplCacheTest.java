@@ -3,8 +3,8 @@ package com.example.et.module.transaction;
 import com.example.et.core.config.CacheNames;
 import com.example.et.module.reference.category.SysCategoryService;
 import com.example.et.module.reference.paymentmode.PaymentModeService;
+import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.dto.TransactionFilterParams;
-import com.example.et.module.transaction.dto.TransactionResponseDto;
 import com.example.et.module.transaction.internal.TransactionRepo;
 import com.example.et.module.transaction.internal.TransactionServiceImpl;
 import com.example.et.module.transaction.internal.strategy.TransactionStrategyFactory;
@@ -64,7 +64,7 @@ class TransactionServiceImplCacheTest {
     Pageable pageable = PageRequest.of(0, 10);
 
     Transaction transaction = new Transaction();
-    TransactionResponseDto responseDto = new TransactionResponseDto(
+    TransactionDetailsResponse responseDto = new TransactionDetailsResponse(
         UUID.randomUUID(),
         Transaction.TransactionType.EXPENSE,
         100.0f,

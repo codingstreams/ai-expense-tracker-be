@@ -14,8 +14,8 @@ import com.example.et.module.reference.paymentmode.dto.PaymentModeDetailsRespons
 import com.example.et.module.transaction.Transaction;
 import com.example.et.module.transaction.TransactionContext;
 import com.example.et.module.transaction.TransactionMapper;
-import com.example.et.module.transaction.dto.TransactionRequestDto;
-import com.example.et.module.transaction.dto.TransactionResponseDto;
+import com.example.et.module.transaction.dto.CreateTransactionRequest;
+import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.internal.TransactionRepo;
 import com.example.et.module.transaction.internal.strategy.ExpenseStrategy;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,7 +72,7 @@ class ExpenseStrategyTest {
 
   @Test
   void execute_ShouldDebitAccountAndSaveTransaction_WhenAccountIdProvided() {
-    TransactionRequestDto request = new TransactionRequestDto(
+    CreateTransactionRequest request = new CreateTransactionRequest(
         null,
         Transaction.TransactionType.EXPENSE,
         150.0f,
@@ -90,7 +90,7 @@ class ExpenseStrategyTest {
     TransactionContext context = new TransactionContext(userId, request, paymentMode, null);
     AccountDto accountDto = new AccountDto(accountUuid, "1234", 1000.0f, Account.AccountType.SAVINGS, true, true, null, true);
     Transaction savedTransaction = Transaction.builder().id(UUID.randomUUID()).amount(150.0f).build();
-    TransactionResponseDto expectedResponse = new TransactionResponseDto(
+    TransactionDetailsResponse expectedResponse = new TransactionDetailsResponse(
         savedTransaction.getId(), Transaction.TransactionType.EXPENSE, 150.0f, LocalDate.now(), "Groceries", "Acc", "UPI", null
     );
 
@@ -99,7 +99,7 @@ class ExpenseStrategyTest {
     when(transactionRepo.save(any(Transaction.class))).thenReturn(savedTransaction);
     when(transactionMapper.toResponseDto(savedTransaction)).thenReturn(expectedResponse);
 
-    TransactionResponseDto actual = expenseStrategy.execute(context);
+    TransactionDetailsResponse actual = expenseStrategy.execute(context);
 
     assertNotNull(actual);
     assertEquals(expectedResponse, actual);
@@ -110,7 +110,7 @@ class ExpenseStrategyTest {
   @Test
   void execute_ShouldResolveAccountFromCard_WhenCardIdProvided() {
     UUID cardUuid = UUID.randomUUID();
-    TransactionRequestDto request = new TransactionRequestDto(
+    CreateTransactionRequest request = new CreateTransactionRequest(
         null,
         Transaction.TransactionType.EXPENSE,
         200.0f,
@@ -129,7 +129,7 @@ class ExpenseStrategyTest {
 
     TransactionContext context = new TransactionContext(userId, request, null, null);
     Transaction savedTxn = Transaction.builder().id(UUID.randomUUID()).amount(200.0f).build();
-    TransactionResponseDto expectedResponse = new TransactionResponseDto(
+    TransactionDetailsResponse expectedResponse = new TransactionDetailsResponse(
         savedTxn.getId(), Transaction.TransactionType.EXPENSE, 200.0f, LocalDate.now(), "Fuel", "Acc", "CARD", null
     );
 
@@ -138,7 +138,7 @@ class ExpenseStrategyTest {
     when(transactionRepo.save(any(Transaction.class))).thenReturn(savedTxn);
     when(transactionMapper.toResponseDto(savedTxn)).thenReturn(expectedResponse);
 
-    TransactionResponseDto actual = expenseStrategy.execute(context);
+    TransactionDetailsResponse actual = expenseStrategy.execute(context);
 
     assertNotNull(actual);
     assertEquals(expectedResponse, actual);
@@ -148,7 +148,7 @@ class ExpenseStrategyTest {
   @Test
   void execute_ShouldThrowApiException_WhenCardNotLinked() {
     UUID cardUuid = UUID.randomUUID();
-    TransactionRequestDto request = new TransactionRequestDto(
+    CreateTransactionRequest request = new CreateTransactionRequest(
         null,
         Transaction.TransactionType.EXPENSE,
         100.0f,
@@ -176,7 +176,7 @@ class ExpenseStrategyTest {
 
   @Test
   void execute_ShouldThrowApiException_WhenNeitherAccountNorCardProvided() {
-    TransactionRequestDto request = new TransactionRequestDto(
+    CreateTransactionRequest request = new CreateTransactionRequest(
         null,
         Transaction.TransactionType.EXPENSE,
         100.0f,

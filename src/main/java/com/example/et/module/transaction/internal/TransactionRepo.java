@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TransactionRepo extends JpaRepository<Transaction, UUID>, JpaSpecificationExecutor<Transaction> {
-  Optional<Transaction> findByIdAndAppUserId(UUID transactionId, UUID userUuid);
+  Optional<Transaction> findByIdAndAppUserId(String transactionId, String userId);
 
-  List<Transaction> findAllByTransferIdAndAppUserId(UUID transferId, UUID userUuid);
+  List<Transaction> findAllByTransferIdAndAppUserId(String transferId, String userId);
 }

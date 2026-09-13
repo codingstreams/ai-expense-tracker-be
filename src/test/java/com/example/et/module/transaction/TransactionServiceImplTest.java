@@ -4,10 +4,10 @@ import com.example.et.module.reference.category.SysCategoryService;
 import com.example.et.module.reference.category.SystemCategory;
 import com.example.et.module.reference.paymentmode.PaymentModeService;
 import com.example.et.module.reference.paymentmode.dto.PaymentModeDetailsResponse;
+import com.example.et.module.transaction.dto.CreateTransactionRequest;
 import com.example.et.module.transaction.dto.PagedTransactionsDto;
+import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.dto.TransactionFilterParams;
-import com.example.et.module.transaction.dto.TransactionRequestDto;
-import com.example.et.module.transaction.dto.TransactionResponseDto;
 import com.example.et.module.transaction.internal.TransactionRepo;
 import com.example.et.module.transaction.internal.TransactionServiceImpl;
 import com.example.et.module.transaction.internal.strategy.TransactionStrategy;
@@ -62,7 +62,7 @@ class TransactionServiceImplTest {
     Pageable pageable = PageRequest.of(0, 10);
 
     Transaction transaction = new Transaction();
-    TransactionResponseDto responseDto = new TransactionResponseDto(
+    TransactionDetailsResponse responseDto = new TransactionDetailsResponse(
         UUID.randomUUID(),
         Transaction.TransactionType.EXPENSE,
         100.0f,
@@ -116,7 +116,7 @@ class TransactionServiceImplTest {
     UUID paymentModeId = UUID.randomUUID();
     UUID categoryId = UUID.randomUUID();
 
-    TransactionRequestDto request = new TransactionRequestDto(
+    CreateTransactionRequest request = new CreateTransactionRequest(
         null,
         Transaction.TransactionType.EXPENSE,
         250.0f,
@@ -133,7 +133,7 @@ class TransactionServiceImplTest {
     PaymentModeDetailsResponse paymentMode = new PaymentModeDetailsResponse(paymentModeId, "UPI");
     SystemCategory category = SystemCategory.builder().id(categoryId).name("Groceries").build();
     TransactionStrategy mockStrategy = mock(TransactionStrategy.class);
-    TransactionResponseDto expectedResponse = new TransactionResponseDto(
+    TransactionDetailsResponse expectedResponse = new TransactionDetailsResponse(
         UUID.randomUUID(), Transaction.TransactionType.EXPENSE, 250.0f, LocalDate.now(), "Grocery store", "Acc", "UPI", "Groceries"
     );
 
@@ -142,7 +142,7 @@ class TransactionServiceImplTest {
     when(strategyFactory.getTransactionStrategy(Transaction.TransactionType.EXPENSE)).thenReturn(mockStrategy);
     when(mockStrategy.execute(any(TransactionContext.class))).thenReturn(expectedResponse);
 
-    TransactionResponseDto actualResponse = transactionService.createTransaction(userId, request);
+    TransactionDetailsResponse actualResponse = transactionService.createTransaction(userId, request);
 
     assertNotNull(actualResponse);
     assertEquals(expectedResponse, actualResponse);
@@ -159,7 +159,7 @@ class TransactionServiceImplTest {
   void createTransaction_ShouldDelegateToIncomeStrategy_WhenTypeIsIncome() {
     String userId = UUID.randomUUID().toString();
 
-    TransactionRequestDto request = new TransactionRequestDto(
+    CreateTransactionRequest request = new CreateTransactionRequest(
         null,
         Transaction.TransactionType.INCOME,
         5000.0f,
@@ -174,14 +174,14 @@ class TransactionServiceImplTest {
     );
 
     TransactionStrategy mockStrategy = mock(TransactionStrategy.class);
-    TransactionResponseDto expectedResponse = new TransactionResponseDto(
+    TransactionDetailsResponse expectedResponse = new TransactionDetailsResponse(
         UUID.randomUUID(), Transaction.TransactionType.INCOME, 5000.0f, LocalDate.now(), "Salary", "Acc", "Bank", "Salary"
     );
 
     when(strategyFactory.getTransactionStrategy(Transaction.TransactionType.INCOME)).thenReturn(mockStrategy);
     when(mockStrategy.execute(any(TransactionContext.class))).thenReturn(expectedResponse);
 
-    TransactionResponseDto actualResponse = transactionService.createTransaction(userId, request);
+    TransactionDetailsResponse actualResponse = transactionService.createTransaction(userId, request);
 
     assertNotNull(actualResponse);
     assertEquals(expectedResponse, actualResponse);
@@ -229,7 +229,7 @@ class TransactionServiceImplTest {
     String userId = UUID.randomUUID().toString();
 
     Transaction transaction = new Transaction();
-    TransactionResponseDto responseDto = new TransactionResponseDto(
+    TransactionDetailsResponse responseDto = new TransactionDetailsResponse(
         UUID.randomUUID(), Transaction.TransactionType.EXPENSE, 100.0f, LocalDate.now(), "Desc", "Acc", "UPI", "Food"
     );
 
@@ -237,7 +237,7 @@ class TransactionServiceImplTest {
     when(transactionRepo.findAll(any(Specification.class), eq(Pageable.ofSize(5)))).thenReturn(page);
     when(transactionMapper.toResponseDto(transaction)).thenReturn(responseDto);
 
-    List<TransactionResponseDto> recents = transactionService.getRecentTransactions(userId);
+    List<TransactionDetailsResponse> recents = transactionService.getRecentTransactions(userId);
 
     assertNotNull(recents);
     assertEquals(1, recents.size());
