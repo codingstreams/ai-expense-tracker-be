@@ -1,6 +1,6 @@
 package com.example.et.service.auth;
 
-import com.example.et.module.auth.internal.ExpireTokenServiceImpl;
+import com.example.et.module.auth.internal.BlacklistTokenRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ExpireTokenServiceImplTest {
+class BlacklistTokenRepositoryImplTest {
 
   @Mock
   private StringRedisTemplate redisTemplate;
@@ -26,18 +26,18 @@ class ExpireTokenServiceImplTest {
   @Mock
   private ValueOperations<String, String> valueOperations;
 
-  private ExpireTokenServiceImpl expireTokenService;
+  private BlacklistTokenRepositoryImpl expireTokenService;
 
   @BeforeEach
   void setUp() {
-    expireTokenService = new ExpireTokenServiceImpl(redisTemplate);
+    expireTokenService = new BlacklistTokenRepositoryImpl(redisTemplate);
   }
 
   @Test
   void addExpireToken_withDefaultTtl() {
     when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-    expireTokenService.addExpireToken("sample-token");
+    expireTokenService.add("sample-token");
 
     verify(valueOperations).set(eq("bl:at:sample-token"), eq("revoked"), eq(Duration.ofMinutes(15)));
   }
@@ -47,7 +47,7 @@ class ExpireTokenServiceImplTest {
     when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
     Duration customTtl = Duration.ofMinutes(5);
-    expireTokenService.addExpireToken("sample-token", customTtl);
+    expireTokenService.add("sample-token", customTtl);
 
     verify(valueOperations).set(eq("bl:at:sample-token"), eq("revoked"), eq(customTtl));
   }
@@ -56,7 +56,7 @@ class ExpireTokenServiceImplTest {
   void isExpireToken_whenTokenExistsInRedis_returnsTrue() {
     when(redisTemplate.hasKey("bl:at:sample-token")).thenReturn(true);
 
-    boolean result = expireTokenService.isExpireToken("sample-token");
+    boolean result = expireTokenService.isExpire("sample-token");
 
     assertTrue(result);
   }
@@ -65,7 +65,7 @@ class ExpireTokenServiceImplTest {
   void isExpireToken_whenTokenNotInRedis_returnsFalse() {
     when(redisTemplate.hasKey("bl:at:sample-token")).thenReturn(false);
 
-    boolean result = expireTokenService.isExpireToken("sample-token");
+    boolean result = expireTokenService.isExpire("sample-token");
 
     assertFalse(result);
   }

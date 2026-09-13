@@ -1,6 +1,6 @@
 package com.example.et.service.transaction;
 
-import com.example.et.core.cache.CacheNames;
+import com.example.et.core.config.CacheNames;
 import com.example.et.module.reference.category.SysCategoryService;
 import com.example.et.module.reference.paymentmode.PaymentModeService;
 import com.example.et.module.transaction.Transaction;

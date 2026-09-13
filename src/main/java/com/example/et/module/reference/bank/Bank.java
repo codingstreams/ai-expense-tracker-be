@@ -1,6 +1,6 @@
 package com.example.et.module.reference.bank;
 
-import com.example.et.core.model.BaseAudit;
+import com.example.et.core.BaseAudit;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

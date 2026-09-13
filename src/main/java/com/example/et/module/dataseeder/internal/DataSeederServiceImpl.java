@@ -4,7 +4,7 @@ import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.account.dto.AccountDto;
 import com.example.et.module.auth.AuthService;
-import com.example.et.module.auth.dto.CreateUserReq;
+import com.example.et.module.auth.dto.RegisterUserRequest;
 import com.example.et.module.card.Card;
 import com.example.et.module.card.CardService;
 import com.example.et.module.card.dto.CardDto;
@@ -68,7 +68,7 @@ public class DataSeederServiceImpl implements DataSeederService {
       final String email = faker.internet().emailAddress();
       log.info("[Users Seeder] [{}/{}] Registering user '{}' ({})", i + 1, count, name, email);
 
-      final var request = new CreateUserReq(name, email, DEFAULT_USER_PASSWORD);
+      final var request = new RegisterUserRequest(name, email, DEFAULT_USER_PASSWORD);
       authService.register(request);
       log.info("[Users Seeder] [{}/{}] User registered successfully: {}", i + 1, count, email);
 
@@ -140,7 +140,7 @@ public class DataSeederServiceImpl implements DataSeederService {
 
     // --- Step 1: User Registration ---
     log.info("{} [Step 1/4] Registering user account with email: {}", userTag, email);
-    authService.register(new CreateUserReq(name, email, DEFAULT_JOURNEY_PASSWORD));
+    authService.register(new RegisterUserRequest(name, email, DEFAULT_JOURNEY_PASSWORD));
     final var appUser = appUserService.getUserByEmail(email);
     final var userId = appUser.getId().toString();
     log.info("{} [Step 1/4] Registered successfully. Resolved User ID: {}", userTag, userId);

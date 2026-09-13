@@ -1,4 +1,4 @@
-package com.example.et.core.config;
+package com.example.et.module.ai.chat;
 
 import com.example.et.module.ai.tool.FinanceAiTools;
 import org.springframework.ai.chat.client.ChatClient;
@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class AiConfig {
+public class ChatClientConfig {
 
   @Bean
   ChatClient chatClient(ChatClient.Builder chatClientBuilder, FinanceAiTools financeAiTools) {

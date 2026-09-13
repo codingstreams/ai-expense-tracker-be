@@ -9,5 +9,4 @@ class EtApplicationTests {
   @Test
   void contextLoads() {
   }
-
 }

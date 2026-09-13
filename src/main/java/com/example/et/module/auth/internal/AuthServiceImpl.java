@@ -1,17 +1,12 @@
 package com.example.et.module.auth.internal;
 
-import com.example.et.core.config.props.JwtProps;
-import com.example.et.core.security.BearerAuthToken;
-import com.example.et.core.security.JwtAuthFilter;
-import com.example.et.core.security.JwtUtils;
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
-import com.example.et.module.auth.AppUser;
 import com.example.et.module.auth.AuthService;
-import com.example.et.module.auth.ExpireTokenService;
-import com.example.et.module.auth.RefreshTokenService;
 import com.example.et.module.auth.dto.*;
-import com.example.et.module.reference.paymentmode.internal.PaymentModeRepo;
+import com.example.et.module.reference.paymentmode.PaymentModeMapper;
+import com.example.et.module.reference.paymentmode.PaymentModeService;
+import com.example.et.module.user.AppUser;
 import com.example.et.module.user.AppUserConfig;
 import com.example.et.module.user.AppUserService;
 import io.jsonwebtoken.Claims;
@@ -44,14 +39,15 @@ public class AuthServiceImpl implements AuthService {
   private final SecretKey secretKey;
   private final JwtProps jwtProps;
   private final PasswordEncoder passwordEncoder;
-  private final ExpireTokenService expireTokenService;
-  private final RefreshTokenService refreshTokenService;
+  private final BlacklistTokenRepository blacklistTokenRepository;
+  private final RefreshTokenRepository refreshTokenRepository;
   private final AccountService accountService;
-  private final PaymentModeRepo paymentModeRepo;
+  private final PaymentModeService paymentModeService;
+  private final PaymentModeMapper paymentModeMapper;
 
   @Transactional
   @Override
-  public AuthResponse register(CreateUserReq request) {
+  public AuthSuccessResponse register(RegisterUserRequest request) {
     final var userExists = appUserService.checkUserExists(request.email());
 
     if (userExists) {
@@ -59,7 +55,11 @@ public class AuthServiceImpl implements AuthService {
       throw new RuntimeException("User " + request.email() + " already exists");
     }
 
-    final var cashPaymentMode = paymentModeRepo.findByNameIgnoreCase("Cash").orElse(null);
+    final var cashPaymentMode = paymentModeService.getAllPaymentModes()
+        .stream()
+        .filter(e -> e.name().equalsIgnoreCase("cash"))
+        .findFirst()
+        .orElse(null);
 
     final var newUser = AppUser.builder()
         .name(request.name())
@@ -73,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
         .languagePreference(AppUserConfig.LanguagePreference.EN)
         .currency(AppUserConfig.Currency.INR)
         .spendLimit(0)
-        .paymentMode(cashPaymentMode)
+        .paymentMode(paymentModeMapper.toEntity(cashPaymentMode))
         .build();
 
     newUser.setAppUserConfig(userConfig);
@@ -92,11 +92,11 @@ public class AuthServiceImpl implements AuthService {
 
     accountService.saveAccount(cashAccount);
 
-    return login(new LoginReq(request.email(), request.password()));
+    return login(new LoginRequest(request.email(), request.password()));
   }
 
   @Override
-  public AuthResponse login(LoginReq request) {
+  public AuthSuccessResponse login(LoginRequest request) {
     final var unauthenticatedToken = UsernamePasswordAuthenticationToken.unauthenticated(request.email(),
         request.password());
 
@@ -112,14 +112,14 @@ public class AuthServiceImpl implements AuthService {
     final var expirationTimeRefreshToken = jwtProps.getExpirationTimeRefreshTokenInSeconds();
     final var refreshToken = JwtUtils.generateRefreshToken(userId, secretKey, expirationTimeRefreshToken);
 
-    refreshTokenService.saveRefreshToken(userId, refreshToken, Duration.ofSeconds(expirationTimeRefreshToken));
+    refreshTokenRepository.saveRefreshToken(userId, refreshToken, Duration.ofSeconds(expirationTimeRefreshToken));
 
     final var onboarded = appUserService.checkIsUserOnboardedByEmail(request.email());
 
     final var adjustedExpirationTimeAccessToken = jwtProps.getAdjustedExpirationTimeAccessTokenInSeconds();
     final var expireTime = Instant.now().plusSeconds(adjustedExpirationTimeAccessToken).toEpochMilli();
 
-    return new AuthResponse(
+    return new AuthSuccessResponse(
         accessToken,
         refreshToken,
         BearerAuthToken.TOKEN_TYPE,
@@ -130,7 +130,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public AuthResponse refreshToken(RefreshTokenReq request) {
+  public AuthSuccessResponse refreshToken(RefreshTokenRequest request) {
     if (request == null || request.refreshToken() == null || request.refreshToken().isBlank()) {
       throw new BadCredentialsException("Refresh token must not be blank");
     }
@@ -146,10 +146,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     final var userId = claims.getSubject();
-    if (userId == null || !refreshTokenService.isRefreshTokenValid(userId, refreshToken)) {
+    if (userId == null || !refreshTokenRepository.isRefreshTokenValid(userId, refreshToken)) {
       log.warn("Refresh token reuse or revocation detected for user: {}", userId);
       if (userId != null) {
-        refreshTokenService.deleteRefreshToken(userId);
+        refreshTokenRepository.deleteRefreshToken(userId);
       }
       throw new BadCredentialsException("Refresh token is invalid or revoked");
     }
@@ -163,14 +163,14 @@ public class AuthServiceImpl implements AuthService {
     final var expirationTimeRefreshToken = jwtProps.getExpirationTimeRefreshTokenInSeconds();
     final var newRefreshToken = JwtUtils.generateRefreshToken(userId, secretKey, expirationTimeRefreshToken);
 
-    refreshTokenService.saveRefreshToken(userId, newRefreshToken, Duration.ofSeconds(expirationTimeRefreshToken));
+    refreshTokenRepository.saveRefreshToken(userId, newRefreshToken, Duration.ofSeconds(expirationTimeRefreshToken));
 
     final var onboarded = appUser.isOnboardingComplete();
 
     final var adjustedExpirationTimeAccessToken = jwtProps.getAdjustedExpirationTimeAccessTokenInSeconds();
     final var expireTime = Instant.now().plusSeconds(adjustedExpirationTimeAccessToken).toEpochMilli();
 
-    return new AuthResponse(
+    return new AuthSuccessResponse(
         newAccessToken,
         newRefreshToken,
         BearerAuthToken.TOKEN_TYPE,
@@ -181,12 +181,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public void logout(String token) {
-    logout(token, null);
-  }
-
-  @Override
-  public void logout(String token, LogoutReq logoutReq) {
+  public void logout(String token, LogoutRequest logoutRequest) {
     final var rawTokenOpt = JwtAuthFilter.extractToken(token);
     if (rawTokenOpt.isEmpty()) {
       return;
@@ -200,26 +195,26 @@ public class AuthServiceImpl implements AuthService {
 
       if (expiration != null && expiration.after(now)) {
         long remainingMillis = expiration.getTime() - now.getTime();
-        expireTokenService.addExpireToken(rawToken, Duration.ofMillis(remainingMillis));
+        blacklistTokenRepository.add(rawToken, Duration.ofMillis(remainingMillis));
       } else {
-        expireTokenService.addExpireToken(rawToken);
+        blacklistTokenRepository.add(rawToken);
       }
 
       final var userId = claims.getSubject();
       if (userId != null) {
-        refreshTokenService.deleteRefreshToken(userId);
+        refreshTokenRepository.deleteRefreshToken(userId);
       }
     } catch (Exception e) {
       log.warn("Error parsing claims during logout, blacklisting raw token with default TTL: {}", e.getMessage());
-      expireTokenService.addExpireToken(rawToken);
+      blacklistTokenRepository.add(rawToken);
     }
 
-    if (logoutReq != null && logoutReq.refreshToken() != null) {
+    if (logoutRequest != null && logoutRequest.refreshToken() != null) {
       try {
-        final var rtClaims = JwtUtils.getClaimsFromToken(logoutReq.refreshToken(), secretKey);
+        final var rtClaims = JwtUtils.getClaimsFromToken(logoutRequest.refreshToken(), secretKey);
         final var rtUser = rtClaims.getSubject();
         if (rtUser != null) {
-          refreshTokenService.deleteRefreshToken(rtUser);
+          refreshTokenRepository.deleteRefreshToken(rtUser);
         }
       } catch (Exception e) {
         log.warn("Error parsing refresh token on logout: {}", e.getMessage());

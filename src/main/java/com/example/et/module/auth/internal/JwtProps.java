@@ -1,4 +1,4 @@
-package com.example.et.core.config.props;
+package com.example.et.module.auth.internal;
 
 import lombok.Getter;
 import lombok.Setter;

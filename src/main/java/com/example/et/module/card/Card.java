@@ -1,8 +1,8 @@
 package com.example.et.module.card;
 
-import com.example.et.core.model.BaseAudit;
+import com.example.et.core.BaseAudit;
 import com.example.et.module.account.Account;
-import com.example.et.module.auth.AppUser;
+import com.example.et.module.user.AppUser;
 import jakarta.persistence.*;
 import lombok.*;
 

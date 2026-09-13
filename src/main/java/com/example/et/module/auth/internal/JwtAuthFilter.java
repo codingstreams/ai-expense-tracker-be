@@ -1,6 +1,5 @@
-package com.example.et.core.security;
+package com.example.et.module.auth.internal;
 
-import com.example.et.module.auth.ExpireTokenService;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,7 +21,7 @@ import java.util.Optional;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
   private final AuthenticationManager authenticationManager;
-  private final ExpireTokenService expireTokenService;
+  private final BlacklistTokenRepository blacklistTokenRepository;
 
   public static Optional<String> extractToken(String authorizationHeader) {
     if (StringUtils.isBlank(authorizationHeader) || !authorizationHeader.startsWith("Bearer ")) {
@@ -47,7 +46,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       return;
     }
 
-    if (expireTokenService.isExpireToken(token.get())) {
+    if (blacklistTokenRepository.isExpire(token.get())) {
       filterChain.doFilter(request, response);
       return;
     }

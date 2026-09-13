@@ -1,5 +1,6 @@
-package com.example.et.module.user;
+package com.example.et.module.user.internal;
 
+import com.example.et.module.user.AppUserConfig;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

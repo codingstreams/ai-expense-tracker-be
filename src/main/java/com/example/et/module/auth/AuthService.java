@@ -3,13 +3,11 @@ package com.example.et.module.auth;
 import com.example.et.module.auth.dto.*;
 
 public interface AuthService {
-  AuthResponse register(CreateUserReq createUserReq);
+  AuthSuccessResponse register(RegisterUserRequest registerUserRequest);
 
-  AuthResponse login(LoginReq loginReq);
+  AuthSuccessResponse login(LoginRequest loginRequest);
 
-  AuthResponse refreshToken(RefreshTokenReq refreshTokenReq);
+  AuthSuccessResponse refreshToken(RefreshTokenRequest refreshTokenRequest);
 
-  void logout(String token);
-
-  void logout(String token, LogoutReq logoutReq);
+  void logout(String token, LogoutRequest logoutRequest);
 }

@@ -1,6 +1,6 @@
 package com.example.et.module.reference.bank.internal;
 
-import com.example.et.core.cache.CacheNames;
+import com.example.et.core.config.CacheNames;
 import com.example.et.module.reference.bank.BankMapper;
 import com.example.et.module.reference.bank.BankService;
 import com.example.et.module.reference.bank.dto.BankDto;

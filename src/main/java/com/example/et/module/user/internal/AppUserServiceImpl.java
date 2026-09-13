@@ -1,10 +1,8 @@
 package com.example.et.module.user.internal;
 
-import com.example.et.module.auth.AppUser;
 import com.example.et.module.reference.paymentmode.internal.PaymentModeRepo;
-import com.example.et.module.user.AppUserConfigRepo;
+import com.example.et.module.user.AppUser;
 import com.example.et.module.user.AppUserMapper;
-import com.example.et.module.user.AppUserRepo;
 import com.example.et.module.user.AppUserService;
 import com.example.et.module.user.dto.AppUserDto;
 import com.example.et.module.user.dto.UpdateUserConfigReq;

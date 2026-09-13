@@ -1,5 +1,6 @@
 package com.example.et.core.exception;
 
+import com.example.et.core.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;

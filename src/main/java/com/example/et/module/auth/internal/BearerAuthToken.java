@@ -1,4 +1,4 @@
-package com.example.et.core.security;
+package com.example.et.module.auth.internal;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;

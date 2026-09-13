@@ -1,7 +1,6 @@
 package com.example.et.module.user;
 
-import com.example.et.core.model.BaseAudit;
-import com.example.et.module.auth.AppUser;
+import com.example.et.core.BaseAudit;
 import com.example.et.module.reference.paymentmode.PaymentMode;
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,6 +1,5 @@
 package com.example.et.module.user;
 
-import com.example.et.module.auth.AppUser;
 import com.example.et.module.user.dto.AppUserDto;
 import com.example.et.module.user.dto.UpdateUserConfigReq;
 import com.example.et.module.user.dto.UpdateUserDetailsDto;

@@ -1,6 +1,6 @@
 package com.example.et.module.account.internal;
 
-import com.example.et.core.cache.CacheNames;
+import com.example.et.core.config.CacheNames;
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountMapper;
 import com.example.et.module.account.AccountService;
@@ -8,10 +8,10 @@ import com.example.et.module.account.dto.AccountDto;
 import com.example.et.module.account.dto.AccountDtoOld;
 import com.example.et.module.account.dto.CreateAccountsReq;
 import com.example.et.module.account.dto.UpdateCashDto;
-import com.example.et.module.auth.AppUser;
 import com.example.et.module.reference.bank.BankMapper;
 import com.example.et.module.reference.bank.dto.BankDto;
 import com.example.et.module.reference.bank.internal.BankRepo;
+import com.example.et.module.user.AppUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;

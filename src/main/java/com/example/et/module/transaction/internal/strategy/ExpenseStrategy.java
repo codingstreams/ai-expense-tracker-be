@@ -3,7 +3,6 @@ package com.example.et.module.transaction.internal.strategy;
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.ai.parser.AiParseTaskService;
-import com.example.et.module.auth.AppUser;
 import com.example.et.module.card.CardService;
 import com.example.et.module.reference.paymentmode.PaymentModeMapper;
 import com.example.et.module.transaction.Transaction;
@@ -11,6 +10,7 @@ import com.example.et.module.transaction.TransactionContext;
 import com.example.et.module.transaction.TransactionMapper;
 import com.example.et.module.transaction.dto.TransactionResponseDto;
 import com.example.et.module.transaction.internal.TransactionRepo;
+import com.example.et.module.user.AppUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

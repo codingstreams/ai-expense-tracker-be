@@ -1,14 +1,14 @@
 package com.example.et.module.card.internal;
 
-import com.example.et.core.cache.CacheNames;
+import com.example.et.core.config.CacheNames;
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
-import com.example.et.module.auth.AppUser;
 import com.example.et.module.card.Card;
 import com.example.et.module.card.CardMapper;
 import com.example.et.module.card.CardService;
 import com.example.et.module.card.dto.CardDto;
 import com.example.et.module.card.dto.UserCards;
+import com.example.et.module.user.AppUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;

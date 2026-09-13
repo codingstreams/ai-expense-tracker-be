@@ -1,6 +1,6 @@
 package com.example.et.service.auth;
 
-import com.example.et.module.auth.internal.RefreshTokenServiceImpl;
+import com.example.et.module.auth.internal.RefreshTokenRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class RefreshTokenServiceImplTest {
+class RefreshTokenRepositoryImplTest {
 
   @Mock
   private StringRedisTemplate redisTemplate;
@@ -25,11 +25,11 @@ class RefreshTokenServiceImplTest {
   @Mock
   private ValueOperations<String, String> valueOperations;
 
-  private RefreshTokenServiceImpl refreshTokenService;
+  private RefreshTokenRepositoryImpl refreshTokenService;
 
   @BeforeEach
   void setUp() {
-    refreshTokenService = new RefreshTokenServiceImpl(redisTemplate);
+    refreshTokenService = new RefreshTokenRepositoryImpl(redisTemplate);
   }
 
   @Test

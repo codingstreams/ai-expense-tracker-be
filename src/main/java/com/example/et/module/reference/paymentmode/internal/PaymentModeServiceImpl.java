@@ -1,6 +1,6 @@
 package com.example.et.module.reference.paymentmode.internal;
 
-import com.example.et.core.cache.CacheNames;
+import com.example.et.core.config.CacheNames;
 import com.example.et.module.reference.paymentmode.PaymentModeMapper;
 import com.example.et.module.reference.paymentmode.PaymentModeService;
 import com.example.et.module.reference.paymentmode.dto.PaymentModeDto;

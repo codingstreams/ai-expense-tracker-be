@@ -31,11 +31,11 @@ class AuthControllerTest {
 
   @Test
   void registerUser_returnsCreated() {
-    CreateUserReq req = new CreateUserReq("Test", "test@example.com", "password");
-    AuthResponse mockResponse = new AuthResponse("at", "rt", "Bearer", 600, false);
+    RegisterUserRequest req = new RegisterUserRequest("Test", "test@example.com", "password");
+    AuthSuccessResponse mockResponse = new AuthSuccessResponse("at", "rt", "Bearer", 600, false);
     when(authService.register(req)).thenReturn(mockResponse);
 
-    ResponseEntity<AuthResponse> response = authController.registerUser(req);
+    ResponseEntity<AuthSuccessResponse> response = authController.registerUser(req);
 
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertNotNull(response.getBody());
@@ -45,11 +45,11 @@ class AuthControllerTest {
 
   @Test
   void login_returnsOk() {
-    LoginReq req = new LoginReq("test@example.com", "password");
-    AuthResponse mockResponse = new AuthResponse("at", "rt", "Bearer", 600, true);
+    LoginRequest req = new LoginRequest("test@example.com", "password");
+    AuthSuccessResponse mockResponse = new AuthSuccessResponse("at", "rt", "Bearer", 600, true);
     when(authService.login(req)).thenReturn(mockResponse);
 
-    ResponseEntity<AuthResponse> response = authController.login(req);
+    ResponseEntity<AuthSuccessResponse> response = authController.login(req);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
@@ -58,11 +58,11 @@ class AuthControllerTest {
 
   @Test
   void refresh_returnsOk() {
-    RefreshTokenReq req = new RefreshTokenReq("valid-rt");
-    AuthResponse mockResponse = new AuthResponse("new-at", "new-rt", "Bearer", 600, true);
+    RefreshTokenRequest req = new RefreshTokenRequest("valid-rt");
+    AuthSuccessResponse mockResponse = new AuthSuccessResponse("new-at", "new-rt", "Bearer", 600, true);
     when(authService.refreshToken(req)).thenReturn(mockResponse);
 
-    ResponseEntity<AuthResponse> response = authController.refresh(req);
+    ResponseEntity<AuthSuccessResponse> response = authController.refresh(req);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assert response.getBody() != null;
@@ -72,7 +72,7 @@ class AuthControllerTest {
 
   @Test
   void logout_returnsNoContent() {
-    LogoutReq req = new LogoutReq("valid-rt");
+    LogoutRequest req = new LogoutRequest("valid-rt");
 
     ResponseEntity<Void> response = authController.logout("Bearer token-xyz", req);
 

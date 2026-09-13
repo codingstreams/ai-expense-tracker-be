@@ -1,6 +1,6 @@
 package com.example.et.module.reference.paymentmode;
 
-import com.example.et.core.model.BaseAudit;
+import com.example.et.core.BaseAudit;
 import jakarta.persistence.*;
 import lombok.*;
 

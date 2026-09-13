@@ -1,6 +1,6 @@
 package com.example.et.module.dashboard.internal;
 
-import com.example.et.core.cache.CacheNames;
+import com.example.et.core.config.CacheNames;
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.account.dto.CreateAccountsReq;

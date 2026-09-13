@@ -1,4 +1,4 @@
-package com.example.et.core.security;
+package com.example.et.module.auth.internal;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

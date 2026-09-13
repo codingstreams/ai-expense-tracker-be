@@ -1,6 +1,5 @@
 package com.example.et.module.auth.internal;
 
-import com.example.et.module.auth.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -12,7 +11,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RefreshTokenServiceImpl implements RefreshTokenService {
+public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
   private static final String RT_PREFIX = "rt:";
   private final StringRedisTemplate redisTemplate;
 

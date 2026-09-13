@@ -1,6 +1,6 @@
 package com.example.et.module.reference.category.internal;
 
-import com.example.et.core.cache.CacheNames;
+import com.example.et.core.config.CacheNames;
 import com.example.et.module.reference.category.SysCategoryService;
 import com.example.et.module.reference.category.SystemCategory;
 import jakarta.transaction.Transactional;

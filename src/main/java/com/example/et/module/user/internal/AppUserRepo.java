@@ -1,6 +1,6 @@
-package com.example.et.module.user;
+package com.example.et.module.user.internal;
 
-import com.example.et.module.auth.AppUser;
+import com.example.et.module.user.AppUser;
 import com.example.et.module.user.dto.UserDetailsDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

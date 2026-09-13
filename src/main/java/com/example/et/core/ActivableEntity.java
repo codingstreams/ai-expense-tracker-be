@@ -1,4 +1,4 @@
-package com.example.et.core.model;
+package com.example.et.core;
 
 public interface ActivableEntity {
     Boolean isActive();

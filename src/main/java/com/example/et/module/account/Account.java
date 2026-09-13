@@ -1,9 +1,9 @@
 package com.example.et.module.account;
 
-import com.example.et.core.model.ActivableEntity;
-import com.example.et.core.model.BaseAudit;
-import com.example.et.module.auth.AppUser;
+import com.example.et.core.ActivableEntity;
+import com.example.et.core.BaseAudit;
 import com.example.et.module.reference.bank.Bank;
+import com.example.et.module.user.AppUser;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;

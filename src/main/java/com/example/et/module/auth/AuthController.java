@@ -16,30 +16,30 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/register")
-  public ResponseEntity<AuthResponse> registerUser(@RequestBody CreateUserReq createUserReq) {
-    log.info("Received user registration request for email: {}", createUserReq.email());
+  public ResponseEntity<AuthSuccessResponse> registerUser(@RequestBody RegisterUserRequest registerUserRequest) {
+    log.info("Received user registration request for email: {}", registerUserRequest.email());
 
-    final var authResponse = authService.register(createUserReq);
+    final var authResponse = authService.register(registerUserRequest);
 
-    log.info("Successfully registered user with email: {}", createUserReq.email());
+    log.info("Successfully registered user with email: {}", registerUserRequest.email());
     return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> login(@RequestBody LoginReq loginReq) {
-    log.info("Received login request for user: {}", loginReq.email());
+  public ResponseEntity<AuthSuccessResponse> login(@RequestBody LoginRequest loginRequest) {
+    log.info("Received login request for user: {}", loginRequest.email());
 
-    final var authResponse = authService.login(loginReq);
+    final var authResponse = authService.login(loginRequest);
 
-    log.info("User logged in successfully: {}", loginReq.email());
+    log.info("User logged in successfully: {}", loginRequest.email());
     return ResponseEntity.ok(authResponse);
   }
 
   @PostMapping("/refresh")
-  public ResponseEntity<AuthResponse> refresh(@RequestBody RefreshTokenReq refreshTokenReq) {
+  public ResponseEntity<AuthSuccessResponse> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) {
     log.info("Received token refresh request");
 
-    final var authResponse = authService.refreshToken(refreshTokenReq);
+    final var authResponse = authService.refreshToken(refreshTokenRequest);
 
     log.info("Token refreshed successfully");
     return ResponseEntity.ok(authResponse);
@@ -48,10 +48,10 @@ public class AuthController {
   @PostMapping("/logout")
   public ResponseEntity<Void> logout(
       @RequestHeader(HttpHeaders.AUTHORIZATION) String token,
-      @RequestBody(required = false) LogoutReq logoutReq) {
+      @RequestBody(required = false) LogoutRequest logoutRequest) {
     log.info("Received logout request");
 
-    authService.logout(token, logoutReq);
+    authService.logout(token, logoutRequest);
 
     log.info("User logged out successfully");
     return ResponseEntity.noContent().build();

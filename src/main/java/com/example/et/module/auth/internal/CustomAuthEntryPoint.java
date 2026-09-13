@@ -1,6 +1,6 @@
-package com.example.et.core.security;
+package com.example.et.module.auth.internal;
 
-import com.example.et.core.exception.ApiErrorResponse;
+import com.example.et.core.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

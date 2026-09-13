@@ -1,17 +1,13 @@
 package com.example.et.service.auth;
 
-import com.example.et.core.config.props.JwtProps;
-import com.example.et.core.security.JwtUtils;
 import com.example.et.module.account.AccountService;
-import com.example.et.module.auth.AppUser;
-import com.example.et.module.auth.ExpireTokenService;
-import com.example.et.module.auth.RefreshTokenService;
-import com.example.et.module.auth.dto.AuthResponse;
-import com.example.et.module.auth.dto.LoginReq;
-import com.example.et.module.auth.dto.LogoutReq;
-import com.example.et.module.auth.dto.RefreshTokenReq;
-import com.example.et.module.auth.internal.AuthServiceImpl;
+import com.example.et.module.auth.dto.AuthSuccessResponse;
+import com.example.et.module.auth.dto.LoginRequest;
+import com.example.et.module.auth.dto.LogoutRequest;
+import com.example.et.module.auth.dto.RefreshTokenRequest;
+import com.example.et.module.auth.internal.*;
 import com.example.et.module.reference.paymentmode.internal.PaymentModeRepo;
+import com.example.et.module.user.AppUser;
 import com.example.et.module.user.AppUserService;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,9 +45,9 @@ class AuthServiceImplTest {
   @Mock
   private PasswordEncoder passwordEncoder;
   @Mock
-  private ExpireTokenService expireTokenService;
+  private BlacklistTokenRepository blacklistTokenRepository;
   @Mock
-  private RefreshTokenService refreshTokenService;
+  private RefreshTokenRepository refreshTokenRepository;
   @Mock
   private AccountService accountService;
   @Mock
@@ -75,10 +71,10 @@ class AuthServiceImplTest {
         secretKey,
         jwtProps,
         passwordEncoder,
-        expireTokenService,
-        refreshTokenService,
+        blacklistTokenRepository,
+        refreshTokenRepository,
         accountService,
-        paymentModeRepo
+        null, null
     );
   }
 
@@ -90,7 +86,7 @@ class AuthServiceImplTest {
     when(authenticationManager.authenticate(any())).thenReturn(authenticatedToken);
     when(appUserService.checkIsUserOnboardedByEmail("test@example.com")).thenReturn(true);
 
-    AuthResponse response = authService.login(new LoginReq("test@example.com", "pass"));
+    AuthSuccessResponse response = authService.login(new LoginRequest("test@example.com", "pass"));
 
     assertNotNull(response);
     assertNotNull(response.accessToken());
@@ -100,7 +96,7 @@ class AuthServiceImplTest {
     assertTrue(response.expireTime() > System.currentTimeMillis());
     assertEquals(540, response.expiresInSeconds());
 
-    verify(refreshTokenService).saveRefreshToken(eq("test@example.com"), eq(response.refreshToken()), any(Duration.class));
+    verify(refreshTokenRepository).saveRefreshToken(eq("test@example.com"), eq(response.refreshToken()), any(Duration.class));
   }
 
   @Test
@@ -108,11 +104,11 @@ class AuthServiceImplTest {
     String username = "test@example.com";
     String existingRefreshToken = JwtUtils.generateRefreshToken(username, secretKey, 3600);
 
-    when(refreshTokenService.isRefreshTokenValid(username, existingRefreshToken)).thenReturn(true);
+    when(refreshTokenRepository.isRefreshTokenValid(username, existingRefreshToken)).thenReturn(true);
     AppUser appUser = AppUser.builder().id(UUID.randomUUID()).email(username).onboardingComplete(true).build();
     when(appUserService.getUserById(username)).thenReturn(appUser);
 
-    AuthResponse response = authService.refreshToken(new RefreshTokenReq(existingRefreshToken));
+    AuthSuccessResponse response = authService.refreshToken(new RefreshTokenRequest(existingRefreshToken));
 
     assertNotNull(response);
     assertNotNull(response.accessToken());
@@ -121,12 +117,12 @@ class AuthServiceImplTest {
     assertTrue(response.expireTime() > System.currentTimeMillis());
     assertEquals(540, response.expiresInSeconds());
 
-    verify(refreshTokenService).saveRefreshToken(eq(username), eq(response.refreshToken()), any(Duration.class));
+    verify(refreshTokenRepository).saveRefreshToken(eq(username), eq(response.refreshToken()), any(Duration.class));
   }
 
   @Test
   void refreshToken_blankToken_throwsBadCredentialsException() {
-    assertThrows(BadCredentialsException.class, () -> authService.refreshToken(new RefreshTokenReq("")));
+    assertThrows(BadCredentialsException.class, () -> authService.refreshToken(new RefreshTokenRequest("")));
   }
 
   @Test
@@ -134,11 +130,11 @@ class AuthServiceImplTest {
     String username = "test@example.com";
     String existingRefreshToken = JwtUtils.generateRefreshToken(username, secretKey, 3600);
 
-    when(refreshTokenService.isRefreshTokenValid(username, existingRefreshToken)).thenReturn(false);
+    when(refreshTokenRepository.isRefreshTokenValid(username, existingRefreshToken)).thenReturn(false);
 
-    assertThrows(BadCredentialsException.class, () -> authService.refreshToken(new RefreshTokenReq(existingRefreshToken)));
+    assertThrows(BadCredentialsException.class, () -> authService.refreshToken(new RefreshTokenRequest(existingRefreshToken)));
 
-    verify(refreshTokenService).deleteRefreshToken(username);
+    verify(refreshTokenRepository).deleteRefreshToken(username);
   }
 
   @Test
@@ -147,9 +143,9 @@ class AuthServiceImplTest {
     String accessToken = JwtUtils.generateAccessToken(username, List.of(new SimpleGrantedAuthority("ROLE_USER")), secretKey, 600);
     String header = "Bearer " + accessToken;
 
-    authService.logout(header, new LogoutReq("some-refresh-token"));
+    authService.logout(header, new LogoutRequest("some-refresh-token"));
 
-    verify(expireTokenService).addExpireToken(eq(accessToken), any(Duration.class));
-    verify(refreshTokenService).deleteRefreshToken(username);
+    verify(blacklistTokenRepository).add(eq(accessToken), any(Duration.class));
+    verify(refreshTokenRepository).deleteRefreshToken(username);
   }
 }

@@ -1,7 +1,6 @@
-package com.example.et.module.auth;
+package com.example.et.module.user;
 
-import com.example.et.core.model.BaseAudit;
-import com.example.et.module.user.AppUserConfig;
+import com.example.et.core.BaseAudit;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -1,4 +1,4 @@
-package com.example.et.core.cache;
+package com.example.et.core.config;
 
 public interface CacheNames {
   // --- User-Scoped Caches ---
