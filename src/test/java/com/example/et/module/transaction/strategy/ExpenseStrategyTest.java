@@ -130,7 +130,7 @@ class ExpenseStrategyTest {
         savedTxn.getId(), Transaction.TransactionType.EXPENSE, 200.0f, LocalDate.now(), "Fuel", "Acc", "CARD", null
     );
 
-    doNothing().when(accountService).debitAccount(userId, null, 200.0f);
+    doNothing().when(accountService).debitAccount(userId, accountUuid.toString(), 200.0f);
     when(cardService.getUserCard(userId, cardUuid)).thenReturn(card);
     when(transactionRepo.save(any(Transaction.class))).thenReturn(savedTxn);
     when(transactionMapper.toResponseDto(savedTxn)).thenReturn(expectedResponse);
@@ -140,6 +140,7 @@ class ExpenseStrategyTest {
     assertNotNull(actual);
     assertEquals(expectedResponse, actual);
     verify(cardService, times(1)).getUserCard(userId, cardUuid);
+    verify(accountService, times(1)).debitAccount(userId, accountUuid.toString(), 200.0f);
   }
 
   @Test
@@ -162,12 +163,12 @@ class ExpenseStrategyTest {
     Card cardWithoutAccount = Card.builder().id(cardUuid).account(null).build();
     TransactionContext context = new TransactionContext(userId, request, null, null);
 
-    doNothing().when(accountService).debitAccount(userId, null, 100.0f);
     when(cardService.getUserCard(userId, cardUuid)).thenReturn(cardWithoutAccount);
 
     ApiException ex = assertThrows(ApiException.class, () -> expenseStrategy.execute(context));
 
     assertEquals(ErrorCode.CARD_NOT_LINKED, ex.getErrorCode());
+    verify(accountService, never()).debitAccount(any(), any(), anyFloat());
     verify(transactionRepo, never()).save(any());
   }
 
@@ -188,11 +189,11 @@ class ExpenseStrategyTest {
     );
 
     TransactionContext context = new TransactionContext(userId, request, null, null);
-    doNothing().when(accountService).debitAccount(userId, null, 100.0f);
 
     ApiException ex = assertThrows(ApiException.class, () -> expenseStrategy.execute(context));
 
     assertEquals(ErrorCode.INVALID_TRANSACTION_PAYLOAD, ex.getErrorCode());
+    verify(accountService, never()).debitAccount(any(), any(), anyFloat());
     verify(transactionRepo, never()).save(any());
   }
 

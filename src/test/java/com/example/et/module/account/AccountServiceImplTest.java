@@ -173,31 +173,29 @@ class AccountServiceImplTest {
   // ----------------------------------------------------------------------
   @Test
   void getAccount_ShouldReturnAccountDto_WhenFound() {
-    when(accountRepository.findByIdAndAppUserId(accountId, userId)).thenReturn(Optional.of(sampleAccount));
+    when(accountRepository.findByIdAndAppUserId(accountUuid, userUuid)).thenReturn(Optional.of(sampleAccount));
     when(accountMapper.toDto(sampleAccount)).thenReturn(sampleAccountDetailsResponse);
 
     AccountDetailsResponse result = accountService.getAccount(userId, accountId);
 
     assertNotNull(result);
     assertEquals(sampleAccountDetailsResponse, result);
-    verify(accountRepository, times(1)).findByIdAndAppUserId(accountId, userId);
+    verify(accountRepository, times(1)).findByIdAndAppUserId(accountUuid, userUuid);
   }
 
   @Test
   void getAccount_ShouldThrowApiException_WhenNotFound() {
-    when(accountRepository.findByIdAndAppUserId(accountId, userId)).thenReturn(Optional.empty());
+    when(accountRepository.findByIdAndAppUserId(accountUuid, userUuid)).thenReturn(Optional.empty());
 
     ApiException ex = assertThrows(ApiException.class, () -> accountService.getAccount(userId, accountId));
 
     assertEquals(ErrorCode.ACCOUNT_NOT_FOUND, ex.getErrorCode());
-    verify(accountRepository, times(1)).findByIdAndAppUserId(accountId, userId);
+    verify(accountRepository, times(1)).findByIdAndAppUserId(accountUuid, userUuid);
   }
 
   @Test
   void getAccountEntity_ShouldReturnEntity_WhenFound() {
-    when(accountRepository.findByIdAndAppUserId(accountId, userId)).thenReturn(Optional.of(sampleAccount));
-    when(accountMapper.toDto(sampleAccount)).thenReturn(sampleAccountDetailsResponse);
-    when(accountMapper.toEntity(sampleAccountDetailsResponse)).thenReturn(sampleAccount);
+    when(accountRepository.findByIdAndAppUserId(accountUuid, userUuid)).thenReturn(Optional.of(sampleAccount));
 
     Account result = accountService.getAccountEntity(userId, accountId);
 
@@ -222,10 +220,9 @@ class AccountServiceImplTest {
         true
     );
 
-    when(accountRepository.findByIdAndAppUserId(accountId, userId)).thenReturn(Optional.of(sampleAccount));
-    when(accountMapper.toDto(sampleAccount)).thenReturn(sampleAccountDetailsResponse, updateDto);
-    when(accountMapper.toEntity(sampleAccountDetailsResponse)).thenReturn(sampleAccount);
+    when(accountRepository.findByIdAndAppUserId(accountUuid, userUuid)).thenReturn(Optional.of(sampleAccount));
     when(accountRepository.save(sampleAccount)).thenReturn(sampleAccount);
+    when(accountMapper.toDto(sampleAccount)).thenReturn(updateDto);
 
     AccountDetailsResponse result = accountService.updateAccount(userId, accountId, updateDto);
 
@@ -250,9 +247,8 @@ class AccountServiceImplTest {
         true
     );
 
-    when(accountRepository.findByIdAndAppUserId(accountId, userId)).thenReturn(Optional.of(sampleAccount));
-    when(accountMapper.toDto(sampleAccount)).thenReturn(sampleAccountDetailsResponse, sameDto);
-    when(accountMapper.toEntity(sampleAccountDetailsResponse)).thenReturn(sampleAccount);
+    when(accountRepository.findByIdAndAppUserId(accountUuid, userUuid)).thenReturn(Optional.of(sampleAccount));
+    when(accountMapper.toDto(sampleAccount)).thenReturn(sameDto);
 
     AccountDetailsResponse result = accountService.updateAccount(userId, accountId, sameDto);
 
@@ -265,9 +261,7 @@ class AccountServiceImplTest {
   // ----------------------------------------------------------------------
   @Test
   void deleteAccount_ShouldDeactivateAccount_WhenNotCashAccount() {
-    when(accountRepository.findByIdAndAppUserId(accountId, userId)).thenReturn(Optional.of(sampleAccount));
-    when(accountMapper.toDto(sampleAccount)).thenReturn(sampleAccountDetailsResponse);
-    when(accountMapper.toEntity(sampleAccountDetailsResponse)).thenReturn(sampleAccount);
+    when(accountRepository.findByIdAndAppUserId(accountUuid, userUuid)).thenReturn(Optional.of(sampleAccount));
 
     accountService.deleteAccount(userId, accountId);
 
@@ -285,11 +279,7 @@ class AccountServiceImplTest {
         .isActive(true)
         .build();
 
-    AccountDetailsResponse cashDto = new AccountDetailsResponse(accountUuid, "CASH", 100.0f, Account.AccountType.CASH, false, false, null, true);
-
-    when(accountRepository.findByIdAndAppUserId(accountId, userId)).thenReturn(Optional.of(cashAccount));
-    when(accountMapper.toDto(cashAccount)).thenReturn(cashDto);
-    when(accountMapper.toEntity(cashDto)).thenReturn(cashAccount);
+    when(accountRepository.findByIdAndAppUserId(accountUuid, userUuid)).thenReturn(Optional.of(cashAccount));
 
     ApiException ex = assertThrows(ApiException.class, () -> accountService.deleteAccount(userId, accountId));
 
@@ -395,9 +385,7 @@ class AccountServiceImplTest {
   // ----------------------------------------------------------------------
   @Test
   void debitAccount_ShouldDeductBalanceAndSave_WhenSufficientBalance() {
-    when(accountRepository.findByIdAndAppUserId(accountId, userId)).thenReturn(Optional.of(sampleAccount));
-    when(accountMapper.toDto(sampleAccount)).thenReturn(sampleAccountDetailsResponse);
-    when(accountMapper.toEntity(sampleAccountDetailsResponse)).thenReturn(sampleAccount);
+    when(accountRepository.findByIdAndAppUserId(accountUuid, userUuid)).thenReturn(Optional.of(sampleAccount));
 
     accountService.debitAccount(userId, accountId, 200.0f);
 
@@ -407,9 +395,7 @@ class AccountServiceImplTest {
 
   @Test
   void debitAccount_ShouldThrowInsufficientAccountBalanceException_WhenBalanceInsufficient() {
-    when(accountRepository.findByIdAndAppUserId(accountId, userId)).thenReturn(Optional.of(sampleAccount));
-    when(accountMapper.toDto(sampleAccount)).thenReturn(sampleAccountDetailsResponse);
-    when(accountMapper.toEntity(sampleAccountDetailsResponse)).thenReturn(sampleAccount);
+    when(accountRepository.findByIdAndAppUserId(accountUuid, userUuid)).thenReturn(Optional.of(sampleAccount));
 
     assertThrows(InsufficientAccountBalanceException.class, () -> accountService.debitAccount(userId, accountId, 600.0f));
 
@@ -418,9 +404,7 @@ class AccountServiceImplTest {
 
   @Test
   void debitAccount_ShouldThrowApiException_WhenAmountIsZeroOrNegative() {
-    when(accountRepository.findByIdAndAppUserId(accountId, userId)).thenReturn(Optional.of(sampleAccount));
-    when(accountMapper.toDto(sampleAccount)).thenReturn(sampleAccountDetailsResponse);
-    when(accountMapper.toEntity(sampleAccountDetailsResponse)).thenReturn(sampleAccount);
+    when(accountRepository.findByIdAndAppUserId(accountUuid, userUuid)).thenReturn(Optional.of(sampleAccount));
 
     ApiException ex = assertThrows(ApiException.class, () -> accountService.debitAccount(userId, accountId, -10.0f));
 
@@ -433,9 +417,7 @@ class AccountServiceImplTest {
   // ----------------------------------------------------------------------
   @Test
   void creditAccount_ShouldIncreaseBalanceAndSave_WhenValidAmount() {
-    when(accountRepository.findByIdAndAppUserId(accountId, userId)).thenReturn(Optional.of(sampleAccount));
-    when(accountMapper.toDto(sampleAccount)).thenReturn(sampleAccountDetailsResponse);
-    when(accountMapper.toEntity(sampleAccountDetailsResponse)).thenReturn(sampleAccount);
+    when(accountRepository.findByIdAndAppUserId(accountUuid, userUuid)).thenReturn(Optional.of(sampleAccount));
 
     accountService.creditAccount(userId, accountId, 250.0f);
 
@@ -445,9 +427,7 @@ class AccountServiceImplTest {
 
   @Test
   void creditAccount_ShouldThrowApiException_WhenAmountIsZeroOrNegative() {
-    when(accountRepository.findByIdAndAppUserId(accountId, userId)).thenReturn(Optional.of(sampleAccount));
-    when(accountMapper.toDto(sampleAccount)).thenReturn(sampleAccountDetailsResponse);
-    when(accountMapper.toEntity(sampleAccountDetailsResponse)).thenReturn(sampleAccount);
+    when(accountRepository.findByIdAndAppUserId(accountUuid, userUuid)).thenReturn(Optional.of(sampleAccount));
 
     ApiException ex = assertThrows(ApiException.class, () -> accountService.creditAccount(userId, accountId, 0.0f));
 

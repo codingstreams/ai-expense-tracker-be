@@ -13,6 +13,7 @@ import com.example.et.module.transaction.TransactionMapper;
 import com.example.et.module.transaction.dto.TransactionDetailsResponse;
 import com.example.et.module.transaction.internal.TransactionRepo;
 import com.example.et.module.user.AppUser;
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -29,14 +30,14 @@ public class ExpenseStrategy implements TransactionStrategy {
   private final TransactionMapper transactionMapper;
 
   private Account resolveAccount(String userId, String accountId, String cardId) {
-    if (cardId != null) {
+    if (cardId != null && !StringUtils.isBlank(cardId)) {
       final var card = cardService.getUserCard(userId, UUID.fromString(cardId));
       if (card.getAccount() == null) {
         throw new ApiException(ErrorCode.CARD_NOT_LINKED);
       }
       return Account.ofId(card.getAccount().getId());
     }
-    if (accountId != null) {
+    if (accountId != null && !StringUtils.isBlank(accountId)) {
       return Account.ofId(accountService.getAccount(userId, accountId).id());
     }
     throw new ApiException(ErrorCode.INVALID_TRANSACTION_PAYLOAD);
@@ -50,10 +51,10 @@ public class ExpenseStrategy implements TransactionStrategy {
     final var amount = transactionContext.requestDto().amount();
     final var cardId = transactionContext.requestDto().cardId();
 
-    // Debit Account
-    accountService.debitAccount(userId, accountId, amount);
-
     final var account = resolveAccount(userId, accountId, cardId);
+
+    // Debit Account
+    accountService.debitAccount(userId, account.getId().toString(), amount);
 
     final var transaction = Transaction.builder()
         .appUser(user)

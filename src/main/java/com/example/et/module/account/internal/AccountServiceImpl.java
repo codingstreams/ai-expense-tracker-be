@@ -146,14 +146,13 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
   public Account getAccountEntity(String userId, String accountId) {
-    return accountMapper.toEntity(getAccount(userId, accountId));
+    return accountRepository.findByIdAndAppUserId(UUID.fromString(accountId), UUID.fromString(userId))
+        .orElseThrow(() -> new ApiException(ErrorCode.ACCOUNT_NOT_FOUND));
   }
 
   @Override
   public AccountDetailsResponse getAccount(String userId, String accountId) {
-    return accountRepository.findByIdAndAppUserId(accountId, userId)
-        .map(accountMapper::toDto)
-        .orElseThrow(() -> new ApiException(ErrorCode.ACCOUNT_NOT_FOUND));
+    return accountMapper.toDto(getAccountEntity(userId, accountId));
   }
 
   @Override
