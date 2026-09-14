@@ -10,8 +10,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class JwtProps {
   private String secretKey;
   private long expirationTimeAccessTokenInMinutes;
+  private long expirationTimeRefreshTokenInDays;
 
   public long getExpirationTimeAccessTokenInSeconds() {
     return expirationTimeAccessTokenInMinutes * 60;
+  }
+
+  public long getExpirationTimeRefreshTokenInSeconds() {
+    return expirationTimeRefreshTokenInDays * 24 * 60 * 60;
   }
 }

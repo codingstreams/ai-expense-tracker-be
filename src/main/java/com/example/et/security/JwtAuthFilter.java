@@ -1,6 +1,7 @@
 package com.example.et.security;
 
 import com.example.et.service.auth.ExpireTokenService;
+import com.example.et.service.auth.RefreshTokenService;
 import com.example.et.util.JwtUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;
@@ -25,6 +26,7 @@ import java.util.Optional;
 public class JwtAuthFilter extends OncePerRequestFilter {
   private final AuthenticationManager authenticationManager;
   private final SecretKey secretKey;
+  private final RefreshTokenService refreshTokenService;
 
   @Qualifier("redisExpireTokenService")
   private final ExpireTokenService expireTokenService;
@@ -56,7 +58,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     final var claims = JwtUtils.getClaimsFromToken(token.get(), secretKey);
     final var jti = claims.getId();
 
-    if (expireTokenService.isExpireToken(jti)) {
+    if (expireTokenService.isExpireToken(jti) || refreshTokenService.isPresent(jti)) {
       filterChain.doFilter(request, response);
       return;
     }

@@ -1,6 +1,7 @@
 package com.example.et.service.auth;
 
 import com.example.et.config.props.JwtProps;
+import com.example.et.controller.dto.RefreshTokenReq;
 import com.example.et.controller.dto.auth.AuthResponse;
 import com.example.et.controller.dto.auth.CreateUserReq;
 import com.example.et.controller.dto.auth.LoginReq;
@@ -13,12 +14,15 @@ import com.example.et.security.JwtAuthFilter;
 import com.example.et.service.account.AccountService;
 import com.example.et.service.appuser.AppUserService;
 import com.example.et.util.JwtUtils;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,7 @@ import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -38,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
   private final SecretKey secretKey;
   private final JwtProps jwtProps;
   private final PasswordEncoder passwordEncoder;
+  private final RefreshTokenService refreshTokenService;
 
   @Qualifier("redisExpireTokenService")
   private final ExpireTokenService expireTokenService;
@@ -104,7 +110,15 @@ public class AuthServiceImpl implements AuthService {
     final Collection<? extends GrantedAuthority> roles = authenticatedToken.getAuthorities().stream().filter(r -> Objects.requireNonNull(r.getAuthority()).equals("ROLE_USER")).toList();
 
     final var expirationTimeAccessToken = jwtProps.getExpirationTimeAccessTokenInSeconds();
+    final var expirationTimeRefreshToken = jwtProps.getExpirationTimeRefreshTokenInSeconds();
+
     final var accessToken = JwtUtils.generateAccessToken(userId, roles, secretKey, expirationTimeAccessToken);
+    final var refreshToken = JwtUtils.generateRefreshToken(userId, secretKey, expirationTimeRefreshToken);
+
+    final var refreshTokenClaims = JwtUtils.parseToken(refreshToken, secretKey);
+
+    // add this rt to cache
+    refreshTokenService.saveRefreshToken(userId, refreshTokenClaims.getId(), Duration.ofSeconds(expirationTimeRefreshToken));
 
     final var onboarded = appUserService.checkIsUserOnboardedByEmail(request.email());
 
@@ -112,7 +126,8 @@ public class AuthServiceImpl implements AuthService {
         accessToken,
         BearerAuthToken.TOKEN_TYPE,
         expirationTimeAccessToken,
-        onboarded
+        onboarded,
+        refreshToken
     );
   }
 
@@ -143,5 +158,51 @@ public class AuthServiceImpl implements AuthService {
       expireTokenService.addExpireToken(rawToken.get());
     }
 
+  }
+
+  @Override
+  public AuthResponse refreshToken(RefreshTokenReq refreshTokenReq) {
+    final var refreshToken = refreshTokenReq.refreshToken();
+
+    final Claims claims;
+    try {
+      claims = JwtUtils.parseToken(refreshToken, secretKey);
+    } catch (Exception e) {
+      log.error("Invalid or expired refresh token: {}", e.getMessage());
+      throw new BadCredentialsException("Invalid or expired refresh token");
+    }
+
+    final var userId = claims.getSubject();
+    final var jti = claims.getId();
+
+    if (userId == null || !refreshTokenService.isRefreshTokenValid(userId, jti)) {
+      log.warn("Refresh token reuse or revocation detected for user: {}", userId);
+      if (userId != null) {
+        refreshTokenService.deleteRefreshToken(userId);
+      }
+      throw new BadCredentialsException("Refresh token is invalid or revoked");
+    }
+
+    final var appUser = appUserService.getUserByUserIdWithConfigV2(userId);
+    final Collection<? extends GrantedAuthority> roles = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+
+    final var expirationTimeAccessToken = jwtProps.getExpirationTimeAccessTokenInSeconds();
+    final var newAccessToken = JwtUtils.generateAccessToken(userId, roles, secretKey, expirationTimeAccessToken);
+
+    final var expirationTimeRefreshToken = jwtProps.getExpirationTimeRefreshTokenInSeconds();
+    final var newRefreshToken = JwtUtils.generateRefreshToken(userId, secretKey, expirationTimeRefreshToken);
+    final var refreshTokenClaims = JwtUtils.parseToken(newRefreshToken, secretKey);
+
+    refreshTokenService.saveRefreshToken(userId, refreshTokenClaims.getId(), Duration.ofSeconds(expirationTimeRefreshToken));
+
+    final var onboarded = appUser.onboardingComplete();
+
+    return new AuthResponse(
+        newAccessToken,
+        BearerAuthToken.TOKEN_TYPE,
+        expirationTimeAccessToken,
+        onboarded,
+        newRefreshToken
+    );
   }
 }
