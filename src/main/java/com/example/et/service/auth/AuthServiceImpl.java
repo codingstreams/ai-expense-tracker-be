@@ -2,8 +2,8 @@ package com.example.et.service.auth;
 
 import com.example.et.config.props.JwtProps;
 import com.example.et.controller.dto.auth.AuthResponse;
-import com.example.et.controller.dto.auth.LoginReq;
 import com.example.et.controller.dto.auth.CreateUserReq;
+import com.example.et.controller.dto.auth.LoginReq;
 import com.example.et.model.core.Account;
 import com.example.et.model.core.AppUser;
 import com.example.et.model.core.AppUserConfig;
@@ -15,6 +15,7 @@ import com.example.et.service.appuser.AppUserService;
 import com.example.et.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,7 +24,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.Duration;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Objects;
 
 @Service
@@ -35,7 +38,10 @@ public class AuthServiceImpl implements AuthService {
   private final SecretKey secretKey;
   private final JwtProps jwtProps;
   private final PasswordEncoder passwordEncoder;
+
+  @Qualifier("redisExpireTokenService")
   private final ExpireTokenService expireTokenService;
+
   private final AccountService accountService;
   private final PaymentModeRepo paymentModeRepo;
 
@@ -112,6 +118,30 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public void logout(String token) {
-    JwtAuthFilter.extractToken(token).ifPresent(expireTokenService::addExpireToken);
+    // JTI
+    final var rawToken = JwtAuthFilter.extractToken(token);
+
+    if (rawToken.isEmpty()) {
+      return;
+    }
+
+    try {
+      final var claims = JwtUtils.getClaimsFromToken(rawToken.get(), secretKey);
+      final var exp = claims.getExpiration();
+      final var now = new Date();
+      final var jti = claims.getId();
+
+      // Calculate TTL
+      if (exp != null && !exp.after(now)) {
+        final var ttl = exp.getTime() - now.getTime(); // time diff is in ms
+        expireTokenService.addExpireToken(jti, Duration.ofMillis(ttl));
+      } else {
+        expireTokenService.addExpireToken(jti);
+      }
+    } catch (Exception e) {
+      log.warn("Error parsing claims during logout, blacklisting raw token with default TTL: {}", e.getMessage());
+      expireTokenService.addExpireToken(rawToken.get());
+    }
+
   }
 }

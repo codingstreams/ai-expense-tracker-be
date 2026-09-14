@@ -1,7 +1,11 @@
 package com.example.et.service.auth;
 
-public interface ExpireTokenService {
-  void addExpireToken(String token);
+import java.time.Duration;
 
-  boolean isExpireToken(String token);
+public interface ExpireTokenService {
+  void addExpireToken(String jti);
+
+  boolean isExpireToken(String jti);
+
+  void addExpireToken(String jti, Duration ttl);
 }
