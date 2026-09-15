@@ -5,10 +5,7 @@ import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.account.dto.CreateAccountsRequest;
 import com.example.et.module.dashboard.DashboardService;
-import com.example.et.module.dashboard.dto.CategoryBreakdownDto;
-import com.example.et.module.dashboard.dto.MonthlyTrendDto;
-import com.example.et.module.dashboard.dto.OnboardUserDto;
-import com.example.et.module.dashboard.dto.UserSummaryDto;
+import com.example.et.module.dashboard.dto.*;
 import com.example.et.module.transaction.Transaction;
 import com.example.et.module.transaction.TransactionService;
 import com.example.et.module.transaction.dto.TransactionDetailsResponse;
@@ -49,7 +46,7 @@ public class DashboardServiceImpl implements DashboardService {
       value = CacheNames.USER_FINANCIAL_SUMMARY,
       key = "#userId + ':breakdown:' + (#year != null ? #year : T(java.time.LocalDate).now().getYear()) + ':' + (#month != null ? #month : T(java.time.LocalDate).now().getMonthValue())"
   )
-  public List<CategoryBreakdownDto> getCategoryBreakdown(String userId, Integer year, Integer month) {
+  public CategoryBreakdownResponse getCategoryBreakdown(String userId, Integer year, Integer month) {
     final var now = LocalDate.now();
     final var targetYear = year != null ? year : now.getYear();
     final var targetMonth = month != null ? month : now.getMonthValue();
@@ -72,21 +69,23 @@ public class DashboardServiceImpl implements DashboardService {
     final Map<String, List<TransactionDetailsResponse>> grouped = expenseTransactions.stream()
         .collect(Collectors.groupingBy(t -> t.category() != null ? t.category() : "Uncategorized"));
 
-    return grouped.entrySet().stream()
+    final var content = grouped.entrySet().stream()
         .map(entry -> {
           final var category = entry.getKey();
           final var txList = entry.getValue();
           final var sum = txList.stream().mapToDouble(t -> Math.abs(t.amount())).sum();
           final var percentage = totalExpense > 0 ? (sum / totalExpense) * 100.0 : 0.0;
-          return new CategoryBreakdownDto(
+          return new CategoryBreakdown(
               category != null ? category : "Uncategorized",
               sum,
               percentage,
               (long) txList.size()
           );
         })
-        .sorted(Comparator.comparingDouble(CategoryBreakdownDto::totalAmount).reversed())
+        .sorted(Comparator.comparingDouble(CategoryBreakdown::totalAmount).reversed())
         .toList();
+
+    return new CategoryBreakdownResponse(content);
   }
 
   @Override

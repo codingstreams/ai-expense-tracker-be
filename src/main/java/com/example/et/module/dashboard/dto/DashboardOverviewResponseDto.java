@@ -6,5 +6,5 @@ import java.util.List;
 
 public record DashboardOverviewResponseDto(
     UserSummaryDto userSummary, List<MonthlyTrendDto> monthlyTrend,
-    List<TransactionDetailsResponse> recentTransactions, List<CategoryBreakdownDto> categoryBreakdown) {
+    List<TransactionDetailsResponse> recentTransactions, CategoryBreakdownResponse categoryBreakdown) {
 }

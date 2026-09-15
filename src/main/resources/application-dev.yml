@@ -34,6 +34,8 @@ spring:
       api-key: ${GROQ_API_KEY}
       base-url: https://api.groq.com/openai/v1
       chat:
+        extra-body:
+          reasoning_format: hidden
         options:
           model: openai/gpt-oss-20b
           temperature: 0.0

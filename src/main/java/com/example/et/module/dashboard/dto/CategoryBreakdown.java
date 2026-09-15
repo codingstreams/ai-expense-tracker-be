@@ -1,6 +1,6 @@
 package com.example.et.module.dashboard.dto;
 
-public record CategoryBreakdownDto(
+public record CategoryBreakdown(
     String categoryName,
     Double totalAmount,
     Double percentage,

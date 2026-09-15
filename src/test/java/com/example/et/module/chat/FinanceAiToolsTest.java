@@ -2,7 +2,8 @@ package com.example.et.module.chat;
 
 import com.example.et.module.ai.tool.FinanceAiTools;
 import com.example.et.module.dashboard.DashboardService;
-import com.example.et.module.dashboard.dto.CategoryBreakdownDto;
+import com.example.et.module.dashboard.dto.CategoryBreakdown;
+import com.example.et.module.dashboard.dto.CategoryBreakdownResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,10 +52,10 @@ class FinanceAiToolsTest {
     when(redisTemplate.hasKey(hashKey)).thenReturn(false);
     when(redisTemplate.opsForHash()).thenReturn(hashOperations);
 
-    when(dashboardService.getCategoryBreakdown(userId, 2026, 9)).thenReturn(List.of(
-        new CategoryBreakdownDto("Groceries", 150.50, 60.0, 5L),
-        new CategoryBreakdownDto("Dining", 100.00, 40.0, 3L)
-    ));
+    when(dashboardService.getCategoryBreakdown(userId, 2026, 9)).thenReturn(new CategoryBreakdownResponse(List.of(
+        new CategoryBreakdown("Groceries", 150.50, 60.0, 5L),
+        new CategoryBreakdown("Dining", 100.00, 40.0, 3L)
+    )));
 
     final Map<Object, Object> populatedEntries = new HashMap<>();
     populatedEntries.put("Groceries", "150.50");

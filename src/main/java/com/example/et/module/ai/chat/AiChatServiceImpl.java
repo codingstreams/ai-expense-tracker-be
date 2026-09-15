@@ -67,13 +67,21 @@ public class AiChatServiceImpl implements AiChatService {
         .toolContext(Map.of("userId", userId))
         .messages(promptMessages);
 
-    final var reply = promptSpec.call().content();
-    final var safeReply = reply != null ? reply : "";
+    String reply = null;
+    try {
+      reply = promptSpec.call().content();
+    } catch (Exception e) {
+      log.info("Unable to fetch reply, error: {}", e.getMessage());
+    }
 
-    saveMessages(sessionKey, List.of(
-        new StoredChatMessage(MessageType.USER, request.message()),
-        new StoredChatMessage(MessageType.ASSISTANT, safeReply)
-    ));
+    String safeReply = "";
+    if (reply != null && !reply.isEmpty()) {
+      safeReply = reply;
+      saveMessages(sessionKey, List.of(
+          new StoredChatMessage(MessageType.USER, request.message()),
+          new StoredChatMessage(MessageType.ASSISTANT, safeReply)
+      ));
+    }
 
     return new ChatReplyResponse(safeReply, userId);
   }

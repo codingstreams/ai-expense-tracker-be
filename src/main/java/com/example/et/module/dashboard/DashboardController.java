@@ -51,7 +51,7 @@ public class DashboardController {
   }
 
   @GetMapping("/category-breakdown")
-  public ResponseEntity<List<CategoryBreakdownDto>> getCategoryBreakdown(
+  public ResponseEntity<CategoryBreakdownResponse> getCategoryBreakdown(
       @RequestParam(required = false) Integer year,
       @RequestParam(required = false) Integer month,
       @AuthenticationPrincipal String userId) {

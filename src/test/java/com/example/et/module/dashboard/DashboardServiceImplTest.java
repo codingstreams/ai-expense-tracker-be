@@ -3,10 +3,7 @@ package com.example.et.module.dashboard;
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
 import com.example.et.module.account.dto.AccountDetailsResponse;
-import com.example.et.module.dashboard.dto.CategoryBreakdownDto;
-import com.example.et.module.dashboard.dto.MonthlyTrendDto;
-import com.example.et.module.dashboard.dto.OnboardUserDto;
-import com.example.et.module.dashboard.dto.UserSummaryDto;
+import com.example.et.module.dashboard.dto.*;
 import com.example.et.module.dashboard.internal.DashboardServiceImpl;
 import com.example.et.module.transaction.Transaction;
 import com.example.et.module.transaction.TransactionService;
@@ -112,20 +109,20 @@ class DashboardServiceImplTest {
     when(transactionService.getAllTransactions(eq(userId), any(TransactionFilterParams.class), any(Pageable.class)))
         .thenReturn(pagedTxns);
 
-    List<CategoryBreakdownDto> breakdown = dashboardService.getCategoryBreakdown(userId, year, month);
+    CategoryBreakdownResponse breakdown = dashboardService.getCategoryBreakdown(userId, year, month);
 
     assertNotNull(breakdown);
-    assertEquals(2, breakdown.size());
+    assertEquals(2, breakdown.content().size());
 
     // Food should be 1st (total 300.0, 75%)
-    CategoryBreakdownDto first = breakdown.get(0);
+    CategoryBreakdown first = breakdown.content().get(0);
     assertEquals("Food", first.categoryName());
     assertEquals(300.0, first.totalAmount(), 0.001);
     assertEquals(75.0, first.percentage(), 0.001);
     assertEquals(2L, first.transactionCount());
 
     // Transport should be 2nd (total 100.0, 25%)
-    CategoryBreakdownDto second = breakdown.get(1);
+    CategoryBreakdown second = breakdown.content().get(1);
     assertEquals("Transport", second.categoryName());
     assertEquals(100.0, second.totalAmount(), 0.001);
     assertEquals(25.0, second.percentage(), 0.001);
@@ -143,13 +140,13 @@ class DashboardServiceImplTest {
     when(transactionService.getAllTransactions(eq(userId), any(TransactionFilterParams.class), any(Pageable.class)))
         .thenReturn(pagedTxns);
 
-    List<CategoryBreakdownDto> breakdown = dashboardService.getCategoryBreakdown(userId, null, null);
+    CategoryBreakdownResponse breakdown = dashboardService.getCategoryBreakdown(userId, null, null);
 
     assertNotNull(breakdown);
-    assertEquals(1, breakdown.size());
-    assertEquals("Uncategorized", breakdown.get(0).categoryName());
-    assertEquals(50.0, breakdown.get(0).totalAmount(), 0.001);
-    assertEquals(100.0, breakdown.get(0).percentage(), 0.001);
+    assertEquals(1, breakdown.content().size());
+    assertEquals("Uncategorized", breakdown.content().get(0).categoryName());
+    assertEquals(50.0, breakdown.content().get(0).totalAmount(), 0.001);
+    assertEquals(100.0, breakdown.content().get(0).percentage(), 0.001);
   }
 
   @Test
@@ -159,10 +156,10 @@ class DashboardServiceImplTest {
     when(transactionService.getAllTransactions(eq(userId), any(TransactionFilterParams.class), any(Pageable.class)))
         .thenReturn(emptyTxns);
 
-    List<CategoryBreakdownDto> breakdown = dashboardService.getCategoryBreakdown(userId, 2026, 1);
+    CategoryBreakdownResponse breakdown = dashboardService.getCategoryBreakdown(userId, 2026, 1);
 
     assertNotNull(breakdown);
-    assertTrue(breakdown.isEmpty());
+    assertTrue(breakdown.content().isEmpty());
   }
 
   // ----------------------------------------------------------------------

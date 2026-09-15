@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -55,7 +56,7 @@ public class FinanceAiTools {
 
     if (category != null && !category.isBlank()) {
       final String search = category.trim().toLowerCase();
-      for (Map.Entry<Object, Object> entry : entries.entrySet()) {
+      for (var entry : entries.entrySet()) {
         final String catName = entry.getKey().toString();
         if (catName.equalsIgnoreCase(search) || catName.toLowerCase().contains(search)) {
           return String.format("%s: $%.2f for %d-%02d", catName, Double.parseDouble(entry.getValue().toString()), targetYear, targetMonth);
@@ -84,7 +85,7 @@ public class FinanceAiTools {
       double total = 0.0;
 
       if (breakdown != null) {
-        for (var item : breakdown) {
+        for (var item : breakdown.content()) {
           map.put(item.categoryName(), String.format("%.2f", item.totalAmount()));
           total += item.totalAmount();
         }
@@ -108,7 +109,7 @@ public class FinanceAiTools {
     }
     final var auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null && auth.isAuthenticated()) {
-      return auth.getName();
+      return Objects.requireNonNull(auth.getPrincipal()).toString();
     }
     return null;
   }
