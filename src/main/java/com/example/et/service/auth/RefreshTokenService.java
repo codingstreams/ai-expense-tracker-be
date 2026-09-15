@@ -10,7 +10,7 @@ public interface RefreshTokenService {
 
   boolean isRefreshTokenValid(String userId, String jti);
 
-  void deleteRefreshToken(String userId);
+  void deleteRefreshToken(String jti);
 
   boolean isPresent(String jti);
 }

@@ -28,13 +28,13 @@ public class RedisRefreshTokenService implements RefreshTokenService {
 
   @Override
   public boolean isRefreshTokenValid(String userId, String jti) {
-    final String storedTokenJti = redisTemplate.opsForValue().get(RT_PREFIX + userId);
-    return storedTokenJti != null && storedTokenJti.equals(jti);
+    final String storedTokenUid = redisTemplate.opsForValue().get(RT_PREFIX + jti);
+    return storedTokenUid != null && storedTokenUid.equals(userId);
   }
 
   @Override
-  public void deleteRefreshToken(String userId) {
-
+  public void deleteRefreshToken(String jti) {
+    redisTemplate.delete(RT_PREFIX + jti);
   }
 
   @Override

@@ -1,5 +1,6 @@
 package com.example.et.service.auth;
 
+import com.example.et.controller.dto.LogoutReq;
 import com.example.et.controller.dto.RefreshTokenReq;
 import com.example.et.controller.dto.auth.AuthResponse;
 import com.example.et.controller.dto.auth.CreateUserReq;
@@ -10,7 +11,7 @@ public interface AuthService {
 
   AuthResponse login(LoginReq loginReq);
 
-  void logout(String token);
+  void logout(String token, LogoutReq req);
 
   AuthResponse refreshToken(RefreshTokenReq refreshTokenReq);
 }

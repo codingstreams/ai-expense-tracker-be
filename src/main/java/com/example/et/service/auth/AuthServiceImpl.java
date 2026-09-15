@@ -1,6 +1,7 @@
 package com.example.et.service.auth;
 
 import com.example.et.config.props.JwtProps;
+import com.example.et.controller.dto.LogoutReq;
 import com.example.et.controller.dto.RefreshTokenReq;
 import com.example.et.controller.dto.auth.AuthResponse;
 import com.example.et.controller.dto.auth.CreateUserReq;
@@ -132,7 +133,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public void logout(String token) {
+  public void logout(String token, LogoutReq req) {
     // JTI
     final var rawToken = JwtAuthFilter.extractToken(token);
 
@@ -153,6 +154,9 @@ public class AuthServiceImpl implements AuthService {
       } else {
         expireTokenService.addExpireToken(jti);
       }
+
+      final var refreshTokenJti = JwtUtils.getClaimsFromToken(req.refreshToken(), secretKey).getId();
+      refreshTokenService.deleteRefreshToken(refreshTokenJti);
     } catch (Exception e) {
       log.warn("Error parsing claims during logout, blacklisting raw token with default TTL: {}", e.getMessage());
       expireTokenService.addExpireToken(rawToken.get());
@@ -178,7 +182,7 @@ public class AuthServiceImpl implements AuthService {
     if (userId == null || !refreshTokenService.isRefreshTokenValid(userId, jti)) {
       log.warn("Refresh token reuse or revocation detected for user: {}", userId);
       if (userId != null) {
-        refreshTokenService.deleteRefreshToken(userId);
+        refreshTokenService.deleteRefreshToken(jti);
       }
       throw new BadCredentialsException("Refresh token is invalid or revoked");
     }
@@ -193,6 +197,7 @@ public class AuthServiceImpl implements AuthService {
     final var newRefreshToken = JwtUtils.generateRefreshToken(userId, secretKey, expirationTimeRefreshToken);
     final var refreshTokenClaims = JwtUtils.parseToken(newRefreshToken, secretKey);
 
+    refreshTokenService.deleteRefreshToken(jti);
     refreshTokenService.saveRefreshToken(userId, refreshTokenClaims.getId(), Duration.ofSeconds(expirationTimeRefreshToken));
 
     final var onboarded = appUser.onboardingComplete();

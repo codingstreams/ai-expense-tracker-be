@@ -1,5 +1,6 @@
 package com.example.et.controller;
 
+import com.example.et.controller.dto.LogoutReq;
 import com.example.et.controller.dto.RefreshTokenReq;
 import com.example.et.controller.dto.auth.AuthResponse;
 import com.example.et.controller.dto.auth.CreateUserReq;
@@ -40,10 +41,10 @@ public class AuthController {
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<Void> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+  public ResponseEntity<Void> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String token, LogoutReq req) {
     log.info("Received logout request");
 
-    authService.logout(token);
+    authService.logout(token, req);
 
     log.info("User logged out successfully");
     return ResponseEntity.noContent().build();
