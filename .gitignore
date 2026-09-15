@@ -44,3 +44,5 @@ out/
 /.learnings/
 /setup_db.sh
 /.notes/
+.env.prod
+.groq_key

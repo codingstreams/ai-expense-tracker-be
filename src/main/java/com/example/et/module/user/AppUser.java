@@ -1,0 +1,40 @@
+package com.example.et.module.user;
+
+import com.example.et.core.BaseAudit;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.UUID;
+
+@EqualsAndHashCode(callSuper = false)
+@Entity
+@Table(name = "app_user")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class AppUser extends BaseAudit {
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(name = "id", updatable = false, nullable = false)
+  private UUID id;
+
+  @Column(name = "name", nullable = false)
+  private String name;
+
+  @Column(name = "email", nullable = false, unique = true)
+  private String email;
+
+  @Column(name = "password", nullable = false)
+  private String password;
+
+  @Column(name = "is_onboarding_complete", nullable = false)
+  private boolean onboardingComplete;
+
+  @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
+  private AppUserConfig appUserConfig;
+
+  public static AppUser ofId(String userId) {
+    return AppUser.builder().id(UUID.fromString(userId)).build();
+  }
+}

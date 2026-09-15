@@ -1,0 +1,124 @@
+package com.example.et.module.transaction;
+
+import com.example.et.core.config.CacheNames;
+import com.example.et.module.reference.category.SysCategoryService;
+import com.example.et.module.reference.paymentmode.PaymentModeService;
+import com.example.et.module.transaction.dto.TransactionDetailsResponse;
+import com.example.et.module.transaction.dto.TransactionFilterParams;
+import com.example.et.module.transaction.internal.TransactionRepo;
+import com.example.et.module.transaction.internal.TransactionServiceImpl;
+import com.example.et.module.transaction.internal.strategy.TransactionStrategyFactory;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {
+    TransactionServiceImpl.class,
+    TransactionServiceImplCacheTest.TestCacheNames.class
+})
+class TransactionServiceImplCacheTest {
+
+  @MockitoBean
+  private TransactionRepo transactionRepo;
+  @MockitoBean
+  private TransactionMapper transactionMapper;
+  @MockitoBean
+  private PaymentModeService paymentModeService;
+  @MockitoBean
+  private SysCategoryService sysCategoryService;
+  @MockitoBean
+  private TransactionStrategyFactory strategyFactory;
+  @Autowired
+  private TransactionService transactionService;
+  @Autowired
+  private CacheManager cacheManager;
+
+  @Test
+  void getAllTransactions_ShouldCacheResult_WhenListIsNotEmpty() {
+    String userId = UUID.randomUUID().toString();
+    TransactionFilterParams filterParams = TransactionFilterParams.empty();
+    Pageable pageable = PageRequest.of(0, 10);
+
+    Transaction transaction = new Transaction();
+    TransactionDetailsResponse responseDto = new TransactionDetailsResponse(
+        UUID.randomUUID(),
+        Transaction.TransactionType.EXPENSE,
+        100.0f,
+        LocalDate.now(),
+        "Test description",
+        "Account",
+        "UPI",
+        "Food"
+    );
+    Page<Transaction> page = new PageImpl<>(List.of(transaction), pageable, 1);
+
+    when(transactionRepo.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+    when(transactionMapper.toResponseDto(any())).thenReturn(responseDto);
+
+    // First call (populates cache)
+    var firstCall = transactionService.getAllTransactions(userId, filterParams, pageable);
+    assertNotNull(firstCall);
+    assertEquals(1, firstCall.content().size());
+
+    // Second call (hits cache)
+    var secondCall = transactionService.getAllTransactions(userId, filterParams, pageable);
+    assertNotNull(secondCall);
+    assertEquals(1, secondCall.content().size());
+
+    // Repo should only be queried once due to caching
+    verify(transactionRepo, times(1)).findAll(any(Specification.class), eq(pageable));
+  }
+
+  @Test
+  void getAllTransactions_ShouldNotCacheResult_WhenListIsEmpty() {
+    String userId = UUID.randomUUID().toString();
+    TransactionFilterParams filterParams = TransactionFilterParams.empty();
+    Pageable pageable = PageRequest.of(0, 10);
+
+    Page<Transaction> emptyPage = Page.empty(pageable);
+
+    when(transactionRepo.findAll(any(Specification.class), eq(pageable))).thenReturn(emptyPage);
+
+    // First call (empty list, not cached due to unless condition)
+    transactionService.getAllTransactions(userId, filterParams, pageable);
+
+    // Second call (hits repo again)
+    transactionService.getAllTransactions(userId, filterParams, pageable);
+
+    // Repo should be queried twice because empty results are not cached
+    verify(transactionRepo, times(2)).findAll(any(Specification.class), eq(pageable));
+  }
+
+  @Configuration
+  @EnableCaching
+  static class TestCacheNames {
+    @Bean
+    public CacheManager cacheManager() {
+      return new ConcurrentMapCacheManager(CacheNames.USER_TRANSACTIONS);
+    }
+  }
+}
