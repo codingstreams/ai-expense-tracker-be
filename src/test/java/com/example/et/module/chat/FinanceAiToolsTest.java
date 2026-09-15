@@ -4,6 +4,7 @@ import com.example.et.module.ai.tool.FinanceAiTools;
 import com.example.et.module.dashboard.DashboardService;
 import com.example.et.module.dashboard.dto.CategoryBreakdown;
 import com.example.et.module.dashboard.dto.CategoryBreakdownResponse;
+import com.example.et.module.dashboard.dto.UserSummaryDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -103,5 +104,53 @@ class FinanceAiToolsTest {
 
     assertEquals("Unable to identify authenticated user.", result);
     verify(redisTemplate, never()).hasKey(anyString());
+  }
+
+  @Test
+  void getUserFinancialSummary_authenticated_returnsFormattedSummary() {
+    final String userId = "user-123";
+    final ToolContext toolContext = new ToolContext(Map.of("userId", userId));
+    final UserSummaryDto summary = new UserSummaryDto(100000.0, 50000.0, 20000.0, 30000.0, 666.67);
+
+    when(dashboardService.getSummary(userId)).thenReturn(summary);
+
+    String result = financeAiTools.getUserFinancialSummary(toolContext);
+
+    assertEquals(summary.getFormattedSummary(), result);
+    verify(dashboardService).getSummary(userId);
+  }
+
+  @Test
+  void getUserFinancialSummary_unauthenticated_returnsErrorMessage() {
+    ToolContext emptyContext = new ToolContext(Collections.emptyMap());
+
+    String result = financeAiTools.getUserFinancialSummary(emptyContext);
+
+    assertEquals("Unable to identify authenticated user.", result);
+    verifyNoInteractions(dashboardService);
+  }
+
+  @Test
+  void getUserFinancialSummary_nullSummary_returnsErrorMessage() {
+    final String userId = "user-123";
+    final ToolContext toolContext = new ToolContext(Map.of("userId", userId));
+
+    when(dashboardService.getSummary(userId)).thenReturn(null);
+
+    String result = financeAiTools.getUserFinancialSummary(toolContext);
+
+    assertEquals("Unable to fetch user's financial summary.", result);
+  }
+
+  @Test
+  void getUserFinancialSummary_serviceException_returnsErrorMessage() {
+    final String userId = "user-123";
+    final ToolContext toolContext = new ToolContext(Map.of("userId", userId));
+
+    when(dashboardService.getSummary(userId)).thenThrow(new RuntimeException("Service failure"));
+
+    String result = financeAiTools.getUserFinancialSummary(toolContext);
+
+    assertEquals("Unable to fetch user's financial summary.", result);
   }
 }

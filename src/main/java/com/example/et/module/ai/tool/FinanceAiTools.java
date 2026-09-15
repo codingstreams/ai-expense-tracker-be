@@ -78,6 +78,27 @@ public class FinanceAiTools {
     return String.format("Month: %d-%02d | %s | Total Expenses: $%s", targetYear, targetMonth, categoryDetails, total);
   }
 
+  @Tool(description = "Get the user's high-level financial health summary (total income, total expenses, net savings, and savings rate) for the current month. Use this to answer queries like total spend vs income, or how much is left over.")
+  public String getUserFinancialSummary(
+      ToolContext toolContext
+  ) {
+    final String userId = resolveUserId(toolContext);
+    if (userId == null || userId.isBlank()) {
+      return "Unable to identify authenticated user.";
+    }
+
+    try {
+      final var userFinancialSummary = dashboardService.getSummary(userId);
+      if (userFinancialSummary == null) {
+        return "Unable to fetch user's financial summary.";
+      }
+      return userFinancialSummary.getFormattedSummary();
+    } catch (Exception e) {
+      log.error("Failed to fetch financial summary for user: {}", userId, e);
+      return "Unable to fetch user's financial summary.";
+    }
+  }
+
   private void populateCategoryHash(String userId, int year, int month, String hashKey) {
     try {
       final var breakdown = dashboardService.getCategoryBreakdown(userId, year, month);

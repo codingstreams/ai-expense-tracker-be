@@ -54,7 +54,10 @@ public class AiChatServiceImpl implements AiChatService {
         User Accounts:
         %s
         
-        When the user asks questions about their expenses, spending, or category breakdowns, ALWAYS use the getCategorySpendingSummary tool to fetch accurate real-time data.
+        Currency: INR(₹)
+        
+        When the user asks high-level financial health questions (such as total spend vs income, how much is left over, net savings, or savings rate), ALWAYS use the getUserFinancialSummary tool to fetch accurate real-time data.
+        When the user asks questions about specific category expenses, spending, or category breakdowns, ALWAYS use the getCategorySpendingSummary tool to fetch accurate real-time data.
         Answer clearly and concisely based on the tool results.
         """.formatted(LocalDate.now(), accountsSummary);
 
