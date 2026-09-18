@@ -67,4 +67,4 @@ management:
 
 app:
   caching:
-    enabled: true
+    enabled: ${CACHE_ENABLED:false}
