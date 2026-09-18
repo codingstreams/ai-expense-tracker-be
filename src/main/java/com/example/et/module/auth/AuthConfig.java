@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -40,7 +41,7 @@ public class AuthConfig {
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter, AuthenticationEntryPoint authenticationEntryPoint) {
 
-    final var whitelistEndpoints = new String[]{"/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/error", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"};
+    final var whitelistEndpoints = new String[]{"/api/auth/register", "/api/auth/login", "/error", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"};
 
     http
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -61,10 +62,13 @@ public class AuthConfig {
 
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
+    final var allowedMethods = List.of("GET", "POST", "PUT", "DELETE", "OPTIONS");
+    final var allowedHeaders = List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, "X-API-Version");
+
     final var configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(allowedOrigins); // Your Next.js URL
-    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-API-Version"));
+    configuration.setAllowedOrigins(allowedOrigins);
+    configuration.setAllowedMethods(allowedMethods);
+    configuration.setAllowedHeaders(allowedHeaders);
     configuration.setAllowCredentials(true);
 
     final var source = new UrlBasedCorsConfigurationSource();

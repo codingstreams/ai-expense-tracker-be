@@ -102,8 +102,10 @@ class AccountServiceImplTest {
   void addAccounts_ShouldValidateBankIdsAndSaveAccounts_WhenValid() {
     CreateAccountsRequest request = new CreateAccountsRequest(List.of(sampleAccountDetailsResponse));
 
+    final var userId = UUID.randomUUID().toString();
+
     doNothing().when(bankService).validateBankIds(any());
-    when(accountMapper.toEntity(sampleAccountDetailsResponse)).thenReturn(sampleAccount);
+    when(accountMapper.toEntity(sampleAccountDetailsResponse, userId)).thenReturn(sampleAccount);
     when(accountRepository.saveAll(List.of(sampleAccount))).thenReturn(List.of(sampleAccount));
     when(accountMapper.toDto(sampleAccount)).thenReturn(sampleAccountDetailsResponse);
 

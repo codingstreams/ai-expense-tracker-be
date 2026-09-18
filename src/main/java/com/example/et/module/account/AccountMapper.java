@@ -2,10 +2,7 @@ package com.example.et.module.account;
 
 import com.example.et.module.account.dto.AccountDetailsResponse;
 import com.example.et.module.reference.bank.BankMapper;
-import org.mapstruct.Builder;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
 @Mapper(
     componentModel = "spring",
@@ -17,10 +14,11 @@ public interface AccountMapper {
   AccountDetailsResponse toDto(Account entity);
 
   // DTO to Entity
-  @Mapping(target = "appUser", ignore = true)
+  @Mapping(target = "appUser", expression = "java(com.example.et.module.user.AppUser.ofId(userId))")
+  @Mapping(target = "isActive", defaultValue = "true")
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "lastModifiedAt", ignore = true)
-  Account toEntity(AccountDetailsResponse dto);
+  Account toEntity(AccountDetailsResponse dto, @Context String userId);
 
   // Update existing entity from DTO
   @Mapping(target = "id", ignore = true)

@@ -66,7 +66,7 @@ public class CardServiceImpl implements CardService {
             .bank(cardDto.bank())
             .build());
       } else {
-        account = accountMapper.toEntity(accountService.getAccount(userId, cardDto.accountId()));
+        account = accountMapper.toEntity(accountService.getAccount(userId, cardDto.accountId()), userId);
       }
 
       return Card.builder()

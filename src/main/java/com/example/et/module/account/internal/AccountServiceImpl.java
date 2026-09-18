@@ -54,7 +54,7 @@ public class AccountServiceImpl implements AccountService {
 
     final var accountToBeCreated = requestBody.accounts()
         .stream()
-        .map(accountMapper::toEntity)
+        .map(dto -> accountMapper.toEntity(dto, userId))
         .toList();
 
     return accountRepository.saveAll(accountToBeCreated)

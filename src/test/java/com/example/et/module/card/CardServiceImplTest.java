@@ -230,7 +230,7 @@ class CardServiceImplTest {
     CardResponse responseCard = new CardResponse(savedCard.getId(), Card.CardType.DEBIT_CARD, "8888", existingAccountId, null, null);
 
     when(accountService.getAccount(userId, existingAccountId)).thenReturn(existingAccountDetailsResponse);
-    when(accountMapper.toEntity(existingAccountDetailsResponse)).thenReturn(existingAccount);
+    when(accountMapper.toEntity(existingAccountDetailsResponse, userId)).thenReturn(existingAccount);
     when(cardRepo.saveAll(any())).thenReturn(List.of(savedCard));
     when(cardMapper.toDto(savedCard)).thenReturn(responseCard);
 
