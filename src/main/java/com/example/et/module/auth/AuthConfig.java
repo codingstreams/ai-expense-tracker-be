@@ -41,7 +41,7 @@ public class AuthConfig {
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter, AuthenticationEntryPoint authenticationEntryPoint) {
 
-    final var whitelistEndpoints = new String[]{"/api/auth/register", "/api/auth/login", "/error", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"};
+    final var whitelistEndpoints = new String[]{"/api/auth/register", "/api/auth/login", "/error", "/v3/api-docs/**", "/v3/api-docs.yaml","/swagger-ui/**", "/swagger-ui.html"};
 
     http
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))

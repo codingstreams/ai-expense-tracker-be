@@ -75,3 +75,7 @@ management:
     distribution:
       percentiles-histogram:
         http.server.requests: true
+
+app:
+  caching:
+    enabled: ${CACHE_ENABLED:false}

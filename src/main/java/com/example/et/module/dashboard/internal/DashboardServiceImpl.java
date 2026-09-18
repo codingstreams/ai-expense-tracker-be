@@ -3,6 +3,7 @@ package com.example.et.module.dashboard.internal;
 import com.example.et.core.config.CacheNames;
 import com.example.et.module.account.Account;
 import com.example.et.module.account.AccountService;
+import com.example.et.module.account.dto.AccountDetailsResponse;
 import com.example.et.module.account.dto.CreateAccountsRequest;
 import com.example.et.module.dashboard.DashboardService;
 import com.example.et.module.dashboard.dto.*;
@@ -18,10 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,9 +32,13 @@ public class DashboardServiceImpl implements DashboardService {
 
   @Override
   public OnboardUserDto onboardUser(String userId, OnboardUserDto requestBody) {
-    final var accounts = accountService.addAccounts(userId, new CreateAccountsRequest(requestBody.accounts()));
+    List<AccountDetailsResponse> accounts = new ArrayList<>();
+    if(Objects.nonNull(requestBody.accounts())) {
+      accounts = accountService.addAccounts(userId, new CreateAccountsRequest(requestBody.accounts()));
+    }
     final var cashBalance = accountService.updateCashBalance(userId, requestBody.cashBalance());
     final var userConfig = appUserService.updateUserConfig(userId, requestBody.userConfig());
+
 
     return new OnboardUserDto(userConfig, cashBalance, accounts);
   }

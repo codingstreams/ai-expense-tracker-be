@@ -2,6 +2,8 @@ package com.example.et.core.config;
 
 import io.lettuce.core.RedisURI;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -40,16 +42,5 @@ public class CommonCacheConfig {
     return new StringRedisTemplate(connectionFactory);
   }
 
-  @Bean
-  public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-    final var cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-        .entryTtl(Duration.ofDays(7))
-        .disableCachingNullValues()
-        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(RedisSerializer.json()));
 
-    return RedisCacheManager.builder(connectionFactory)
-        .cacheDefaults(cacheConfiguration)
-        .build();
-  }
 }
